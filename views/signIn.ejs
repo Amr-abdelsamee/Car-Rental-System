@@ -1,0 +1,26 @@
+<%- include("header") -%>
+
+<link rel="stylesheet" href="../css/signin.css" type="text/css">
+<title>sign in</title>
+</head>
+
+<body>
+
+<div class="common-container">
+    <div class="container">
+        <h2>Sign In to Lists</h2>
+        <form action="/signin" method="post">
+                        <p class="signinMessage"></p>
+                        <input class="inputBar " name="username"  placeholder="E-mail" autocomplete="off" type="text" required autofocus>
+                        <input class="inputBar " name="password"  placeholder="Password"  autocomplete="off" type="password" required>
+                        <br>
+                        <button class="signBtn" name="btn" value="signup" type="submit">Sign in</button>
+                    </div>
+            </form>
+    </div>
+</div>
+
+
+
+
+<%- include("footer") %> 

@@ -1,0 +1,32 @@
+<%- include("header") -%>
+
+<link rel="stylesheet" href="../css/signup.css" type="text/css">
+<title>sign up</title>
+</head>
+
+<body>
+
+<div class="common-container">
+    <div class="container signupPage">
+        <h2>Sign Up to Lists</h2>
+        <form action="/signup" method="post">
+        
+                        <input class="inputBar" name="fname"  placeholder="First name" autocomplete="off" type="text" required autofocus>
+                        <input class="inputBar" name="lname"  placeholder="Last name" autocomplete="off" type="text" required>
+                        <input class="inputBar" name="username" placeholder="E-mail"     autocomplete="off" type="text" required>
+                        <input class="inputBar" name="password"  placeholder="password"   autocomplete="off" type="text" required>
+                        <br>
+                        <button class="signBtn" name="btn" value="signup" type="submit">Sign up</button>
+                    </div>
+            </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<%- include("footer") %> 
