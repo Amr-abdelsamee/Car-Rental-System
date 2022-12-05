@@ -32,30 +32,20 @@ app.use(favicon(__dirname + '/public/images/favicon.png')); // favicon location
 
 
 //? ---------------------------------------------< Database section >--------------------------------------------------------
-// const db = mysql.createConnection({
-//     host: "localhost",
-//     user:"root",
-//     password: "",
-//     database: "car_rental"
-// });
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "car_rental"
+});
 
-// db.connect((err)=>{
-//     if(err){
-//         console.log(err);
-//     }else{
-//         console.log(">>> Database connected !")
-//     }
-// });
-
-// let sql = "SELECT * FROM admin";
-// db.query(sql,(err,result)=>{
-//     if(err){
-//         console.log(err)
-//     }else{
-//         console.log(result)
-//     }
-// })
-
+db.connect((err) => {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(">>> Database connected !")
+    }
+});
 
 
 
@@ -91,7 +81,39 @@ app.route("/admin")
     })
     .post(function (req, res) {
         let menu_btn = req.body.control_btn;
-        res.render("control/" + menu_btn, { admin: "Amr ABSO" })
+        console.log(menu_btn)
+        switch (menu_btn) {
+            case "add_car":
+                res.render("control/add_car")
+                break;
+            case "all_cars":
+                let sql = "SELECT * FROM car";
+                db.query(sql, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log(result)
+                        console.log(result[0].car_id)
+                        res.render("control/all_cars",{cars:result})
+                    }
+                })
+                break;
+            case "all_customers":
+                res.render("control/all_customers")
+                break;
+            case "add_customer":
+                res.render("control/all_customers")
+                break;
+            case "dashboard":
+                res.render("control/dashboard", { admin: "Amr ABSO" })
+                break;
+            case "setting":
+                res.render("control/setting")
+                break;
+            case "reservations":
+                res.render("control/reservations")
+                break;
+        }
     });
 
 app.route("/add")
@@ -110,6 +132,7 @@ app.route("/add")
                 lic_no: req.body.lic_no,
                 image_path: req.body.image,
             };
+
             console.log(new_car)
         } else if (req.body.control_btn === "add_customer") {
             let new_car = {
