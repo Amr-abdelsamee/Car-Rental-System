@@ -186,7 +186,7 @@ th {
 }
 @media print {
   * {
-    color: #000 !important;
+    color: rgb(0, 0, 0) !important;
     text-shadow: none !important;
     background: transparent !important;
     box-shadow: none !important;
