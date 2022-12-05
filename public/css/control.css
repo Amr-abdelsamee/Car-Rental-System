@@ -29,7 +29,7 @@ body {
     border: 1px solid #f3f3f3;
 }
 
-h2 ,h3 {
+h2 ,h3, h4 {
     color: #f00;
 }
 
@@ -128,6 +128,7 @@ p {
     height: 60px;
     font-size: 30px;
     font-weight: 700;
+    user-select: none;
 }
 
 
@@ -136,7 +137,7 @@ p {
 }
 
 
-.last-access-logout{
+.orange-button{
     color: white;
     padding: 15px 50px 5px 50px;
     float: right;
@@ -179,7 +180,7 @@ p {
 
 
 .navbar-cls-top {
-    background: #4D4D4D;
+    background: #202020;
     border-bottom: none;
 
 }
@@ -222,4 +223,26 @@ p {
     .navbar {
         border-radius: 0px;
     }
+}
+
+
+/*----< add car >----*/
+.add-car{
+    width: 80%;
+    padding: 10px;
+    margin-left: 30px;
+}
+
+.input_field {
+    font-family: inherit;
+    width: 40%;
+    border: 0;
+    border-bottom: 2px solid gray;
+    outline: 0;
+    font-size: 1.5rem;
+    padding: 5px 4px;
+    transition: border-color 0.2s;
+    }
+.input_field:focus{
+    border-bottom: 2px solid #f00;
 }
