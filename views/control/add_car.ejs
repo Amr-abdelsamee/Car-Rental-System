@@ -1,0 +1,37 @@
+<%- include("control") %>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Add a new Car</h2>
+        </div>
+    </div>
+
+    <hr />
+    <form action="/add" method="post">
+        <div class="add-car panel-back">
+            <h4>Company</h4>
+            <input type="text" class="input_field" name="company">
+            <h4>Color</h4>
+            <input type="color" value="#0000" name="color">
+            <h4>Status</h4>
+            <input type="text" class="input_field" name="stat">
+            <h4>Office</h4>
+            <input type="text" class="input_field" name="office">
+            <h4>Model</h4>
+            <input type="text" class="input_field" name="model">
+            <h4>Year</h4>
+            <input type="text" class="input_field" name="year">
+            <h4>Miles</h4>
+            <input type="text" class="input_field" name="miles">
+            <h4>Price</h4>
+            <input type="text" class="input_field" name="price">
+            <h4>licence No</h4>
+            <input type="text" class="input_field" name="lic_no">
+            <h4>Image</h4>
+            <input type="file" name="image">
+
+            <div class="orange-button">
+                <button name="control_btn" value="add_car" type="submit" class="btn btn-danger square-btn">Done</button>
+            </div>
+    </form>
+    </div>

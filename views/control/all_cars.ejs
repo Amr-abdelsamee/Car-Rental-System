@@ -1,6 +1,12 @@
 <%- include("control")  %> 
 
+<div class="row">
+    <div class="col-md-12">
+        <h2>All Cars</h2>
+    </div>
+</div>
 
+<hr />
 
 
 
@@ -44,6 +50,11 @@
             </tbody>
         </table>
     </div>
+    <form action="/admin" method="post">
+    <div class="orange-button">
+        <button name="control_btn" value="add_car" type="submit" class="btn btn-danger square-btn">Add</button>
+    </div>
+</form>
 </div>
 
 
