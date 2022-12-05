@@ -14,9 +14,17 @@
             <h4>Color</h4>
             <input type="color" value="#0000" name="color">
             <h4>Status</h4>
-            <input type="text" class="input_field" name="stat">
+            <select name="stat" class="input_field">
+                <option value="Available">Available</option>
+                <option value="Unavailable">Unavailable</option>
+            </select>
             <h4>Office</h4>
-            <input type="text" class="input_field" name="office">
+            <select name="office" class="input_field">
+                <option value="Alexandria">Alexandria</option>
+                <option value="Cairo">Cairo</option>
+                <option value="Giza">Giza</option>
+                <option value="Mansoura">Mansoura</option>
+            </select>
             <h4>Model</h4>
             <input type="text" class="input_field" name="model">
             <h4>Year</h4>
@@ -29,6 +37,7 @@
             <input type="text" class="input_field" name="lic_no">
             <h4>Image</h4>
             <input type="file" name="image">
+            
 
             <div class="orange-button">
                 <button name="control_btn" value="add_car" type="submit" class="btn btn-danger square-btn">Done</button>

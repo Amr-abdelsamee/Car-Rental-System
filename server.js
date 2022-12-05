@@ -8,6 +8,7 @@
 //? npm install -g nodemon
 //? npm install url
 //? npm install mysql
+//? npm install hex-color-to-color-name
 //TODO: to run the server type: nodemon server.js
 
 
@@ -18,6 +19,7 @@ const bodyParser = require("body-parser"); // for requestes parsing
 
 const favicon = require('serve-favicon'); // for icon
 //const chalk = require("chalk") // for console colors
+const Get_Color_Name = require("hex-color-to-color-name")
 
 
 const app = express();
@@ -56,8 +58,6 @@ db.connect((err) => {
 app.route("/")
     .get(function (req, res) {
         res.render("main")
-        // varr current date
-        //for start of the day ast 12 am
     })
     .post(function (req, res) {
         let btnType = req.body.btn;
@@ -77,24 +77,20 @@ app.route("/")
 app.route("/admin")
     .get(function (req, res) {
         res.render("control/dashboard", { admin: "Amr ABSO" })
-
     })
     .post(function (req, res) {
         let menu_btn = req.body.control_btn;
-        // console.log(menu_btn)
         let sql = ""
         switch (menu_btn) {
             case "dashboard":
                 res.render("control/dashboard", { admin: "Amr ABSO" })
                 break;
-
             case "all_cars":
                 sql = "SELECT * FROM car";
                 db.query(sql, (err, result) => {
                     if (err) {
                         console.log(err)
                     } else {
-                        console.log(result)
                         res.render("control/all_cars", { cars: result })
                     }
                 })
@@ -105,7 +101,6 @@ app.route("/admin")
                     if (err) {
                         console.log(err)
                     } else {
-                        console.log(result)
                         res.render("control/all_customers", { customers: result })
                     }
                 })
@@ -116,7 +111,6 @@ app.route("/admin")
                     if (err) {
                         console.log(err)
                     } else {
-                        console.log(result)
                         res.render("control/reservations", { reservations: result })
                     }
                 })
@@ -125,7 +119,7 @@ app.route("/admin")
                 res.render("control/add_car")
                 break;
             case "add_customer":
-                res.render("control/all_customers")
+                res.render("control/add_customer")
                 break;
             case "setting":
                 res.render("control/setting")
@@ -135,11 +129,13 @@ app.route("/admin")
 
 app.route("/add")
     .post(function (req, res) {
-        console.log(req.body.control_btn)
+        let sql = ""
         if (req.body.control_btn === "add_car") {
+            const color_name = Get_Color_Name.GetColorName(req.body.color);
+
             let new_car = {
                 company: req.body.company,
-                color: req.body.color,
+                color: color_name,
                 stat: req.body.stat,
                 office: req.body.office,
                 model: req.body.model,
@@ -147,19 +143,93 @@ app.route("/add")
                 miles: req.body.miles,
                 price: req.body.price,
                 lic_no: req.body.lic_no,
-                image_path: req.body.image,
+                image_path: null,
             };
 
-            console.log(new_car)
+            sql = "INSERT INTO car VALUES (?)";
+            const VALUES = [
+                null
+                , new_car.company
+                , new_car.color
+                , new_car.stat
+                , new_car.office
+                , new_car.model
+                , parseInt(new_car.year)
+                , parseInt(new_car.miles)
+                , parseInt(new_car.price)
+                , new_car.lic_no
+                , null
+            ]
+            db.query(sql, [VALUES], (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("NEW car added to the system!")
+                    console.log(new_car)
+                    res.redirect("/admin")
+                }
+            })
+
+
         } else if (req.body.control_btn === "add_customer") {
-            let new_car = {
-                name: req.body.name,
+            let new_customer = {
+                fname: req.body.fname,
+                lname: req.body.lname,
                 email: req.body.email,
                 password: req.body.password,
                 address: req.body.address,
                 phone: req.body.phone,
             };
-            console.log(new_car)
+
+            sql = "INSERT INTO customer VALUES (?)";
+            const VALUES = [
+                null
+                , new_customer.fname
+                , new_customer.lname
+                , new_customer.email
+                , new_customer.password
+                , new_customer.address
+                , parseInt(new_customer.phone)
+            ]
+            db.query(sql, [VALUES], (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("NEW customer added to the system!")
+                    console.log(new_customer)
+                    res.redirect("/admin")
+                }
+            })
+        }
+    });
+
+    app.route("/delete")
+    .post(function (req, res) {
+        let sql = ""
+        if (req.body.control_btn === "delete_car") {
+            
+            sql = "DELETE FROM car WHERE lic_no = ?";
+            const VALUE = req.body.car_lic
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a car from the system!")
+                    res.redirect("/admin")
+                }
+            })
+        } else if (req.body.control_btn === "delete_customer") {
+
+            sql = "DELETE FROM customer WHERE customer_id = ?";
+            const VALUE = req.body.customer_id
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a customer from the system!")
+                    res.redirect("/admin")
+                }
+            })
         }
     });
 //? -------------------------------------------< End of sign up route section >-------------------------------------------------

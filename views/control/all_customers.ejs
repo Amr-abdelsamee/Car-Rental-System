@@ -19,8 +19,8 @@
                         <th>Customer ID</th>
                         <th>First name</th>
                         <th>Last name</th>
-                        <th>Password</th>
                         <th>Email</th>
+                        <th>Password</th>
                         <th>Address</th>
                         <th>Phone</th>
                     </tr>
@@ -38,10 +38,10 @@
                                 <%= customers[i].lname %>
                             </th>
                             <th>
-                                <%= customers[i].password %>
+                                <%= customers[i].email %>
                             </th>
                             <th>
-                                <%= customers[i].email %>
+                                <%= customers[i].password %>
                             </th>
                             <th>
                                 <%= customers[i].address %>
@@ -60,6 +60,25 @@
                     class="btn btn-danger square-btn">Add</button>
             </div>
         </form>
+        <div class="row">
+            <form action="/delete" method="post">
+                <select name="customer_id" class="input_field">
+                    <option value="">Select customer to delete</option>
+                    <% for(var i=0; i < customers.length; i++){ %>
+                        <option value="<%= customers[i].customer_id %>">
+                            <%= customers[i].customer_id %> - <%= customers[i].fname %> <%= customers[i].lname %>
+                                        - <%= customers[i].email %>
+                        </option>
+                        <% } %>
+                </select>
+                <br>
+                <div class="orange-button" style="float: left !important;">
+                    <button name="control_btn" value="delete_customer" type="submit"
+                        class="btn btn-danger square-btn">Delete</button>
+                </div>
+            </form>
+        </div>
+
     </div>
     </div>
     <%- include("control_footer") %>
