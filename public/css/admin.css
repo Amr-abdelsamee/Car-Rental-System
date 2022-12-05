@@ -3,86 +3,58 @@ body {
   font-family: 'Roboto Slab', sans-serif;
 }
 
-.common-container {
-  width: 360px;
-  height: auto;
-  display: block;
-  overflow: auto;
-  margin: auto;
+
+.admin-sign-up-container {
+  width: 30%;
+  padding: 30px;
+  margin: 40px auto;
+  border-radius: 5px;
+  height: fit-content;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   background-color: #e5eaf5;
-  padding-bottom: 2%;
-  border: 1px solid whitesmoke;
-  border-radius: 7px;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
+
 
 .head {
   color: red;
   margin-bottom: 50px;
 }
 
+
 .signBtn {
-  color: red;
-  text-align: center;
-  font-weight: bold;
-  border-radius: 6px;
-  border-color: black;
-  background-color: darkgrey;
-  font-family: 'Dancing Script', sans-serif;
-  font-size: 1em;
-  padding: 10px;
-  text-decoration: none;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: auto;
-  padding-left:15%;
-  padding-right:15%;
-  height: auto;
-  margin-top: 20px;
+  width: 30%;
   border: none;
+  color: rgb(165, 0, 0);
+  padding: 10px;
+  display: block;
+  font-size: 1em;
+  margin-top: 20px;
+  margin-left: auto;
+  font-weight: bold;
+  margin-right: auto;
+  text-align: center;
+  border-radius: 6px;
+  background-color: darkgrey;
 }
 
 
 button:hover {
+  cursor: pointer;
   background-color:  #a28089;
 }
 
 
-
 h1 {
-  color: red;
+  color: rgb(177, 2, 2);
   text-align: center;
   padding-top: 15px;
 }
 
-form {
-  width: 300px;
-  margin-left: 20px;
-}
-
-form label {
-  display: flex;
-  margin-top: 20px;
-  font-size: 18px;
-}
 
 form input {
-  width: 100%;
-  padding: 7px;
-  border: 1px solid gray;
-  border-radius: 6px;
-  outline: none;
-  margin-top:2%;
-}
-
-#log:hover {
-  color: #D190D5;
-}
-
-#log {
-  color: blue;
-}
-p {
-  text-align: center;
+  width: 70% !important;
+  margin-bottom: 10px;
 }

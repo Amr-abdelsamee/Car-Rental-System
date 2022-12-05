@@ -1,0 +1,25 @@
+<%- include("../header") -%>
+
+  <link rel="stylesheet" href="../css/admin.css" type="text/css">
+  <link rel="stylesheet" href="../css/control.css" type="text/css">
+  <title>Admin Sign In</title>
+
+  </head>
+
+  <body>
+    <div class="head">
+      <h1>Welcome Admin<h1>
+    </div>
+    <div class="admin-sign-up-container">
+      <h1>Admin Sign In</h1>
+      <form id="form" action="/admin" method="post">
+        <input class="input_field" name="username" placeholder="E-mail" autocomplete="off" type="text" required
+          autofocus>
+        <br>
+        <input class="input_field" name="password" placeholder="Password" autocomplete="off" type="password" required>
+        <br>
+        <button class="signBtn" name="signIn_btn" value="signin" type="submit">Sign in</button>
+      </form>
+    </div>
+    </div>
+  </body>

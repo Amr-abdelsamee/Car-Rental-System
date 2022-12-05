@@ -76,54 +76,74 @@ app.route("/")
 //? ---------------------------------------------< Admin route section >-------------------------------------------------------
 app.route("/admin")
     .get(function (req, res) {
-        res.render("control/dashboard", { admin: "Amr ABSO" })
+        res.render("control/admin_signIn")
     })
     .post(function (req, res) {
-        let menu_btn = req.body.control_btn;
-        let sql = ""
-        switch (menu_btn) {
-            case "dashboard":
-                res.render("control/dashboard", { admin: "Amr ABSO" })
-                break;
-            case "all_cars":
-                sql = "SELECT * FROM car";
-                db.query(sql, (err, result) => {
-                    if (err) {
-                        console.log(err)
+        var current_admin = ""
+        if (req.body.signIn_btn === "signin") {
+            const VALUES = [req.body.password, req.body.username]
+            sql = "SELECT * FROM `admin` WHERE `password`= ? AND email=?";
+
+            db.query(sql, VALUES, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    if (result.length) {
+                        current_admin = VALUES[1]
+                        res.render("control/dashboard", { admin: current_admin })
                     } else {
-                        res.render("control/all_cars", { cars: result })
+                        res.redirect("/admin")
                     }
-                })
-                break;
-            case "all_customers":
-                sql = "SELECT * FROM customer";
-                db.query(sql, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        res.render("control/all_customers", { customers: result })
-                    }
-                })
-                break;
-            case "reservations":
-                sql = "SELECT * FROM reservation ";
-                db.query(sql, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        res.render("control/reservations", { reservations: result })
-                    }
-                })
-                break;
-            case "add_car":
-                res.render("control/add_car")
-                break;
-            case "add_customer":
-                res.render("control/add_customer")
-                break;
-            case "setting":
-                res.render("control/setting")
-                break;
+                }
+            })
+
+        } else if (req.body.control_btn) {
+            let menu_btn = req.body.control_btn;
+            let sql = ""
+            switch (menu_btn) {
+                case "dashboard":
+                    res.render("control/dashboard", { admin: current_admin })
+                    break;
+                case "all_cars":
+                    sql = "SELECT * FROM car";
+                    db.query(sql, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/all_cars", { cars: result })
+                        }
+                    })
+                    break;
+                case "all_customers":
+                    sql = "SELECT * FROM customer";
+                    db.query(sql, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/all_customers", { customers: result })
+                        }
+                    })
+                    break;
+                case "reservations":
+                    sql = "SELECT * FROM reservation ";
+                    db.query(sql, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/reservations", { reservations: result })
+                        }
+                    })
+                    break;
+                case "add_car":
+                    res.render("control/add_car")
+                    break;
+                case "add_customer":
+                    res.render("control/add_customer")
+                    break;
+                case "setting":
+                    res.render("control/setting")
+                    break;
+            }
         }
     });
 
@@ -203,11 +223,11 @@ app.route("/add")
         }
     });
 
-    app.route("/delete")
+app.route("/delete")
     .post(function (req, res) {
         let sql = ""
         if (req.body.control_btn === "delete_car") {
-            
+
             sql = "DELETE FROM car WHERE lic_no = ?";
             const VALUE = req.body.car_lic
             db.query(sql, VALUE, (err, result) => {
