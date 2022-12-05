@@ -20,9 +20,12 @@ const favicon = require('serve-favicon'); // for icon
 
 
 const app = express();
-
+app.set('views', __dirname + '/views/');
 app.set('view engine', 'ejs');
-app.use(express.static("public")); // CSS location
+app.use(express.static("public"));
+// app.use(express.static(path.join('public'))); // CSS location
+// app.use(express.static(path.join('app'))); //js location
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(favicon(__dirname + '/public/images/favicon.png')); // favicon location
 
@@ -53,7 +56,19 @@ app.route("/")
         }
     });
 //? ---------------------------------------------< End of root route section >---------------------------------------------------
+//? ---------------------------------------------< Sign up route section >-------------------------------------------------------
+app.route("/admin")
+    .get(function (req, res) {
+        res.render("control/dashboard", { admin: "Amr ABSO" })
 
+    })
+    .post(function (req, res) {
+
+        let menu_btn = req.body.control_btn;
+        console.log(menu_btn)
+        res.render("control/" + menu_btn, { admin: "Amr ABSO" })
+    });
+//? -------------------------------------------< End of sign up route section >-------------------------------------------------
 
 
 //? ---------------------------------------------< Sign in route section >-------------------------------------------------------
@@ -62,7 +77,6 @@ app.route("/signin")
         res.render("signIn")
     })
     .post(function (req, res) {
-
     });
 //? -------------------------------------------< End of sign in route section >-------------------------------------------------
 

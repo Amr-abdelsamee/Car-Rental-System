@@ -1,0 +1,53 @@
+<%- include("../header") -%>
+
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/control.css" type="text/css">
+    <title>Admin</title>
+    </head>
+
+    <div id="wrapper">
+        <nav class="navbar navbar-default navbar-cls-top " role="navigation" style="margin-bottom: 0">
+            <span class="navbar-brand">Admin</span>
+            <div class="last-access-logout">
+                Last access : 5 Dec 2022 &nbsp;
+                <a href="#" class="btn btn-danger square-btn">Logout</a>
+            </div>
+        </nav>
+
+        <form action="/admin" method="post">
+            <nav class="navbar-default navbar-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav">
+                        <li class="text-center"></li>
+                        <li>
+                            <!--active-menu "-->
+                            <button name="control_btn" value="dashboard" type="submit"> Dashboard</button>
+                        </li>
+                        <li>
+                            <button name="control_btn" value="all_cars" type="submit"> All cars</button>
+                        </li>
+                        <li>
+                            <button name="control_btn" value="all_customers" type="submit"> All customers</button>
+                        </li>
+                        <li>
+                            <button name="control_btn" value="reservations" type="submit"> Reservations</button>
+                        </li>
+                        <li>
+                            <button name="control_btn" value="setting" type="submit"> Setting </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </form>
+
+
+        <div id="page-wrapper">
+            <div id="page-inner">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Admin Dashboard</h2>
+                        <h5>Welcome &nbsp;<%= admin %>, Glad to see you back. </h5>
+                    </div>
+                </div>
+
+                <hr />
