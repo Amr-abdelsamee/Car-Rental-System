@@ -43,7 +43,6 @@ h4 {
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;
     border-radius: 0px;
-
 }
 
 
@@ -227,10 +226,13 @@ p {
 
 
 /*----< add car >----*/
-.add-car{
+.add{
     width: 80%;
-    padding: 10px;
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-bottom: 60px;
     margin-left: 30px;
+
 }
 
 .input_field {
