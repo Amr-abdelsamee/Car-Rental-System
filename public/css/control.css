@@ -248,3 +248,10 @@ p {
 .input_field:focus{
     border-bottom: 2px solid #f00;
 }
+
+ thead{
+    font-size: 15px;
+} 
+tbody{
+    color: rgb(109, 109, 109);
+}
