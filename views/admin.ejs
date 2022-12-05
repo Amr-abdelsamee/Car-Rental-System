@@ -1,7 +1,7 @@
 <%- include("header") -%>
 
-<link rel="stylesheet" href="../css/signin.css" type="text/css">
-<title>Sign In</title>
+<link rel="stylesheet" href="../css/admin.css" type="text/css">
+<title>Admin Sign In</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400&display=swap" rel="stylesheet">
@@ -9,11 +9,11 @@
 
 <body>
 <div class="head">
-   <h1>Welcome to the Car Rental Website<h1>
+   <h1>Welcome Admin<h1>
 </div>
 <div class="common-container">
     <div class="container">
-        <h1>Sign In</h1>
+        <h1>Admin Sign In</h1>
         <form id="form" action="/signin" method="post">
                         <p class="signinMessage"></p>
                         <input class="inputBar" name="username"  placeholder="E-mail" autocomplete="off" type="text" required autofocus>
@@ -22,7 +22,6 @@
                         <button class="signBtn" name="btn" value="signup" type="submit">Sign in</button>
                     </div>
             </form>
-            <p>Don't have an account? <a id="log" href="signup">SignUp</a></p>
     </div>
 </div>
 

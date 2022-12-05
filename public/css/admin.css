@@ -1,12 +1,7 @@
 body {
-  background-color: #e5eaf5;
-  font-family: 'Dancing Script', cursive;
-  background-image: url(https://media.giphy.com/media/O58wTsoBqBqMw/giphy.gif);
-  background-size: cover;
-  background-repeat: no-repeat;
+  background-color: #202020;
+  font-family: 'Roboto Slab', sans-serif;
 }
-
-
 
 .common-container {
   width: 360px;
@@ -15,24 +10,25 @@ body {
   overflow: auto;
   margin: auto;
   background-color: #e5eaf5;
+  padding-bottom: 2%;
   border: 1px solid whitesmoke;
   border-radius: 7px;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
 
 .head {
-  color: darkgrey;
+  color: red;
   margin-bottom: 50px;
 }
 
 .signBtn {
-  color: black;
+  color: red;
   text-align: center;
   font-weight: bold;
   border-radius: 6px;
   border-color: black;
   background-color: darkgrey;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Dancing Script', sans-serif;
   font-size: 1em;
   padding: 10px;
   text-decoration: none;
@@ -55,6 +51,7 @@ button:hover {
 
 
 h1 {
+  color: red;
   text-align: center;
   padding-top: 15px;
 }
