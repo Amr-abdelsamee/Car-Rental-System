@@ -10,7 +10,7 @@ CREATE TABLE cars(
     year int not null,
     miles float not null,
     price int not null,
-    lic_no int not null UNIQUE,
+    lic_no varchar(11) not null UNIQUE,
     image_path MEDIUMBLOB
 );
 CREATE TABLE customers(
