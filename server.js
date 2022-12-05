@@ -7,6 +7,7 @@
 //? npm install body-parser
 //? npm install -g nodemon
 //? npm install url
+//? npm install mysql
 //TODO: to run the server type: nodemon server.js
 
 
@@ -28,7 +29,27 @@ app.use(favicon(__dirname + '/public/images/favicon.png')); // favicon location
 
 
 //? ---------------------------------------------< Database section >--------------------------------------------------------
+const mysql = require('mysql');
+const db= mysql.createConnection ({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "car_rental",
+    connectionLimit: 10
+});
+db.connect((err)=>{
+    if(err) throw err;
+    console.log("Connected to database");
+});
 
+app.route("/database")
+    .get(function(req,res){
+        db.query("SELECT * FROM car_rental.cars", (err, result)=>{
+            if(err) throw err;  
+            console.log(result);
+            res.send(result);
+        });
+    })
 
 //? -------------------------------------------< End of Database Section >-------------------------------------------------------
 
@@ -48,10 +69,15 @@ app.route("/")
         else if (btnType == "signup") {
             res.redirect("/signup")
         }
+        else if (btnType == "profile") {
+            res.redirect("/profile")
+        }
         else {
             res.redirect("/")
         }
     });
+
+
 //? ---------------------------------------------< End of root route section >---------------------------------------------------
 
 
@@ -93,4 +119,9 @@ app.listen(process.env.PORT || 3000, function () {
     console.log(new Date() + ":: Server started..")
 })
 
-
+//? ---------------------------------------------< Profile route section >-------------------------------------------------------
+app.route("/profile")
+    .get(function (req, res) {
+        res.render("profile")
+    })
+//? ---------------------------------------------< End of profile route section >-------------------------------------------------------
