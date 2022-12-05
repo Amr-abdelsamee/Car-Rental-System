@@ -83,7 +83,6 @@ app.route("/admin")
         if (req.body.signIn_btn === "signin") {
             const VALUES = [req.body.password, req.body.username]
             sql = "SELECT * FROM `admin` WHERE `password`= ? AND email=?";
-
             db.query(sql, VALUES, (err, result) => {
                 if (err) {
                     console.log(err)
@@ -152,7 +151,6 @@ app.route("/add")
         let sql = ""
         if (req.body.control_btn === "add_car") {
             const color_name = Get_Color_Name.GetColorName(req.body.color);
-
             let new_car = {
                 company: req.body.company,
                 color: color_name,
@@ -261,8 +259,61 @@ app.route("/signin")
         res.render("signIn")
     })
     .post(function (req, res) {
+            const VALUES = [req.body.password, req.body.username]
+            sql = "SELECT * FROM `customer` WHERE `password`= ? AND email=?";
+            db.query(sql, VALUES, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    if (result.length) {
+                        current_admin = VALUES[1]
+                        res.redirect("main")
+                    } else {
+                        res.redirect("/signin")
+                    }
+                }
+            })
     });
 //? -------------------------------------------< End of sign in route section >-------------------------------------------------
+
+
+
+//? ---------------------------------------------< Sign up route section >-------------------------------------------------------
+app.route("/signup")
+    .get(function (req, res) {
+        res.render("signUp")
+    })
+    .post(function (req, res) {
+        let new_customer = {
+            fname: req.body.fname,
+            lname: req.body.lname,
+            email: req.body.email,
+            password: req.body.password,
+            address: req.body.address,
+            phone: req.body.phone,
+        };
+
+        sql = "INSERT INTO customer VALUES (?)";
+        const VALUES = [
+            null
+            , new_customer.fname
+            , new_customer.lname
+            , new_customer.email
+            , new_customer.password
+            , new_customer.address
+            , parseInt(new_customer.phone)
+        ]
+        db.query(sql, [VALUES], (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log("NEW customer added to the system!")
+                console.log(new_customer)
+                res.redirect("/signin")
+            }
+        })
+    });
+//? -------------------------------------------< End of sign up route section >-------------------------------------------------
 
 
 
@@ -275,17 +326,15 @@ app.route("/signout")
 
 
 
-//? ---------------------------------------------< Sign up route section >-------------------------------------------------------
-app.route("/signup")
+//? ---------------------------------------------< Main route section >-------------------------------------------------------
+app.route("/main")
     .get(function (req, res) {
-        res.render("signUp")
+        res.render("main")
     })
     .post(function (req, res) {
 
     });
-//? -------------------------------------------< End of sign up route section >-------------------------------------------------
-
-
+//? ---------------------------------------------< End of Main route section >-------------------------------------------------------
 
 app.listen(process.env.PORT || 3000, function () {
     console.log(new Date() + ":: Server started..")
