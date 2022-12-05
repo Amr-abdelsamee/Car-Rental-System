@@ -81,37 +81,54 @@ app.route("/admin")
     })
     .post(function (req, res) {
         let menu_btn = req.body.control_btn;
-        console.log(menu_btn)
+        // console.log(menu_btn)
+        let sql = ""
         switch (menu_btn) {
-            case "add_car":
-                res.render("control/add_car")
+            case "dashboard":
+                res.render("control/dashboard", { admin: "Amr ABSO" })
                 break;
+
             case "all_cars":
-                let sql = "SELECT * FROM car";
+                sql = "SELECT * FROM car";
                 db.query(sql, (err, result) => {
                     if (err) {
                         console.log(err)
                     } else {
                         console.log(result)
-                        console.log(result[0].car_id)
-                        res.render("control/all_cars",{cars:result})
+                        res.render("control/all_cars", { cars: result })
                     }
                 })
                 break;
             case "all_customers":
-                res.render("control/all_customers")
+                sql = "SELECT * FROM customer";
+                db.query(sql, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log(result)
+                        res.render("control/all_customers", { customers: result })
+                    }
+                })
+                break;
+            case "reservations":
+                sql = "SELECT * FROM reservation ";
+                db.query(sql, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log(result)
+                        res.render("control/reservations", { reservations: result })
+                    }
+                })
+                break;
+            case "add_car":
+                res.render("control/add_car")
                 break;
             case "add_customer":
                 res.render("control/all_customers")
                 break;
-            case "dashboard":
-                res.render("control/dashboard", { admin: "Amr ABSO" })
-                break;
             case "setting":
                 res.render("control/setting")
-                break;
-            case "reservations":
-                res.render("control/reservations")
                 break;
         }
     });
