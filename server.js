@@ -81,6 +81,7 @@ app.route("/admin")
     .post(function (req, res) {
         var current_admin = ""
         if (req.body.signIn_btn === "signin") {
+            console.log("clicked in if noww")
             const VALUES = [req.body.password, req.body.username]
             sql = "SELECT * FROM `admin` WHERE `password`= ? AND email=?";
             db.query(sql, VALUES, (err, result) => {
@@ -330,6 +331,14 @@ app.route("/signout")
 app.route("/main")
     .get(function (req, res) {
         res.render("main")
+    })
+    .post(function (req, res) {
+
+    });
+
+    app.route("/overview")
+    .get(function (req, res) {
+        res.render("car_overview.ejs")
     })
     .post(function (req, res) {
 
