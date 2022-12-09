@@ -67,6 +67,9 @@ app.route("/")
         else if (btnType == "signup") {
             res.redirect("/signup")
         }
+        else if(btnType == "profile"){
+            res.redirect("/profile")
+        }
         else {
             res.redirect("/")
         }
@@ -323,7 +326,12 @@ app.route("/signout")
 
     })
 //? ---------------------------------------------< End of Sign out route section >-------------------------------------------------------
-
+//? ---------------------------------------------< Profile route section >-------------------------------------------------------
+app.route("/profile")
+    .get(function (req, res) {
+        res.render("profile")
+    })
+//? ---------------------------------------------< End of profile route section >-------------------------------------------------------
 
 
 //? ---------------------------------------------< Main route section >-------------------------------------------------------
