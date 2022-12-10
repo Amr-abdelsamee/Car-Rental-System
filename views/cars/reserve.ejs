@@ -1,0 +1,28 @@
+    <%- include("../header") -%>
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/car_overview.css" type="text/css">
+    <title>reserve</title>
+    </head>
+
+    <body>
+
+        <div class="container">
+            <form action="overview" method="get">
+            <button class="back-button" name="back_btn" value="back">Back</button></form>
+            <div class="sub-container">
+                <div class="left-block">this is the reservation calender for this model</div>
+                <div class="right-block">
+                    <h2>BMW x7 2022</h2>
+                    <hr>
+
+                    <h4>Price/day: 100$</h4>
+                    <h3>Total: SELECTED DAYS * 100$</h3>
+                    <form action="reserve" method="post">
+                    <button class="reserve-button" name="reserve_btn" value="reserve">Confirm</button></form>
+                </div>
+            </div>
+        </div>
+
+
+
+    </body>
