@@ -1,0 +1,18 @@
+<%- include("control") %>
+
+
+    <h2>Add a new Admin</h2>
+    <hr />
+
+    <form action="/add" method="post">
+        <div class="add panel-back">
+            <h4>Email</h4>
+            <input type="text" class="input_field" name="email">
+            <h4>Password</h4>
+            <input type="text" class="input_field" name="password">
+            <div class="orange-button">
+                <button name="control_btn" value="add_admin" type="submit"
+                    class="btn btn-danger square-btn">Done</button>
+            </div>
+    </form>
+    </div>

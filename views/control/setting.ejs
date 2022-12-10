@@ -1,16 +1,60 @@
-<%- include("control")  %> 
-<div class="row">
-    <div class="col-md-12">
-        <h2>Main Settings</h2>
-        
+<%- include("control") %>
+
+
+    <h2>Main Settings</h2>
+    <hr />
+    <br>
+    <h3>All Admins</h3>
+    <hr />
+    <div class="panel-body">
+        <div class="table-responsive" style="width: 60%;">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="bg-color-red">
+                    <tr>
+                        <th>Email</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < admin.length; i++){ %>
+                        <tr>
+                            <th>
+                                <%= admin[i].email %>
+                            </th>
+                            <th>
+                                <%= admin[i].password %>
+                            </th>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <form action="/admin" method="post">
+            <div class="orange-button">
+                <button name="control_btn" value="add_admin" type="submit"
+                    class="btn btn-danger square-btn">Add</button>
+            </div>
+        </form>
+        <div class="row">
+            <form action="/delete" method="post">
+                <select name="admin_email" class="input_field">
+                    <option value="">Select admin to delete</option>
+                    <% for(var i=0; i < admin.length; i++){ %>
+                        <option value="<%= admin[i].email %>">
+                            <%= admin[i].email %>
+                        </option>
+                        <% } %>
+                </select>
+                <br>
+                <div class="orange-button" style="float: left !important;">
+                    <button name="control_btn" value="delete_admin" type="submit"
+                        class="btn btn-danger square-btn">Delete</button>
+                </div>
+            </form>
+        </div>
+        <hr/>
     </div>
-</div>
-
-<hr />
+    </div>
 
 
-
-</div>
-
-
-<%- include("control_footer") %>
+    <%- include("control_footer") %>
