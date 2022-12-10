@@ -67,7 +67,7 @@ app.route("/")
         else if (btnType == "signup") {
             res.redirect("/signup")
         }
-        else if(btnType == "profile"){
+        else if (btnType == "profile") {
             res.redirect("/profile")
         }
         else {
@@ -227,32 +227,40 @@ app.route("/add")
 
 app.route("/delete")
     .post(function (req, res) {
-        let sql = ""
-        if (req.body.control_btn === "delete_car") {
-
-            sql = "DELETE FROM car WHERE lic_no = ?";
-            const VALUE = req.body.car_lic
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a car from the system!")
-                    res.redirect("/admin")
-                }
-            })
-        } else if (req.body.control_btn === "delete_customer") {
-
-            sql = "DELETE FROM customer WHERE customer_id = ?";
-            const VALUE = req.body.customer_id
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a customer from the system!")
-                    res.redirect("/admin")
-                }
-            })
+        // to delete a car
+        if (req.body.car_lic) {
+            let sql = ""
+            if (req.body.control_btn === "delete_car") {
+                sql = "DELETE FROM car WHERE lic_no = ?";
+                const VALUE = req.body.car_lic
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted a car from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
         }
+
+        // to delete a customer
+        if (req.body.customer_id) {
+            if (req.body.control_btn === "delete_customer") {
+                sql = "DELETE FROM customer WHERE customer_id = ?";
+                const VALUE = req.body.customer_id
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted a customer from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
+        }
+
+
     });
 //? -------------------------------------------< End of sign up route section >-------------------------------------------------
 
@@ -263,20 +271,20 @@ app.route("/signin")
         res.render("signIn")
     })
     .post(function (req, res) {
-            const VALUES = [req.body.password, req.body.username]
-            sql = "SELECT * FROM `customer` WHERE `password`= ? AND email=?";
-            db.query(sql, VALUES, (err, result) => {
-                if (err) {
-                    console.log(err)
+        const VALUES = [req.body.password, req.body.username]
+        sql = "SELECT * FROM `customer` WHERE `password`= ? AND email=?";
+        db.query(sql, VALUES, (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                if (result.length) {
+                    current_admin = VALUES[1]
+                    res.redirect("main")
                 } else {
-                    if (result.length) {
-                        current_admin = VALUES[1]
-                        res.redirect("main")
-                    } else {
-                        res.redirect("/signin")
-                    }
+                    res.redirect("/signin")
                 }
-            })
+            }
+        })
     });
 //? -------------------------------------------< End of sign in route section >-------------------------------------------------
 
@@ -344,9 +352,9 @@ app.route("/main")
 
     });
 
-    app.route("/overview")
+app.route("/overview")
     .get(function (req, res) {
-        res.render("car_overview.ejs")
+        res.render("cars/car_overview.ejs")
     })
     .post(function (req, res) {
 
