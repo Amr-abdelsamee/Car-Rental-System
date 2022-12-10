@@ -84,7 +84,6 @@ app.route("/admin")
     .post(function (req, res) {
         var current_admin = ""
         if (req.body.signIn_btn === "signin") {
-            console.log("clicked in if noww")
             const VALUES = [req.body.password, req.body.username]
             sql = "SELECT * FROM `admin` WHERE `password`= ? AND email=?";
             db.query(sql, VALUES, (err, result) => {
@@ -137,15 +136,25 @@ app.route("/admin")
                         }
                     })
                     break;
+                case "setting":
+                        sql = "SELECT * FROM admin";
+                        db.query(sql, (err, result) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                res.render("control/setting", { admin: result })
+                            }
+                        })
+                        break;
                 case "add_car":
                     res.render("control/add_car")
                     break;
                 case "add_customer":
                     res.render("control/add_customer")
                     break;
-                case "setting":
-                    res.render("control/setting")
-                    break;
+                    case "add_admin":
+                        res.render("control/add_admin")
+                        break;
             }
         }
     });
@@ -222,6 +231,26 @@ app.route("/add")
                     res.redirect("/admin")
                 }
             })
+        } else if (req.body.control_btn === "add_admin") {
+            let new_admin = {
+                email: req.body.email,
+                password: req.body.password,
+            };
+
+            sql = "INSERT INTO admin (email,password) VALUES (?)";
+            const VALUES = [
+                new_admin.email
+                , new_admin.password
+            ]
+            db.query(sql, [VALUES], (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("NEW admin added to the system!")
+                    console.log(new_admin)
+                    res.redirect("/admin")
+                }
+            })
         }
     });
 
@@ -259,6 +288,22 @@ app.route("/delete")
                 })
             }
         }
+
+                // to delete an admin
+                if (req.body.admin_email) {
+                    if (req.body.control_btn === "delete_admin") {
+                        sql = "DELETE FROM admin WHERE email = ?";
+                        const VALUE = req.body.admin_email
+                        db.query(sql, VALUE, (err, result) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                console.log("An admin deleted another from the system!")
+                                res.redirect("/admin")
+                            }
+                        })
+                    }
+                }
 
 
     });
@@ -359,6 +404,16 @@ app.route("/overview")
     .post(function (req, res) {
 
     });
+
+    app.route("/reserve")
+    .get(function (req, res) {
+        res.render("cars/reserve.ejs")
+    })
+    .post(function (req, res) {
+        
+    });
+
+
 //? ---------------------------------------------< End of Main route section >-------------------------------------------------------
 
 app.listen(process.env.PORT || 3000, function () {
