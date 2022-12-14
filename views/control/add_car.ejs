@@ -10,9 +10,9 @@
     <form action="/add" method="post" enctype="multipart/form-data">
         <div class="add panel-back">
             <h4>Company</h4>
-            <input type="text" class="input_field" name="company">
+            <input type="text" class="input_field" name="company" required>
             <h4>Color</h4>
-            <input type="color" value="#0000" name="color">
+            <input type="color" value="#0000" name="color" required>
             <h4>Status</h4>
             <select name="stat" class="input_field">
                 <option value="Active">Active</option>
@@ -28,17 +28,17 @@
                     <% } %>
             </select>
             <h4>Model</h4>
-            <input type="text" class="input_field" name="model">
+            <input type="text" class="input_field" name="model" required>
             <h4>Year</h4>
-            <input type="text" class="input_field" name="year">
+            <input type="text" class="input_field" name="year" required>
             <h4>Miles</h4>
-            <input type="text" class="input_field" name="miles">
+            <input type="text" class="input_field" name="miles" required>
             <h4>Price</h4>
-            <input type="text" class="input_field" name="price">
+            <input type="text" class="input_field" name="price" required>
             <h4>licence No</h4>
-            <input type="text" class="input_field" name="lic_no">
+            <input type="text" class="input_field" name="lic_no" required>
             <h4>Image</h4>
-            <input type="file" name="image" accept="image/*">
+            <input type="file" name="image" accept="image/*" required>
 
 
             <div class="orange-button">
