@@ -16,13 +16,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% for(var i=0; i < admin.length; i++){ %>
+                    <% for(var i=0; i < admins.length; i++){ %>
                         <tr>
                             <th>
-                                <%= admin[i].email %>
+                                <%= admins[i].email %>
                             </th>
                             <th>
-                                <%= admin[i].password %>
+                                <%= admins[i].password %>
                             </th>
                         </tr>
                         <% } %>
@@ -38,22 +38,74 @@
         <div class="row">
             <form action="/delete" method="post">
                 <select name="admin_email" class="input_field">
-                    <option value="">Select admin to delete</option>
-                    <% for(var i=0; i < admin.length; i++){ %>
-                        <option value="<%= admin[i].email %>">
-                            <%= admin[i].email %>
+                    <option value=""></option>
+                    <% for(var i=0; i < admins.length; i++){ %>
+                        <option value="<%= admins[i].email %>">
+                            <%= admins[i].email %>
                         </option>
                         <% } %>
                 </select>
                 <br>
                 <div class="orange-button" style="float: left !important;">
-                    <button name="control_btn" value="delete_admin" type="submit"
+                    <button name="delete_control_btn" value="delete_admin" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
                 </div>
             </form>
         </div>
         <hr/>
+        <h3>All Offices</h3>
+        <hr />
+        <div class="table-responsive" style="width: 60%;">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="bg-color-red">
+                    <tr>
+                        <th>Office ID</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < offices.length; i++){ %>
+                        <tr>
+                            <th>
+                                <%= offices[i].office_id %>
+                            </th>
+                            <th>
+                                <%= offices[i].location %>
+                            </th>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <form action="/admin" method="post">
+            <div class="orange-button">
+                <button name="control_btn" value="add_office" type="submit"
+                    class="btn btn-danger square-btn">Add</button>
+            </div>
+        </form>
+        <div class="row">
+            <form action="/delete" method="post">
+                <select name="office_id" class="input_field">
+                    <option value=""></option>
+                    <% for(var i=0; i < offices.length; i++){ %>
+                        <option value="<%= offices[i].office_id %>">
+                            <%= offices[i].location %>
+                        </option>
+                        <% } %>
+                </select>
+                <br>
+                <div class="orange-button" style="float: left !important;">
+                    <button name="delete_control_btn" value="delete_office" type="submit"
+                        class="btn btn-danger square-btn">Delete</button>
+                </div>
+            </form>
+        </div>
+
+
+
+
     </div>
+
     </div>
 
 
