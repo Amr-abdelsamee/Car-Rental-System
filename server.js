@@ -9,11 +9,13 @@
 //? npm install url
 //? npm install mysql
 //? npm install hex-color-to-color-name
+//? npm install express-fileupload
 //TODO: to run the server type: nodemon server.js
 
 
 require('dotenv').config(); // for .env file
 const express = require("express"); // express module for routes
+const fileUpload = require('express-fileupload');
 const mysql = require("mysql") // mysql database
 const bodyParser = require("body-parser"); // for requestes parsing
 
@@ -21,10 +23,12 @@ const favicon = require('serve-favicon'); // for icon
 //const chalk = require("chalk") // for console colors
 const Get_Color_Name = require("hex-color-to-color-name")
 
+const fs = require('fs'); // for images
 
 const app = express();
 app.set('views', __dirname + '/views/');
 app.set('view engine', 'ejs');
+app.use(fileUpload());
 app.use(express.static("public"));
 // app.use(express.static(path.join('public'))); // CSS location
 // app.use(express.static(path.join('app'))); //js location
@@ -75,7 +79,27 @@ app.route("/")
         }
     });
 //? ---------------------------------------------< End of root route section >---------------------------------------------------
-
+function loadImages() {
+    let sql = "SELECT * FROM cars";
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            
+            for (var i = 0; i < result.length; i++) {
+                console.log(result[i])
+                let imageName = result[i].car_id
+                let buffer = Buffer.from(result[i].image, 'binary');
+                fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
+                    if (err) console.log(err);
+                    else {
+                        console.log("Image " + imageName + ".jpg successfully loaded!");
+                    }
+                });
+            }
+        }
+    })
+}
 //? ---------------------------------------------< Admin route section >-------------------------------------------------------
 app.route("/admin")
     .get(function (req, res) {
@@ -92,7 +116,16 @@ app.route("/admin")
                 } else {
                     if (result.length) {
                         current_admin = VALUES[1]
-                        res.render("control/dashboard", { admin: current_admin })
+                        loadImages()
+                        sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
+                        db.query(sql, (err, result2) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                res.render("control/dashboard", { admin: current_admin, cars: result2 })
+                            }
+                        })
+
                     } else {
                         // error message should be added here ------------------------------<
                         res.redirect("/admin")
@@ -105,7 +138,14 @@ app.route("/admin")
             let sql = ""
             switch (menu_btn) {
                 case "dashboard":
-                    res.render("control/dashboard", { admin: current_admin })
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
+                    db.query(sql, (err, result2) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/dashboard", { admin: current_admin, cars: result2 })
+                        }
+                    })
                     break;
                 case "all_cars":
                     sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
@@ -113,7 +153,7 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/all_cars", { cars: result })
+                            res.render("control/all_cars", { cars: result})
                         }
                     })
                     break;
@@ -181,6 +221,10 @@ app.route("/add")
     .post(function (req, res) {
         let sql = ""
         if (req.body.control_btn === "add_car") {
+            const { image } = req.files
+            console.log(image.data)
+
+
             const color_name = Get_Color_Name.GetColorName(req.body.color);
             const VALUES = [
                 null
@@ -193,7 +237,7 @@ app.route("/add")
                 , parseInt(req.body.miles)
                 , parseInt(req.body.price)
                 , parseInt(req.body.office)
-                , null
+                , image.data
             ]
             sql = "INSERT INTO cars VALUES (?)";
             db.query(sql, [VALUES], (err, result) => {
