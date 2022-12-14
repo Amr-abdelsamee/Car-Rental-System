@@ -85,7 +85,7 @@ app.route("/admin")
         var current_admin = ""
         if (req.body.signIn_btn === "signin") {
             const VALUES = [req.body.password, req.body.username]
-            sql = "SELECT * FROM `admin` WHERE `password`= ? AND email=?";
+            sql = "SELECT * FROM `admins` WHERE `password`= ? AND email=?";
             db.query(sql, VALUES, (err, result) => {
                 if (err) {
                     console.log(err)
@@ -94,6 +94,7 @@ app.route("/admin")
                         current_admin = VALUES[1]
                         res.render("control/dashboard", { admin: current_admin })
                     } else {
+                        // error message should be added here ------------------------------<
                         res.redirect("/admin")
                     }
                 }
@@ -107,7 +108,7 @@ app.route("/admin")
                     res.render("control/dashboard", { admin: current_admin })
                     break;
                 case "all_cars":
-                    sql = "SELECT * FROM car";
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
@@ -117,7 +118,7 @@ app.route("/admin")
                     })
                     break;
                 case "all_customers":
-                    sql = "SELECT * FROM customer";
+                    sql = "SELECT * FROM customers";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
@@ -127,7 +128,7 @@ app.route("/admin")
                     })
                     break;
                 case "reservations":
-                    sql = "SELECT * FROM reservation ";
+                    sql = "SELECT * FROM reservations";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
@@ -137,24 +138,41 @@ app.route("/admin")
                     })
                     break;
                 case "setting":
-                        sql = "SELECT * FROM admin";
-                        db.query(sql, (err, result) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                res.render("control/setting", { admin: result })
-                            }
-                        })
-                        break;
+                    sql = "SELECT * FROM admins";
+                    db.query(sql, (err, result1) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            sql = "SELECT * FROM offices";
+                            db.query(sql, (err, result2) => {
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    res.render("control/setting", { admins: result1, offices: result2 })
+                                }
+                            })
+                        }
+                    })
+                    break;
                 case "add_car":
-                    res.render("control/add_car")
+                    sql = "SELECT * FROM offices";
+                    db.query(sql, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/add_car", { offices: result })
+                        }
+                    })
                     break;
                 case "add_customer":
                     res.render("control/add_customer")
                     break;
-                    case "add_admin":
-                        res.render("control/add_admin")
-                        break;
+                case "add_admin":
+                    res.render("control/add_admin")
+                    break;
+                case "add_office":
+                    res.render("control/add_office")
+                    break;
             }
         }
     });
@@ -164,90 +182,86 @@ app.route("/add")
         let sql = ""
         if (req.body.control_btn === "add_car") {
             const color_name = Get_Color_Name.GetColorName(req.body.color);
-            let new_car = {
-                company: req.body.company,
-                color: color_name,
-                stat: req.body.stat,
-                office: req.body.office,
-                model: req.body.model,
-                year: req.body.year,
-                miles: req.body.miles,
-                price: req.body.price,
-                lic_no: req.body.lic_no,
-                image_path: null,
-            };
-
-            sql = "INSERT INTO car VALUES (?)";
             const VALUES = [
                 null
-                , new_car.company
-                , new_car.color
-                , new_car.stat
-                , new_car.office
-                , new_car.model
-                , parseInt(new_car.year)
-                , parseInt(new_car.miles)
-                , parseInt(new_car.price)
-                , new_car.lic_no
+                , req.body.company
+                , req.body.model
+                , req.body.lic_no
+                , color_name
+                , req.body.stat
+                , parseInt(req.body.year)
+                , parseInt(req.body.miles)
+                , parseInt(req.body.price)
+                , parseInt(req.body.office)
                 , null
             ]
+            sql = "INSERT INTO cars VALUES (?)";
             db.query(sql, [VALUES], (err, result) => {
                 if (err) {
                     console.log(err)
                 } else {
                     console.log("NEW car added to the system!")
-                    console.log(new_car)
+                    console.log(VALUES)
+                    // success message should be added here ------------------------------<
                     res.redirect("/admin")
                 }
             })
 
 
         } else if (req.body.control_btn === "add_customer") {
-            let new_customer = {
-                fname: req.body.fname,
-                lname: req.body.lname,
-                email: req.body.email,
-                password: req.body.password,
-                address: req.body.address,
-                phone: req.body.phone,
-            };
 
-            sql = "INSERT INTO customer VALUES (?)";
             const VALUES = [
                 null
-                , new_customer.fname
-                , new_customer.lname
-                , new_customer.email
-                , new_customer.password
-                , new_customer.address
-                , parseInt(new_customer.phone)
+                , req.body.fname
+                , req.body.lname
+                , req.body.email
+                , req.body.password
+                , req.body.address
+                , req.body.phone
             ]
+
+            sql = "INSERT INTO customers VALUES (?)";
             db.query(sql, [VALUES], (err, result) => {
                 if (err) {
                     console.log(err)
                 } else {
                     console.log("NEW customer added to the system!")
-                    console.log(new_customer)
+                    console.log(VALUES)
+                    // success message should be added here ------------------------------<
                     res.redirect("/admin")
                 }
             })
         } else if (req.body.control_btn === "add_admin") {
-            let new_admin = {
-                email: req.body.email,
-                password: req.body.password,
-            };
 
-            sql = "INSERT INTO admin (email,password) VALUES (?)";
             const VALUES = [
-                new_admin.email
-                , new_admin.password
+                req.body.email
+                , req.body.password
             ]
+            sql = "INSERT INTO admins (email,password) VALUES (?)";
             db.query(sql, [VALUES], (err, result) => {
                 if (err) {
                     console.log(err)
                 } else {
                     console.log("NEW admin added to the system!")
-                    console.log(new_admin)
+                    console.log(VALUES)
+                    // success message should be added here ------------------------------<
+                    res.redirect("/admin")
+                }
+            })
+        } else if (req.body.control_btn === "add_office") {
+            const VALUES = [
+                null
+                , req.body.location
+
+            ]
+            sql = "INSERT INTO offices VALUES (?)";
+            db.query(sql, [VALUES], (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("NEW office added to the system!")
+                    console.log(VALUES)
+                    // success message should be added here ------------------------------<
                     res.redirect("/admin")
                 }
             })
@@ -256,54 +270,73 @@ app.route("/add")
 
 app.route("/delete")
     .post(function (req, res) {
+        console.log(req)
         // to delete a car
-        if (req.body.car_lic) {
-            let sql = ""
-            if (req.body.control_btn === "delete_car") {
-                sql = "DELETE FROM car WHERE lic_no = ?";
-                const VALUE = req.body.car_lic
-                db.query(sql, VALUE, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("An admin deleted a car from the system!")
-                        res.redirect("/admin")
-                    }
-                })
-            }
+        //  if (req.body.car_lic) {
+        let sql = ""
+        if (req.body.delete_control_btn === "delete_car") {
+            sql = "DELETE FROM cars WHERE lic_no = ?";
+            const VALUE = req.body.car_lic
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a car from the system!")
+                    res.redirect("/admin")
+                }
+            })
         }
+        //     }
 
         // to delete a customer
-        if (req.body.customer_id) {
-            if (req.body.control_btn === "delete_customer") {
-                sql = "DELETE FROM customer WHERE customer_id = ?";
-                const VALUE = req.body.customer_id
-                db.query(sql, VALUE, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("An admin deleted a customer from the system!")
-                        res.redirect("/admin")
-                    }
-                })
-            }
+        ///   if (req.body.customer_id) {
+        if (req.body.delete_control_btn === "delete_customer") {
+            sql = "DELETE FROM customers WHERE customer_id = ?";
+            const VALUE = req.body.customer_id
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a customer from the system!")
+                    res.redirect("/admin")
+                }
+            })
+        }
+        //  }
+
+        // to delete an admin
+
+        if (req.body.delete_control_btn === "delete_admin") {
+            sql = "DELETE FROM admins WHERE email = ?";
+            const VALUE = req.body.admin_email
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted another from the system!")
+                    res.redirect("/admin")
+                }
+            })
         }
 
-                // to delete an admin
-                if (req.body.admin_email) {
-                    if (req.body.control_btn === "delete_admin") {
-                        sql = "DELETE FROM admin WHERE email = ?";
-                        const VALUE = req.body.admin_email
-                        db.query(sql, VALUE, (err, result) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                console.log("An admin deleted another from the system!")
-                                res.redirect("/admin")
-                            }
-                        })
-                    }
+
+        // to delete an office
+        //     if (req.body.office_id) {
+        console.log(req.body.delete_control_btn)
+        if (req.body.delete_control_btn === "delete_office") {
+            console.log(2)
+            sql = "DELETE FROM offices WHERE office_id = ?";
+            const VALUE = req.body.office_id
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted an office from the system!")
+                    res.redirect("/admin")
                 }
+            })
+        }
+        //   }
 
 
     });
@@ -405,12 +438,12 @@ app.route("/overview")
 
     });
 
-    app.route("/reserve")
+app.route("/reserve")
     .get(function (req, res) {
         res.render("cars/reserve.ejs")
     })
     .post(function (req, res) {
-        
+
     });
 
 

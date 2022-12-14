@@ -16,15 +16,15 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead class="bg-color-red">
                     <tr>
-                        <th>car ID</th>
-                        <th>company</th>
-                        <th>color</th>
-                        <th>status</th>
-                        <th>office</th>
-                        <th>model</th>
-                        <th>year</th>
-                        <th>miles</th>
-                        <th>price</th>
+                        <th>Car ID</th>
+                        <th>Company</th>
+                        <th>Model</th>
+                        <th>Status</th>
+                        <th>Office</th>
+                        <th>Color</th>
+                        <th>Year</th>
+                        <th>Miles</th>
+                        <th>Price</th>
                         <th>Licence No</th>
                     </tr>
                 </thead>
@@ -38,16 +38,16 @@
                                 <%= cars[i].company %>
                             </th>
                             <th>
-                                <%= cars[i].color %>
+                                <%= cars[i].model %>
                             </th>
                             <th>
                                 <%= cars[i].status %>
                             </th>
                             <th>
-                                <%= cars[i].office %>
+                                <%= cars[i].location %>
                             </th>
                             <th>
-                                <%= cars[i].model %>
+                                <%= cars[i].color %>
                             </th>
                             <th>
                                 <%= cars[i].year %>
@@ -85,7 +85,7 @@
                 </select>
                 <br>
                 <div class="orange-button" style="float: left !important;">
-                    <button name="control_btn" value="delete_car" type="submit"
+                    <button name="delete_control_btn" value="delete_car" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
                 </div>
             </form>

@@ -15,15 +15,15 @@
             <input type="color" value="#0000" name="color">
             <h4>Status</h4>
             <select name="stat" class="input_field">
-                <option value="Available">Available</option>
-                <option value="Unavailable">Unavailable</option>
+                <option value="Active">Active</option>
+                <option value="Rented">Rented</option>
+                <option value="Out of service">Out of service</option>
             </select>
             <h4>Office</h4>
             <select name="office" class="input_field">
-                <option value="Alexandria">Alexandria</option>
-                <option value="Cairo">Cairo</option>
-                <option value="Giza">Giza</option>
-                <option value="Mansoura">Mansoura</option>
+                <% for(var i=0; i < offices.length; i++){ %>
+                <option value="<%= offices[i].office_id %>"> <%= offices[i].location %></option>
+                <% } %>
             </select>
             <h4>Model</h4>
             <input type="text" class="input_field" name="model">
@@ -36,7 +36,7 @@
             <h4>licence No</h4>
             <input type="text" class="input_field" name="lic_no">
             <h4>Image</h4>
-            <input type="file" name="image">
+            <input type="file" name="image" accept="image/*">
             
 
             <div class="orange-button">
