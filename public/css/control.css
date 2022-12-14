@@ -255,3 +255,9 @@ p {
 tbody{
     color: rgb(109, 109, 109);
 }
+
+
+.scroll_bar {
+    overflow:scroll;
+    height:400px;
+}
