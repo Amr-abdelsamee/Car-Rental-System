@@ -11,7 +11,7 @@ CREATE TABLE cars(
     miles float not null,
     price int not null,
     office_id int not null,
-    image_path MEDIUMBLOB
+    `image` MEDIUMBLOB
 );
 CREATE TABLE customers(
     customer_id int auto_increment PRIMARY KEY, 
