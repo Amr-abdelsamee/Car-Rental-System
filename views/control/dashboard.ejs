@@ -61,14 +61,25 @@
 
 
     <div class="row">
+
+
         <% for(var i=0; i < cars.length; i++){ %>
             <div class="col-md-3 col-sm-6 col-xs-6">
                 <div class="panel panel-back noti-box">
                     <div class="text-box">
-                        <div class="car-image" style="background-image: url('../images/cars/<%= cars[i].car_id %>.jpg');"></div>
-                        <p class="text-muted"><%= cars[i].company %> <%= cars[i].model %></p>
-                        <p class="text-muted" style="background-color:'red';"><%= cars[i].color %></p>
-                        <p class="text-muted"><%= cars[i].price %>$</p>
+                       
+                            <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg" alt="car image">
+                       
+                        <p class="text-muted car-card-text">
+                            <%= cars[i].company %>
+                                <%= cars[i].model %>
+                        </p>
+                        <p class="text-muted car-card-text" style="background-color:'red';">
+                            <%= cars[i].color %>
+                        </p>
+                        <p class="text-muted car-card-text">
+                            <%= cars[i].price %>$
+                        </p>
                     </div>
                 </div>
             </div>
