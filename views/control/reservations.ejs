@@ -17,7 +17,8 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead class="bg-color-red">
                     <tr>
-                        <th>Reserve No </th>
+                        <th>#</th>
+                        <th>Reserve No</th>
                         <th>Customer ID</th>
                         <th>Car ID</th>
                         <th>Start Date</th>
@@ -27,6 +28,9 @@
                 <tbody>
                     <% for(var i=0; i < reservations.length; i++){ %>
                         <tr>
+                            <th>
+                                <%= i+1 %>
+                            </th>
                             <th>
                                 <%= reservations[i].reserve_no %>
                             </th>
