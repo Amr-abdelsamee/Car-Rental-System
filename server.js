@@ -79,15 +79,17 @@ app.route("/")
         }
     });
 //? ---------------------------------------------< End of root route section >---------------------------------------------------
-function loadImages() {
-    let sql = "SELECT * FROM cars";
+//used whhen admin login
+function loadAllImages() {
+    fs.mkdir('public\\images\\cars', { recursive: true }, (err) => {
+        if (err) throw err;
+    });
+    let sql = "SELECT car_id,image FROM cars";
     db.query(sql, (err, result) => {
         if (err) {
             console.log(err)
         } else {
-            
             for (var i = 0; i < result.length; i++) {
-                console.log(result[i])
                 let imageName = result[i].car_id
                 let buffer = Buffer.from(result[i].image, 'binary');
                 fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
@@ -97,6 +99,24 @@ function loadImages() {
                     }
                 });
             }
+        }
+    })
+}
+//used in add cars
+function loadLastImages() {
+    let sql = "SELECT car_id,image FROM cars WHERE car_id IN(SELECT  max(car_id) FROM cars )";
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            let imageName = result[0].car_id
+            let buffer = Buffer.from(result[0].image, 'binary');
+            fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
+                if (err) console.log(err);
+                else {
+                    console.log("Image " + imageName + ".jpg successfully loaded!");
+                }
+            });
         }
     })
 }
@@ -116,7 +136,7 @@ app.route("/admin")
                 } else {
                     if (result.length) {
                         current_admin = VALUES[1]
-                        loadImages()
+                        loadAllImages()
                         sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
                         db.query(sql, (err, result2) => {
                             if (err) {
@@ -153,7 +173,7 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/all_cars", { cars: result})
+                            res.render("control/all_cars", { cars: result })
                         }
                     })
                     break;
@@ -247,6 +267,7 @@ app.route("/add")
                     console.log("NEW car added to the system!")
                     console.log(VALUES)
                     // success message should be added here ------------------------------<
+                    loadLastImages()
                     res.redirect("/admin")
                 }
             })
