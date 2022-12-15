@@ -19,7 +19,7 @@
                     <tr>
                         <th>#</th>
                         <th>Reserve No</th>
-                        <th>Customer ID</th>
+                        <th>Customer name</th>
                         <th>Car ID</th>
                         <th>Start Date</th>
                         <th>End Date</th>
@@ -35,7 +35,7 @@
                                 <%= reservations[i].reserve_no %>
                             </th>
                             <th>
-                                <%= reservations[i].customer_id %>
+                                <%= reservations[i].fname %> <%= reservations[i].lname %>
                             </th>
                             <th>
                                 <%= reservations[i].car_id %>
@@ -50,6 +50,29 @@
                         <% } %>
                 </tbody>
             </table>
+        </div>
+        <form action="/admin" method="post">
+            <div class="orange-button">
+                <button name="control_btn" value="add_res" type="submit" class="btn btn-danger square-btn">Add</button>
+            </div>
+        </form>
+
+        <div class="row">
+            <form action="/delete" method="post">
+                <select name="reserve_no" class="input_field" >
+                    <option value=""  disabled selected >Reserve No.</option>
+                    <% for(var i=0; i < reservations.length; i++){ %>
+                        <option value="<%= reservations[i].reserve_no %>">
+                            <%= reservations[i].reserve_no %> %>
+                        </option>
+                        <% } %>
+                </select>
+                <br>
+                <div class="orange-button" style="float: left !important;">
+                    <button name="delete_control_btn" value="delete_res" type="submit"
+                        class="btn btn-danger square-btn">Delete</button>
+                </div>
+            </form>
         </div>
     </div>
     </div>
