@@ -11,7 +11,19 @@
                     <source src="../videos/bg/bmw.mp4" type="video/mp4">
                 </video>
             </div>
+            
             <div class="main-container">
+                <div class="row filters-container">
+                <form action="" method="post">
+                    <select name="filters" class="input_field filters-input-field">
+                        <option value="" disabled selected>pick a filter</option>
+                        <option value="filter1">filter 1</option>
+                        <option value="filter1">filter 1</option>
+                        <option value="filter1">filter 1</option>
+                    </select>
+                    <button class="filters_btn" name="filters_btn" value="apply_filter" type="submit">Apply</button>
+            </form>
+                </div>
                 <div class="row">
                     <% for(var i=0; i < cars.length; i++){ %>
                         <div class="col-md-3 col-sm-6 col-xs-6">

@@ -48,3 +48,27 @@ video {
     height: 100%;
     object-fit: cover;
 }
+
+
+.filters-container {
+    margin-left: 10px ;
+}
+
+.filters-input-field{
+    width: 20% !important;
+    font-size: 20px !important;
+    padding: 0;
+}
+.filters-input-field:focus {
+    border-bottom: 4px solid #0FA564;
+}
+
+.filters_btn{
+    background-color: white;
+    border: none;
+    font-size: 19px;
+}
+
+
+
+
