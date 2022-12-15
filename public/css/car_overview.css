@@ -1,59 +1,78 @@
+:root{
+    --width: 50%;
+}
+
 body{
 background-color: rgb(105, 105, 105);
-/* font-family: Arial, Helvetica, sans-serif; */
+font-family: Arial, Helvetica, sans-serif;
 }
 
 
 .container{
-    width: 50%;
-    height: 500px;
+    width: var(--width);
+    /* min-height: 500px; */
+    height: 60vh;
     padding: 0;
-    margin: 7% auto;
-    border-radius: 20px;
-    background-color: white
+    margin: 0 auto;
+    margin-top: 7%;
+    background-color: white;
+}
+
+.container-header{
+    width: 100%;
+    height: 50px;
+    margin: 0 auto;
+    background-color: black;
+    display: flex;
+    align-items: center;
 }
 
 .back-button{
-    float: left;
-    width: 20%;
-    border: none;
+    /* float: left; */
+    /* padding: 5px; */
+    color: white;
+    font-size: 20px;
+    font-weight: 800;
+    margin-left: 15px;
     padding: 5px;
-    padding-left: 20px;
-    background-color: red;
-    border-radius: 20px 0 0 0 ;
+    width: fit-content;
+
 }
+
 .back-button:hover{
+    text-decoration: none;
     cursor: pointer;
+    border: 1px solid white;
+    color: white;
+    /* -webkit-text-stroke: 1px white; */
 }
 
 .sub-container{
     height: 80%;
+    padding: 0 5px;
     margin-top: 50px;
-    background-color: greenyellow;
+    /* background-color: greenyellow; */
 }
 
 .left-block{
-    width: 40%;
+    width: 55%;
     float: left;
-    padding: 10px;
-    height: 100%;
-    /* border-radius: 20px 0 0 20px; */
-    background-color: rgb(132, 0, 255);
+    height: 90%;
 }
 
 
 .right-block{
-width: 58%;
+width: 43%;
 float: right;
-padding: 10px;
+
 height: 100%;
-background-color: rgb(0, 255, 191);
-/* border-radius: 0 20px 20px 0 ; */
+/* background-color: rgb(0, 255, 191); */
 }
 
 
 h2{
     color: rgb(109, 0, 0);
+    font-weight: 700;
 }
 hr{
     margin: 0;
@@ -61,6 +80,7 @@ hr{
 }
 
 ul{
+    list-style: square;
     margin-top:20px ;
     font-size: 20px;
 }
@@ -69,18 +89,40 @@ h3{
     font-weight: 600;
 }
 
+
 .reserve-button{
-    width: 25%;
+    width: 40%;
     display: inline;
     margin-top: 20px;
     padding: 5px;
     border: none;
-    border-radius: 10px ;
-    background-color: red;
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    background-color: black;
+    color: white;
+    font-size: 20px;
 }
 
 .reserve-button:hover{
     cursor: pointer;
-    box-shadow: rgb(167, 167, 167) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
+
+
+img.car-image {
+    width: 100%;
+    min-height: 100%;
+    height: 200px;
+    display: block;
+    object-fit: cover;
+    /* object-fit: scale-down; */
+    margin-bottom: 20px;
+}
+
+.container-footer{
+    width: var(--width);
+    height: 20px;
+    margin: 0 auto;
+    background-color: black;
+    display: flex;
+    align-items: center;
+}
+

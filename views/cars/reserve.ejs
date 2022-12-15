@@ -7,21 +7,22 @@
     <body>
 
         <div class="container">
-            <form action="overview" method="get">
-            <button class="back-button" name="back_btn" value="back">Back</button></form>
+            <div class="container-header"><a class="back-button" href="main">Back</a></div>
             <div class="sub-container">
-                <div class="left-block">this is the reservation calender for this model</div>
+                <div class="left-block">
+                    <img  class="car-image" src="../images/cars/<%= car.car_id %>.jpg" alt="car image">
+                </div>
                 <div class="right-block">
-                    <h2>BMW x7 2022</h2>
+                    <h2> <%= car.company %> <%= car.model %> <%= car.year %></h2>
                     <hr>
-
-                    <h4>Price/day: 100$</h4>
-                    <h3>Total: SELECTED DAYS * 100$</h3>
-                    <form action="reserve" method="post">
-                    <button class="reserve-button" name="reserve_btn" value="reserve">Confirm</button></form>
+                    <!-- must select the date here -->
+                    <h3>Price/day: <%= car.price %>$</h3>
+                    <form action="reserve" method="get">
+                    <button class="reserve-button" name="reserve_btn" value="reserve">Confrim</button></form>
                 </div>
             </div>
         </div>
+        <div class="container-footer"></div>
 
 
 

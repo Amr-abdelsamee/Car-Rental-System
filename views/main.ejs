@@ -31,8 +31,8 @@
                                     <p class="text-muted car-card-text">
                                         <%= cars[i].price %>$
                                     </p>
-                                    <form action="overview" method="get">
-                                        <button class="view-btn" name="car_view" value="<%= cars[i].car_id %>"
+                                    <form action="overview" method="post">
+                                        <button class="view-btn" name="car_id_btn" value="<%= cars[i].car_id %>"
                                             type="submit">
                                             view
                                         </button>

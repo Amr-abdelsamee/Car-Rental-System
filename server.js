@@ -158,7 +158,7 @@ app.route("/admin")
             let sql = ""
             switch (menu_btn) {
                 case "dashboard":
-                    sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
                     db.query(sql, (err, result2) => {
                         if (err) {
                             console.log(err)
@@ -168,7 +168,7 @@ app.route("/admin")
                     })
                     break;
                 case "all_cars":
-                    sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
@@ -549,18 +549,35 @@ app.route("/main")
 
 app.route("/overview")
     .get(function (req, res) {
-        res.render("cars/car_overview.ejs")
+        res.redirect("main");
     })
     .post(function (req, res) {
 
+        const VALUE = [req.body.car_id_btn]
+        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
+        db.query(sql, VALUE, (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                res.render("cars/car_overview", { car: result[0] })
+            }
+        })
     });
 
 app.route("/reserve")
     .get(function (req, res) {
-        res.render("cars/reserve.ejs")
+        res.redirect("main");
     })
     .post(function (req, res) {
-
+        const VALUE = [req.body.reserve_btn]
+        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
+        db.query(sql, VALUE, (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                res.render("cars/reserve", { car: result[0] })
+            }
+        })
     });
 
 
