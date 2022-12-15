@@ -1,16 +1,18 @@
-:root{
-  --WIDTH : 90%;
+:root {
+  --WIDTH: 90%;
 }
-body{
+
+body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.main-header{
+.main-header {
   width: var(--WIDTH);
   height: 20px;
   margin: 0 auto;
   background-color: black;
 }
+
 .navbar {
   /* background-image:  url("../images/bg/main_bg.jpg"); */
   box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
@@ -38,7 +40,6 @@ body{
   color: rgb(0, 0, 0);
   text-decoration: none;
   border: hidden;
-  
   font-weight: 600;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -47,26 +48,26 @@ body{
 .navbar a:hover {
   cursor: pointer;
   color: white;
-  -webkit-text-stroke: 1px black ;
+  -webkit-text-stroke: 1px black;
   text-decoration: none;
 }
 
 
-.title-btn{
+.title-btn {
   font-size: 40px !important;
   font-weight: 800 !important;
 }
 
 
-.profile{
+.profile {
   display: flex;
   align-items: center;
 }
 
-.profile a{
+.profile a {
   margin: 0;
 }
 
-.profile span{
+.profile span {
   font-size: 20px;
 }

@@ -13,7 +13,7 @@ video {
     left: 0;
     height: 100%;
     width: 100%;
-  }
+}
 
 .customer-sign-title {
     text-align: center;
@@ -23,7 +23,7 @@ video {
 
 
 .customer-sign-container {
-    
+
     position: relative;
     width: 30%;
     padding: 30px;
