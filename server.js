@@ -642,10 +642,36 @@ app.route("/profile")
     .get(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
-            res.render("profile")
+            const VALUE = [app_session.user_id]
+            
+            sql = "SELECT * FROM cars AS C JOIN reservations AS R ON C.car_id=R.car_id WHERE R.customer_id= ?;SELECT * FROM customers WHERE customer_id= ?;";
+            db.query(sql,[VALUE,VALUE], (err, results) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log(results)
+                    res.render("profile", { cars: results[0] ,user: results[1][0]})
+                }
+            })
         }
         else {
             res.redirect("signin")
+        }
+    })
+    .post(function(req, res){
+        if (req.body.car_lic) {
+                sql = "DELETE FROM reservations WHERE car_id = ?";
+                const VALUE = req.body.car_lic
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("A user canceled a reservation!")
+                        res.redirect("/profile")
+                    }
+                })
+        }else{
+            res.redirect("/profile")
         }
     })
 //? ---------------------------------------------< End of profile route section >-------------------------------------------------------

@@ -1,15 +1,85 @@
 <%- include("header") -%>
-<style>
-    body {
-        background-image: url("../images/bg/mercedes.png");
-        /* ,url("../images/bg/elantra.jpg") ,url("../images/bg/bmw4.jpg");  */
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    }
-</style>
-</head>
-<body>
-This is the profile
-<%- include("footer") %>
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/car_overview.css" type="text/css">
+    <title>My profile</title>
+    </head>
+
+    <body>
+
+        <div class="container" style="width: 70%;height: fit-content !important; margin-top: 5% !important;">
+            <div class="container-header"><a class="back-button" href="main">Back</a></div>
+            <div class="sub-container" style="padding-left: 25px;">
+                <h3>Account informations</h3>
+                <hr>
+                <br>
+                <ul>
+                    <li>
+                        First name: <%= user.fname %>
+                    </li>
+                    <li>
+                        Last name: <%= user.lname %>
+                    </li>
+                    <li>
+                        Email: <%= user.email %>
+                    </li>
+                    <li>
+                        Address: <%= user.address %>
+                    </li>
+                    <li>
+                        Phone: <%= user.phone %>
+                    </li>
+                </ul>
+
+                <hr style="width: 100%;">
+                <h3>My cars</h3>
+                <hr>
+                <br>
+                <div class="row">
+                    <% for(var i=0; i < cars.length; i++){ %>
+                        <div class="col-md-3 col-sm-6 col-xs-6">
+                            <div class="panel panel-back noti-box">
+                                <div class="text-box">
+                                    <div class="car-box">
+                                    <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
+                                        alt="car image">
+                                    <p class="text-muted car-card-text">
+                                        <%= cars[i].company %>
+                                            <%= cars[i].model %>
+                                    </p>
+                                    <p class="text-muted car-card-text" style="background-color:'red';">
+                                        <%= cars[i].color %>
+                                    </p>
+                                    <p class="text-muted car-card-text">
+                                        <%= cars[i].price %>$
+                                    </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                </div>
+                <div class="row" style="margin-left:20px; margin-bottom: 30px;">
+                    <form action="profile" method="post">
+                        <select name="car_lic" class="input_field" style="width: 50%; font-size: 15px;">
+                            <option value="" disabled selected>Car to delete</option>
+                            <% for(var i=0; i < cars.length; i++){ %>
+                                <option value="<%= cars[i].car_id %>">
+                                    <%= cars[i].company %> - <%= cars[i].model %>
+                                                - <%= cars[i].lic_no %>- <%= cars[i].office %>
+                                </option>
+                                <% } %>
+                        </select>
+                        <br>
+                        <div class="orange-button">
+                            <button name="delete_control_btn" value="delete_res" type="submit"
+                                class="btn btn-danger square-btn">Remove</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="container-footer" style="width: 70%;"></div>
+
+
+
+    </body>

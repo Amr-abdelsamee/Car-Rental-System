@@ -5779,3 +5779,18 @@ button.close {
   }
 }
 /*# sourceMappingURL=bootstrap.css.map */
+
+.input_field {
+  font-family: inherit;
+  width: 70%;
+  border: 0;
+  border-bottom: 2px solid gray;
+  outline: 0;
+  font-size: 1.2rem;
+  padding: 5px 4px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+  }
+.input_field:focus{
+  border-bottom: 2px solid #f00;
+}
