@@ -6,8 +6,11 @@
 
     <body>
         <%- include("nav_bar") -%>
-
-
+            <div class="vidoe-bg">
+                <video autoplay muted loop>
+                    <source src="../videos/bg/bmw.mp4" type="video/mp4">
+                </video>
+            </div>
             <div class="main-container">
                 <div class="row">
                     <% for(var i=0; i < cars.length; i++){ %>
@@ -29,7 +32,8 @@
                                         <%= cars[i].price %>$
                                     </p>
                                     <form action="overview" method="get">
-                                        <button class="view-btn" name="car_view" value="<%= cars[i].car_id %>" type="submit">
+                                        <button class="view-btn" name="car_view" value="<%= cars[i].car_id %>"
+                                            type="submit">
                                             view
                                         </button>
                                     </form>
