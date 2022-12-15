@@ -15,10 +15,10 @@
 
 require('dotenv').config(); // for .env file
 const express = require("express"); // express module for routes
+const session = require("express-session");
 const fileUpload = require('express-fileupload');
 const mysql = require("mysql") // mysql database
 const bodyParser = require("body-parser"); // for requestes parsing
-
 const favicon = require('serve-favicon'); // for icon
 //const chalk = require("chalk") // for console colors
 const Get_Color_Name = require("hex-color-to-color-name")
@@ -36,6 +36,15 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(favicon(__dirname + '/public/images/favicon.png')); // favicon location
 
+const oneDay = 1000 * 60 * 60 * 24;
+app.use(session({
+    secret: "thisismysecrctekey",
+    saveUninitialized: true,
+    cookie: { maxAge: oneDay },
+    resave: false
+}));
+
+var app_session;
 
 //? ---------------------------------------------< Database section >--------------------------------------------------------
 const db = mysql.createConnection({
@@ -50,7 +59,7 @@ db.connect((err) => {
     if (err) {
         console.log(err);
     } else {
-        console.log(">>> Database connected !")
+        console.log(new Date().toLocaleString() + ":: Database connected !")
     }
 });
 
@@ -59,27 +68,6 @@ db.connect((err) => {
 //? -------------------------------------------< End of Database Section >-------------------------------------------------------
 
 
-//? ---------------------------------------------< Root route section >--------------------------------------------------------
-app.route("/")
-    .get(function (req, res) {
-        res.redirect("/main")
-    })
-    .post(function (req, res) {
-        let btnType = req.body.btn;
-        if (btnType == "signin") {
-            res.redirect("/signin")
-        }
-        else if (btnType == "signup") {
-            res.redirect("/signup")
-        }
-        else if (btnType == "profile") {
-            res.redirect("/profile")
-        }
-        else {
-            res.redirect("/")
-        }
-    });
-//? ---------------------------------------------< End of root route section >---------------------------------------------------
 //used whhen admin login
 function loadAllImages() {
     fs.mkdir('public\\images\\cars', { recursive: true }, (err) => {
@@ -122,38 +110,80 @@ function loadLastImages() {
     })
 }
 //? ---------------------------------------------< Admin route section >-------------------------------------------------------
-app.route("/admin")
+app.route("/control")
     .get(function (req, res) {
-        res.render("control/admin_signIn")
+        app_session = req.session
+        if (app_session.adminPermission) {
+            res.redirect("admin")
+        } else {
+            res.render("control/admin_signIn")
+        }
     })
     .post(function (req, res) {
-        var current_admin = ""
-        if (req.body.signIn_btn === "signin") {
-            const VALUES = [req.body.password, req.body.username]
-            sql = "SELECT * FROM `admins` WHERE `password`= ? AND email=?";
-            db.query(sql, VALUES, (err, result) => {
+        app_session = req.session
+        const VALUES = [req.body.password, req.body.username]
+        let sql = "SELECT * FROM `admins` WHERE `password`= ? AND email=?";
+        db.query(sql, VALUES, (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                if (result.length) {
+                    loadAllImages()
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
+                    db.query(sql, (err, result2) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            app_session.admin_id = VALUES[1]
+                            app_session.userPermission = false
+                            app_session.adminPermission = true
+                            console.log(new Date().toLocaleString() + ":: admin logged in")
+                            res.render("control/dashboard", { admin: VALUES[1], cars: result2 })
+                        }
+                    })
+                } else {
+                    console.log(new Date().toLocaleString() + ":: admin sign in failed!")
+                    console.log(VALUES)
+                    res.redirect("/control")
+                }
+            }
+        })
+    });
+
+
+app.route("/admin_signout")
+    .get(function (req, res) {
+        res.redirect("admin")
+    })
+    .post(function (req, res) {
+        req.session.destroy((err) => {
+            if (err) {
+                return console.log(err);
+            }
+            console.log(new Date().toLocaleString() + ":: admin logged out")
+            res.redirect('/control');
+        });
+    });
+
+
+
+app.route("/admin")
+    .get(function (req, res) {
+        app_session = req.session
+        if (app_session.adminPermission) {
+            sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
+            db.query(sql, (err, result2) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    if (result.length) {
-                        current_admin = VALUES[1]
-                        loadAllImages()
-                        sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
-                        db.query(sql, (err, result2) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                res.render("control/dashboard", { admin: current_admin, cars: result2 })
-                            }
-                        })
-                    } else {
-                        // error message should be added here ------------------------------<
-                        res.redirect("/admin")
-                    }
+                    res.render("control/dashboard", { admin: app_session.admin_id, cars: result2 })
                 }
             })
-
-        } else if (req.body.control_btn) {
+        } else { res.redirect("control") }
+    })
+    .post(function (req, res) {
+        app_session = req.session
+        if (app_session.adminPermission) {
             let menu_btn = req.body.control_btn;
             let sql = ""
             switch (menu_btn) {
@@ -163,7 +193,7 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/dashboard", { admin: current_admin, cars: result2 })
+                            res.render("control/dashboard", { admin: app_session.admin_id, cars: result2 })
                         }
                     })
                     break;
@@ -243,7 +273,10 @@ app.route("/admin")
                             res.render("control/admin_reserve", { cars: results[0], customers: results[1] })
                         }
                     })
+                    break;
             }
+        } else {
+            res.redirect("control")
         }
     });
 
@@ -452,93 +485,110 @@ app.route("/delete")
 //? -------------------------------------------< End of sign up route section >-------------------------------------------------
 
 
-//? ---------------------------------------------< Sign in route section >-------------------------------------------------------
-app.route("/signin")
+//? ---------------------------------------------< Root route section >--------------------------------------------------------
+app.route("/")
     .get(function (req, res) {
-        res.render("signIn")
+        res.redirect("/main")
     })
     .post(function (req, res) {
+    });
+//? ---------------------------------------------< End of root route section >---------------------------------------------------
+
+
+
+//? ---------------------------------------------< customer Sign in/up/out route section >-------------------------------------------------------
+app.route("/signin")
+    .get(function (req, res) {
+        app_session = req.session
+        if (app_session.userPermission) {
+            res.redirect("profile")
+        }
+        else {
+            res.render("signIn")
+        }
+
+    })
+    .post(function (req, res) {
+        app_session = req.session
         const VALUES = [req.body.password, req.body.username]
-        sql = "SELECT * FROM `customer` WHERE `password`= ? AND email=?";
+        sql = "SELECT * FROM `customers` WHERE `password`= ? AND email=?";
         db.query(sql, VALUES, (err, result) => {
             if (err) {
                 console.log(err)
             } else {
                 if (result.length) {
-                    current_admin = VALUES[1]
+                    app_session.user_id = result[0].customer_id
+                    app_session.user_name = result[0].fname + " " + result[0].lname
+                    app_session.userPermission = true
+                    app_session.adminPermission = false
+                    console.log(new Date().toLocaleString() + ":: user logged in")
                     res.redirect("main")
                 } else {
+                    console.log(new Date().toLocaleString() + ":: sign in failed!")
+                    console.log(VALUES)
                     res.redirect("/signin")
                 }
             }
         })
     });
-//? -------------------------------------------< End of sign in route section >-------------------------------------------------
 
-
-
-//? ---------------------------------------------< Sign up route section >-------------------------------------------------------
 app.route("/signup")
     .get(function (req, res) {
         res.render("signUp")
     })
     .post(function (req, res) {
-        let new_customer = {
-            fname: req.body.fname,
-            lname: req.body.lname,
-            email: req.body.email,
-            password: req.body.password,
-            address: req.body.address,
-            phone: req.body.phone,
-        };
-
-        sql = "INSERT INTO customer VALUES (?)";
         const VALUES = [
             null
-            , new_customer.fname
-            , new_customer.lname
-            , new_customer.email
-            , new_customer.password
-            , new_customer.address
-            , parseInt(new_customer.phone)
+            , req.body.fname
+            , req.body.lnamev
+            , req.body.email
+            , req.body.password
+            , req.body.address
+            , parseInt(req.body.phone)
         ]
+        sql = "INSERT INTO customer VALUES (?)";
         db.query(sql, [VALUES], (err, result) => {
             if (err) {
                 console.log(err)
             } else {
-                console.log("NEW customer added to the system!")
-                console.log(new_customer)
+                console.log(new Date().toLocaleString() + ":: NEW customer added to the system!")
+                console.log(VALUES)
                 res.redirect("/signin")
             }
         })
     });
-//? -------------------------------------------< End of sign up route section >-------------------------------------------------
 
-
-
-//? ---------------------------------------------< Sign out route section >-------------------------------------------------------
 app.route("/signout")
-    .post(function (req, res) {
-
-    })
-//? ---------------------------------------------< End of Sign out route section >-------------------------------------------------------
-//? ---------------------------------------------< Profile route section >-------------------------------------------------------
-app.route("/profile")
     .get(function (req, res) {
-        res.render("profile")
+        res.redirect('/main');
     })
-//? ---------------------------------------------< End of profile route section >-------------------------------------------------------
+    .post(function (req, res) {
+        req.session.destroy((err) => {
+            if (err) {
+                return console.log(err);
+            }
+            console.log(new Date().toLocaleString() + ":: user logged out")
+            res.redirect('/main');
+        });
+    })
+//? ---------------------------------------< End of customer Sign in/up/out route section >-------------------------------------------------------
 
 
 //? ---------------------------------------------< Main route section >-------------------------------------------------------
 app.route("/main")
     .get(function (req, res) {
+        app_session = req.session
         sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
         db.query(sql, (err, result) => {
             if (err) {
                 console.log(err)
             } else {
-                res.render("main", { cars: result })
+                if (app_session.userPermission) {
+                    res.render("main", { cars: result, hideClass: "", user: app_session.user_name })
+                }
+                else {
+                    res.render("main", { cars: result, hideClass: "hide-logout", user: "Guest" })
+                }
             }
         })
 
@@ -552,7 +602,6 @@ app.route("/overview")
         res.redirect("main");
     })
     .post(function (req, res) {
-
         const VALUE = [req.body.car_id_btn]
         let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
         db.query(sql, VALUE, (err, result) => {
@@ -569,22 +618,41 @@ app.route("/reserve")
         res.redirect("main");
     })
     .post(function (req, res) {
-        const VALUE = [req.body.reserve_btn]
-        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
-        db.query(sql, VALUE, (err, result) => {
-            if (err) {
-                console.log(err)
-            } else {
-                res.render("cars/reserve", { car: result[0] })
-            }
-        })
+        app_session = req.session
+        if (app_session.userPermission) {
+            const VALUE = [req.body.reserve_btn]
+            let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    res.render("cars/reserve", { car: result[0] })
+                }
+            })
+        }
+        else {
+            res.redirect("signin")
+        }
     });
-
 
 //? ---------------------------------------------< End of Main route section >-------------------------------------------------------
 
+//? ---------------------------------------------< Profile route section >-------------------------------------------------------
+app.route("/profile")
+    .get(function (req, res) {
+        app_session = req.session
+        if (app_session.userPermission) {
+            res.render("profile")
+        }
+        else {
+            res.redirect("signin")
+        }
+    })
+//? ---------------------------------------------< End of profile route section >-------------------------------------------------------
+
+
 app.listen(process.env.PORT || 3000, function () {
-    console.log(new Date() + ":: Server started..")
+    console.log(new Date().toLocaleString() + ":: Server started..")
 })
 
 

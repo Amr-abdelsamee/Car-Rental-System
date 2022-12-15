@@ -7,7 +7,7 @@ body {
 .main-container {
     background-color: rgb(240, 240, 240);
     width: var(--WIDTH);
-    margin: 10px auto;
+    margin: 5px auto;
     padding: 10px;
 }
 
@@ -33,9 +33,7 @@ img.car-image {
     height: 200px;
     display: block;
     object-fit: cover;
-    /* object-fit: scale-down; */
     margin-bottom: 20px;
-
 }
 
 .view-btn {
@@ -44,8 +42,8 @@ img.car-image {
     width: 100%;
     border: none;
     font-size: 20px;
-
 }
+
 
 .view-btn:hover {
     cursor: pointer;
@@ -59,18 +57,16 @@ img.car-image {
     background-color: black;
 }
 
+
 .vidoe-bg {
-    width: var(--WIDTH);
-    height: 200px;
     margin: 0 auto;
+    height: 200px;
+    width: var(--WIDTH);
 }
 
+
 video {
-    object-fit: cover;
-    /* position: absolute; */
-    /* top: 0; */
-    /* left: 0; */
-    height: 100%;
     width: 100%;
-    /* z-index: -1; */
+    height: 100%;
+    object-fit: cover;
 }

@@ -1,20 +1,24 @@
-
-    
-    <div class="main-header"></div>
-    <div class="navbar">
-        <a class="title-btn" href="">RENT</a>
-        <form action="/" method="post">
-            <a href="main">Home</a>
-            <a href="">About</a>
-            <a href="">Contacts</a>
-            <!-- <a href="">Profile</a> -->
-        </form>
-        <div class="profile">
-            <a href="signIn"><lord-icon src="https://cdn.lordicon.com/dxjqoygy.json" trigger="morph" style="width:50px;height:50px">
+<div class="main-header"></div>
+<div class="navbar">
+    <a class="title-btn" href="">RENT</a>
+    <div >
+        <a href="main">Home</a>
+        <a href="">About</a>
+        <a href="">Contacts</a>
+        <!-- <a href="">Profile</a> -->
+    </div>
+    <div class="profile">
+        <a href="signIn"><lord-icon src="https://cdn.lordicon.com/dxjqoygy.json" trigger="morph"
+                style="width:50px;height:50px">
             </lord-icon></a>
-        <span>profile</span>
+        <span>
+            <%= user %>
+        </span>
+        <form action="/signout" method="post">
+        <div class="logout-btn  <%= hideClass %> ">
+            <button class="btn btn-danger square-btn" >Logout</button>
         </div>
-
+        </form>
     </div>
 
-    
+</div>

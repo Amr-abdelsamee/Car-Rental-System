@@ -24,6 +24,7 @@ body {
   align-items: center;
   justify-content: space-around;
   background-color: rgb(255, 255, 255);
+  user-select: none;
 }
 
 .navbar div {
@@ -70,4 +71,12 @@ body {
 
 .profile span {
   font-size: 20px;
+}
+
+.logout-btn{
+  margin-left: 20px;
+}
+
+.hide-logout{
+  display: none !important;
 }
