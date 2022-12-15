@@ -42,7 +42,8 @@ const db = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "",
-    database: "car_rental"
+    database: "car_rental",
+    multipleStatements: true
 });
 
 db.connect((err) => {
@@ -145,7 +146,6 @@ app.route("/admin")
                                 res.render("control/dashboard", { admin: current_admin, cars: result2 })
                             }
                         })
-
                     } else {
                         // error message should be added here ------------------------------<
                         res.redirect("/admin")
@@ -188,11 +188,12 @@ app.route("/admin")
                     })
                     break;
                 case "reservations":
-                    sql = "SELECT * FROM reservations";
+                    sql = "SELECT reserve_no, fname, lname, car_id, startD, endD FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
                         } else {
+                            console.log(result)
                             res.render("control/reservations", { reservations: result })
                         }
                     })
@@ -233,6 +234,15 @@ app.route("/admin")
                 case "add_office":
                     res.render("control/add_office")
                     break;
+                case "add_res":
+                    sql = "SELECT * FROM cars; SELECT * from customers";
+                    db.query(sql, (err, results) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/admin_reserve", { cars: results[0], customers: results[1] })
+                        }
+                    })
             }
         }
     });
@@ -243,8 +253,6 @@ app.route("/add")
         if (req.body.control_btn === "add_car") {
             const { image } = req.files
             console.log(image.data)
-
-
             const color_name = Get_Color_Name.GetColorName(req.body.color);
             const VALUES = [
                 null
@@ -297,7 +305,6 @@ app.route("/add")
                 }
             })
         } else if (req.body.control_btn === "add_admin") {
-
             const VALUES = [
                 req.body.email
                 , req.body.password
@@ -317,7 +324,6 @@ app.route("/add")
             const VALUES = [
                 null
                 , req.body.location
-
             ]
             sql = "INSERT INTO offices VALUES (?)";
             db.query(sql, [VALUES], (err, result) => {
@@ -330,78 +336,116 @@ app.route("/add")
                     res.redirect("/admin")
                 }
             })
+        } else if (req.body.control_btn === "add_res") {
+            const VALUES = [
+                null
+                , req.body.customer_id
+                , req.body.car_id
+                , req.body.sdate
+                , req.body.edate
+            ]
+            sql = "INSERT INTO reservations VALUES (?)";
+            db.query(sql, [VALUES], (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("NEW reservation is made!")
+                    console.log(VALUES)
+                    // success message should be added here ------------------------------<
+                    res.redirect("/admin")
+                }
+            })
         }
     });
 
 app.route("/delete")
     .post(function (req, res) {
-        console.log(req)
-        // to delete a car
-        //  if (req.body.car_lic) {
         let sql = ""
-        if (req.body.delete_control_btn === "delete_car") {
-            sql = "DELETE FROM cars WHERE lic_no = ?";
-            const VALUE = req.body.car_lic
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a car from the system!")
-                    res.redirect("/admin")
-                }
-            })
+
+        // to delete a car
+        if (req.body.car_lic) {
+            if (req.body.delete_control_btn === "delete_car") {
+                sql = "DELETE FROM cars WHERE lic_no = ?";
+                const VALUE = req.body.car_lic
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted a car from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
         }
-        //     }
+
 
         // to delete a customer
-        ///   if (req.body.customer_id) {
-        if (req.body.delete_control_btn === "delete_customer") {
-            sql = "DELETE FROM customers WHERE customer_id = ?";
-            const VALUE = req.body.customer_id
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a customer from the system!")
-                    res.redirect("/admin")
-                }
-            })
+        if (req.body.customer_id) {
+            if (req.body.delete_control_btn === "delete_customer") {
+                sql = "DELETE FROM customers WHERE customer_id = ?";
+                const VALUE = req.body.customer_id
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted a customer from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
         }
-        //  }
 
         // to delete an admin
-
-        if (req.body.delete_control_btn === "delete_admin") {
-            sql = "DELETE FROM admins WHERE email = ?";
-            const VALUE = req.body.admin_email
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted another from the system!")
-                    res.redirect("/admin")
-                }
-            })
+        if (req.body.admin_email) {
+            if (req.body.delete_control_btn === "delete_admin") {
+                sql = "DELETE FROM admins WHERE email = ?";
+                const VALUE = req.body.admin_email
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted another from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
         }
 
 
         // to delete an office
-        //     if (req.body.office_id) {
-        console.log(req.body.delete_control_btn)
-        if (req.body.delete_control_btn === "delete_office") {
-            console.log(2)
-            sql = "DELETE FROM offices WHERE office_id = ?";
-            const VALUE = req.body.office_id
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted an office from the system!")
-                    res.redirect("/admin")
-                }
-            })
+        if (req.body.office_id) {
+            if (req.body.delete_control_btn === "delete_office") {
+                sql = "DELETE FROM offices WHERE office_id = ?";
+                const VALUE = req.body.office_id
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted an office from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
         }
-        //   }
+
+        // to delete a reservation
+        if (req.body.reserve_no) {
+            if (req.body.delete_control_btn === "delete_res") {
+                console.log(2)
+                sql = "DELETE FROM reservations WHERE reserve_no = ?";
+                const VALUE = req.body.reserve_no
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("An admin deleted a reservation from the system!")
+                        res.redirect("/admin")
+                    }
+                })
+            }
+        }
+
+
 
 
     });
