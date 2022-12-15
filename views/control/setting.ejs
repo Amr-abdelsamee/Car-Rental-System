@@ -42,7 +42,7 @@
         <div class="row">
             <form action="/delete" method="post">
                 <select name="admin_email" class="input_field">
-                    <option value=""></option>
+                    <option value="" disabled selected>Admin email</option>
                     <% for(var i=0; i < admins.length; i++){ %>
                         <option value="<%= admins[i].email %>">
                             <%= admins[i].email %>
@@ -97,7 +97,7 @@
         <div class="row">
             <form action="/delete" method="post">
                 <select name="office_id" class="input_field">
-                    <option value=""></option>
+                    <option value="" disabled selected>Office</option>
                     <% for(var i=0; i < offices.length; i++){ %>
                         <option value="<%= offices[i].office_id %>">
                             <%= offices[i].location %>

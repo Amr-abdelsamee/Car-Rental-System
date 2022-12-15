@@ -67,7 +67,7 @@
         <div class="row">
             <form action="/delete" method="post">
                 <select name="customer_id" class="input_field">
-                    <option value="">Select customer to delete</option>
+                    <option value="" disabled selected>Customer to delete</option>
                     <% for(var i=0; i < customers.length; i++){ %>
                         <option value="<%= customers[i].customer_id %>">
                             <%= customers[i].customer_id %> - <%= customers[i].fname %> <%= customers[i].lname %>

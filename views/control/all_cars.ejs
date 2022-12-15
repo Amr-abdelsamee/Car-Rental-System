@@ -75,7 +75,7 @@
         <div class="row">
             <form action="/delete" method="post">
                 <select name="car_lic" class="input_field">
-                    <option value="">Select car to delete</option>
+                    <option value="" disabled selected>Car to delete</option>
                     <% for(var i=0; i < cars.length; i++){ %>
                         <option value="<%= cars[i].lic_no %>">
                             <%= cars[i].car_id %> - <%= cars[i].company %> - <%= cars[i].model %>
