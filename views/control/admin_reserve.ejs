@@ -1,0 +1,38 @@
+<%- include("control") %>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Add a new Reservation</h2>
+        </div>
+    </div>
+
+    <hr />
+    <form action="/add" method="post">
+
+        <div class="add panel-back">
+            <h4>Customer</h4>
+            <select name="customer_id" class="input_field">
+                <% for(var i=0; i < customers.length; i++){ %>
+                    <option value="<%= customers[i].customer_id %>">
+                        <%= customers[i].fname %>  <%= customers[i].lname %> - <%= customers[i].email %>
+                    </option>
+                    <% } %>
+            </select>
+            <h4>Car</h4>
+            <select name="car_id" class="input_field">
+                <% for(var i=0; i < cars.length; i++){ %>
+                    <option value="<%= cars[i].car_id %>">
+                        <%= cars[i].company %> <%= cars[i].model %> - <%= cars[i].year %> - <%= cars[i].lic_no %>
+                    </option>
+                    <% } %>
+            </select>
+            <h4>Start date</h4>
+            <input type="date" name="sdate" required>
+            <h4>End date</h4>
+            <input type="date" name="edate" required>
+
+            <div class="orange-button">
+                <button name="control_btn" value="add_res" type="submit" class="btn btn-danger square-btn">Done</button>
+            </div>
+    </form>
+    </div>
