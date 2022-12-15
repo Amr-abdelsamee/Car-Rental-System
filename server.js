@@ -62,7 +62,7 @@ db.connect((err) => {
 //? ---------------------------------------------< Root route section >--------------------------------------------------------
 app.route("/")
     .get(function (req, res) {
-        res.render("main")
+        res.redirect("/main")
     })
     .post(function (req, res) {
         let btnType = req.body.btn;
@@ -533,7 +533,15 @@ app.route("/profile")
 //? ---------------------------------------------< Main route section >-------------------------------------------------------
 app.route("/main")
     .get(function (req, res) {
-        res.render("main")
+        sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
+        db.query(sql, (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                res.render("main", { cars: result })
+            }
+        })
+
     })
     .post(function (req, res) {
 

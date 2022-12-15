@@ -1,31 +1,48 @@
+<%- include("header") -%>
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/main.css" type="text/css">
+    <title>Car rental</title>
+    </head>
 
-<%- include("nav_bar") -%>
-
-
-<style>
-    body {
-        background-image: url("../images/bg/bmw4.jpg");
-        /* , url("../images/bg/kia.jpg"), url("../images/bg/elantra.jpg"); */
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    }
-</style>
-<title>Car rental</title>
-</head>
-
-<body>
-
-<h1>This is the main page</h1>
-<form action="overview" method="get">
-    <button type="submit">
-        view
-    </button>
-</form>
+    <body>
+        <%- include("nav_bar") -%>
 
 
+            <div class="main-container">
+                <div class="row">
+                    <% for(var i=0; i < cars.length; i++){ %>
+                        <div class="col-md-3 col-sm-6 col-xs-6">
+                            <div class="panel panel-back noti-box">
+                                <div class="car-box">
+
+                                    <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
+                                        alt="car image">
+
+                                    <p class="text-muted car-card-text">
+                                        <%= cars[i].company %>
+                                            <%= cars[i].model %>
+                                    </p>
+                                    <p class="text-muted car-card-text" style="background-color:'red';">
+                                        <%= cars[i].color %>
+                                    </p>
+                                    <p class="text-muted car-card-text">
+                                        <%= cars[i].price %>$
+                                    </p>
+                                    <form action="overview" method="get">
+                                        <button class="view-btn" name="car_view" value="<%= cars[i].car_id %>" type="submit">
+                                            view
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                </div>
+            </div>
 
 
 
-<%- include("footer") %>
+
+
+            <%- include("footer") %>
