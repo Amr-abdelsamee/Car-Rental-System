@@ -27,7 +27,8 @@ CREATE TABLE reservations(
     customer_id int not null,
     car_id int not null,
     startD DATE not null,
-    endD DATE not null
+    endD DATE not null,
+    res_date datetime DEFAULT current_timestamp() not null,
 );
 CREATE TABLE admins(
     email varchar(255) not null PRIMARY KEY,
