@@ -15,7 +15,9 @@
                     <lord-icon src="https://cdn.lordicon.com/ckuogwdx.json" trigger="hover"
                         style="width:80px;height:80px">
                     </lord-icon>
-                    <p class="main-text">120 Car</p>
+                    <p class="main-text">
+                        <%=cars_count %> Car
+                    </p>
                 </div>
             </div>
         </div>
@@ -25,7 +27,9 @@
                     <lord-icon src="https://cdn.lordicon.com/uukerzzv.json" trigger="hover"
                         style="width:80px;height:80px">
                     </lord-icon>
-                    <p class="main-text">30 Customer</p>
+                    <p class="main-text">
+                        <%=customers_count %> Customer
+                    </p>
                 </div>
             </div>
         </div>
@@ -35,7 +39,9 @@
                     <lord-icon src="https://cdn.lordicon.com/nocovwne.json" trigger="hover"
                         style="width:80px;height:80px">
                     </lord-icon>
-                    <p class="main-text">240 Reservation</p>
+                    <p class="main-text">
+                        <%=res_count %> Reservation
+                    </p>
                 </div>
             </div>
         </div>
@@ -45,31 +51,87 @@
                     <lord-icon src="https://cdn.lordicon.com/qhviklyi.json" trigger="hover"
                         style="width:80px;height:80px">
                     </lord-icon>
-                    <p class="main-text">3$ Profits</p>
+                    <p class="main-text">
+                        <%=total_profits%>$ Profits
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
+
     <hr />
+
     <div class="row">
         <div class="col-md-12">
-            <h3>Most reserved cars</h3>
-            <br>
+            <h3>Most recent reservations</h3>
+        </div>
+    </div>
+    <hr style="width: 50%; float: left; margin: 0;">
+    <div class="row">
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <th>#</th>
+                        <th>Reserve date</th>
+                        <th>Customer name</th>
+                        <th>Car ID</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reserve No</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < recent_res.length; i++){ %>
+                            <tr>
+                                <th>
+                                    <%= i+1 %>
+                                </th>
+                                <th>
+                                    <%= recent_res[i].res_date %>
+                                </th>
+                                <th>
+                                    <%= recent_res[i].fname %>
+                                        <%= recent_res[i].lname %>
+                                </th>
+                                <th>
+                                    <%= recent_res[i].car_id %>
+                                </th>
+                                <th>
+                                    <%= recent_res[i].startD %>
+                                </th>
+                                <th>
+                                    <%= recent_res[i].endD %>
+                                </th>
+                                <th>
+                                    <%= recent_res[i].reserve_no %>
+                                </th>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
 
+    <hr />
+
+
     <div class="row">
-
-
+        <div class="col-md-12">
+            <h3>Most reserved cars</h3>
+            <hr style="width: 50%;float: left;margin: 0;">
+            <br>
+        </div>
+    </div>
+    <div class="row">
         <% for(var i=0; i < cars.length; i++){ %>
             <div class="col-md-3 col-sm-6 col-xs-6">
                 <div class="panel panel-back noti-box">
                     <div class="text-box">
-                       
-                            <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg" alt="car image">
-                       
+                        <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg" alt="car image">
                         <p class="text-muted car-card-text">
                             <%= cars[i].company %>
                                 <%= cars[i].model %>
@@ -84,73 +146,9 @@
                 </div>
             </div>
             <% } %>
-
     </div>
 
     <hr />
-
-    <div class="row">
-        <div class="col-md-3 col-sm-12 col-xs-12">
-            <div class="panel panel-primary text-center no-boder bg-color-green">
-                <div class="panel-body">
-                    <i class="fa fa-comments-o fa-5x"></i>
-                    <h4>Note </h4>
-                </div>
-                <div class="panel-footer back-footer-green">
-                    <i class="fa fa-rocket fa-5x"></i>
-                    Lorem ipsum dolor sit amet sit sit, consectetur adipiscing elitsit sit gthn ipsum dolor
-                    sit amet ipsum dolor sit amet
-                </div>
-            </div>
-        </div>
-        <div class="col-md-9 col-sm-12 col-xs-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Most recent reservations
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>First name</th>
-                                    <th>Last name</th>
-                                    <th>ID</th>
-                                    <th>Car</th>
-                                    <th>Car ID</th>
-                                    <th>Res. date</th>
-                                    <th>End date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th>2</th>
-                                    <th>Amr</th>
-                                    <th>Mohsen</th>
-                                    <th>123456578915</th>
-                                    <th>Mercedes</th>
-                                    <th>015</th>
-                                    <th>13-1-2022</th>
-                                    <th>30-12-2022</th>
-                                </tr>
-                                <tr>
-                                    <th>3</th>
-                                    <th>Adel</th>
-                                    <th>yasser</th>
-                                    <th>123456578915</th>
-                                    <th>BMW</th>
-                                    <th>018</th>
-                                    <th>13-12-2022</th>
-                                    <th>30-12-2022</th>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     </div>
 

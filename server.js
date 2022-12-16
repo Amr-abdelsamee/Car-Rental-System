@@ -138,7 +138,7 @@ app.route("/control")
                             app_session.userPermission = false
                             app_session.adminPermission = true
                             console.log(new Date().toLocaleString() + ":: admin logged in")
-                            res.render("control/dashboard", { admin: VALUES[1], cars: result2 })
+                            load_dashBoard(VALUES[1], res)
                         }
                     })
                 } else {
@@ -165,20 +165,36 @@ app.route("/admin_signout")
         });
     });
 
-
+function load_dashBoard(admin, res) {
+    let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
+    let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
+    let sql3 = "SELECT COUNT(customer_id) AS count FROM customers;"
+    let sql4 = "SELECT COUNT(reserve_no) AS count FROM reservations;";
+    let sql5 = "SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;"
+    let sql6 = "SELECT reserve_no, fname, lname, car_id, startD, endD,res_date FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id ORDER BY  res_date DESC  limit 10;"
+    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.render("control/dashboard", {
+                admin: admin,
+                cars: results[0],
+                cars_count: results[1][0].count,
+                customers_count: results[2][0].count,
+                res_count: results[3][0].count,
+                total_profits: results[4][0].total_profits,
+                recent_res: results[5],
+            })
+        }
+    })
+}
 
 app.route("/admin")
     .get(function (req, res) {
         app_session = req.session
         if (app_session.adminPermission) {
-            sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
-            db.query(sql, (err, result2) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    res.render("control/dashboard", { admin: app_session.admin_id, cars: result2 })
-                }
-            })
+            load_dashBoard(app_session.admin_id, res);
         } else { res.redirect("control") }
     })
     .post(function (req, res) {
@@ -188,14 +204,7 @@ app.route("/admin")
             let sql = ""
             switch (menu_btn) {
                 case "dashboard":
-                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
-                    db.query(sql, (err, result2) => {
-                        if (err) {
-                            console.log(err)
-                        } else {
-                            res.render("control/dashboard", { admin: app_session.admin_id, cars: result2 })
-                        }
-                    })
+                    load_dashBoard(app_session.admin_id, res);
                     break;
                 case "all_cars":
                     sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
@@ -371,13 +380,12 @@ app.route("/add")
             })
         } else if (req.body.control_btn === "add_res") {
             const VALUES = [
-                null
-                , req.body.customer_id
+                req.body.customer_id
                 , req.body.car_id
                 , req.body.sdate
                 , req.body.edate
             ]
-            sql = "INSERT INTO reservations VALUES (?)";
+            sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
             db.query(sql, [VALUES], (err, result) => {
                 if (err) {
                     console.log(err)
@@ -540,13 +548,13 @@ app.route("/signup")
         const VALUES = [
             null
             , req.body.fname
-            , req.body.lnamev
+            , req.body.lname
             , req.body.email
             , req.body.password
             , req.body.address
             , parseInt(req.body.phone)
         ]
-        sql = "INSERT INTO customer VALUES (?)";
+        sql = "INSERT INTO customers VALUES (?)";
         db.query(sql, [VALUES], (err, result) => {
             if (err) {
                 console.log(err)
@@ -643,14 +651,13 @@ app.route("/profile")
         app_session = req.session
         if (app_session.userPermission) {
             const VALUE = [app_session.user_id]
-            
+
             sql = "SELECT * FROM cars AS C JOIN reservations AS R ON C.car_id=R.car_id WHERE R.customer_id= ?;SELECT * FROM customers WHERE customer_id= ?;";
-            db.query(sql,[VALUE,VALUE], (err, results) => {
+            db.query(sql, [VALUE, VALUE], (err, results) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    console.log(results)
-                    res.render("profile", { cars: results[0] ,user: results[1][0]})
+                    res.render("profile", { cars: results[0], user: results[1][0] })
                 }
             })
         }
@@ -658,19 +665,19 @@ app.route("/profile")
             res.redirect("signin")
         }
     })
-    .post(function(req, res){
+    .post(function (req, res) {
         if (req.body.car_lic) {
-                sql = "DELETE FROM reservations WHERE car_id = ?";
-                const VALUE = req.body.car_lic
-                db.query(sql, VALUE, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("A user canceled a reservation!")
-                        res.redirect("/profile")
-                    }
-                })
-        }else{
+            sql = "DELETE FROM reservations WHERE car_id = ?";
+            const VALUE = req.body.car_lic
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("A user canceled a reservation!")
+                    res.redirect("/profile")
+                }
+            })
+        } else {
             res.redirect("/profile")
         }
     })
