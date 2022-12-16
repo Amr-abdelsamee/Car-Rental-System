@@ -1,11 +1,12 @@
 body {
   background-color: #202020;
   font-family: 'Roboto Slab', sans-serif;
+  background-image: url(../images/bg/bg.png);
 }
 
 
-.admin-sign-up-container {
-  width: 30%;
+.admin-sign-in-container {
+  width: 40%;
   padding: 30px;
   margin: 40px auto;
   border-radius: 5px;
@@ -16,11 +17,16 @@ body {
   background-color: #e5eaf5;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
-
+.admin-sign-in-container h1{
+  margin-bottom: 50px;
+}
 
 .head {
   color: red;
-  margin-bottom: 50px;
+  font-size: 1.6em;
+  margin-top: 40px;
+  font-weight: 800;
+  margin-bottom: 80px;
 }
 
 
@@ -30,7 +36,7 @@ body {
   color: rgb(165, 0, 0);
   padding: 10px;
   display: block;
-  font-size: 1em;
+  font-size: 1.3em;
   margin-top: 20px;
   margin-left: auto;
   font-weight: bold;
@@ -61,7 +67,7 @@ h1 {
   border: 0;
   border-bottom: 2px solid gray;
   outline: 0;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   padding: 5px 4px;
   margin-bottom: 10px;
   transition: border-color 0.2s;

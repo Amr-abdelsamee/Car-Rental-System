@@ -2,8 +2,8 @@ body {
     background-size: cover;
     background-color: #e5eaf5;
     background-repeat: no-repeat;
-    font-family: 'Dancing Script', cursive;
-    /* background-image: url(https://media.giphy.com/media/O58wTsoBqBqMw/giphy.gif); */
+    font-family: Arial, Helvetica, sans-serif;
+    user-select: none;
 }
 
 video {
@@ -23,9 +23,8 @@ video {
 
 
 .customer-sign-container {
-
     position: relative;
-    width: 30%;
+    width: 40%;
     padding: 30px;
     margin: 10% auto;
     border-radius: 5px;
@@ -36,23 +35,26 @@ video {
     background-color: #e5eaf541;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
-
+.customer-sign-container h1{
+    color: black;
+    font-weight: 900 !important;
+}
 .input_field {
     font-family: inherit;
     width: 70%;
     border: 0;
-    border-bottom: 2px solid gray;
+    border-bottom: 3px solid gray;
     outline: 0;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     padding: 5px 4px;
     margin-bottom: 10px;
     transition: border-color 0.2s;
 }
 
-.input_field:focus {
-    border-bottom: 2px solid #f00;
-}
 
+.input_field:focus {
+    border-bottom: 3px solid #f00;
+}
 
 
 .signBtn {
@@ -61,7 +63,7 @@ video {
     color: rgb(0, 0, 0);
     padding: 10px;
     display: block;
-    font-size: 1em;
+    font-size: 1.1em;
     margin-top: 20px;
     margin-left: auto;
     font-weight: bold;
@@ -75,5 +77,5 @@ video {
 
 .signBtn:hover {
     cursor: pointer;
-    background-color: #5a0018;
+    background-color: #830023;
 }
