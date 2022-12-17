@@ -56,36 +56,38 @@
                 </div>
             </form>
         </div>
-        <hr/>
+        <hr />
         <h3>All Offices</h3>
-        <hr/>
+        <hr />
         <div class="table-responsive" style="width: 70%;">
-            <div class="scroll_bar">
-            <table class="table table-striped table-bordered table-hover">
-                <thead class="bg-color-red">
-                    <tr>
-                        <th>#</th>
-                        <th>Location</th>
-                        <th>Office ID</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for(var i=0; i < offices.length; i++){ %>
-                        <tr>
-                            <th>
-                                <%= i+1 %>
-                            </th>
-                            <th>
-                                <%= offices[i].office_id %>
-                            </th>
-                            <th>
-                                <%= offices[i].location %>
-                            </th>
-                        </tr>
-                        <% } %>
-                </tbody>
-            </table>
-            </div>
+            <% if(offices.length> 2){ %>
+                <div class="scroll_bar">
+                    <% } %>
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead class="bg-color-red">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Location</th>
+                                    <th>Office ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(var i=0; i < offices.length; i++){ %>
+                                    <tr>
+                                        <th>
+                                            <%= i+1 %>
+                                        </th>
+                                        <th>
+                                            <%= offices[i].office_id %>
+                                        </th>
+                                        <th>
+                                            <%= offices[i].location %>
+                                        </th>
+                                    </tr>
+                                    <% } %>
+                            </tbody>
+                        </table>
+                </div>
         </div>
         <form action="/admin" method="post">
             <div class="orange-button">

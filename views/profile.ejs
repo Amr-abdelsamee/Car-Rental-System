@@ -6,7 +6,7 @@
 
     <body>
 
-        <div class="container" style="width: 70%;height: fit-content !important; margin-top: 5% !important;">
+        <div class="container" style="width: 70%;height: fit-content !important; margin-top: 2% !important;">
             <div class="container-header"><a class="back-button" href="main">Back</a></div>
             <div class="sub-container" style="padding-left: 25px;">
                 <h3>Account informations</h3>
@@ -37,7 +37,7 @@
                 <div class="row">
                     <% for(var i=0; i < cars.length; i++){ %>
                         <div class="col-md-3 col-sm-6 col-xs-6">
-                            <div class="panel panel-back noti-box">
+                            <div class="panel panel-back noti-box" >
                                 <div class="text-box">
                                     <div class="car-box">
                                     <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
@@ -54,10 +54,10 @@
                                         price: <%= cars[i].price %>$
                                     </p>
                                     <p class="text-muted car-card-text">
-                                        from: <%= cars[i].startD %>$
+                                        from: <%= cars[i].startD.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'}) %>
                                     </p>
                                     <p class="text-muted car-card-text">
-                                        to: <%= cars[i].endD %>$
+                                        to: <%= cars[i].endD.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'}) %>
                                     </p>
                                     </div>
                                 </div>
@@ -70,9 +70,9 @@
                         <select name="car_lic" class="input_field" style="width: 50%; font-size: 15px;">
                             <option value="" disabled selected>Car to delete</option>
                             <% for(var i=0; i < cars.length; i++){ %>
-                                <option value="<%= cars[i].car_id %>">
+                                <option value="<%= cars[i].reserve_no %>">
                                     <%= cars[i].company %> - <%= cars[i].model %>
-                                                - <%= cars[i].lic_no %>- <%= cars[i].office %>
+                                                - <%= cars[i].office %> - <%= cars[i].startD.toLocaleString() %>:<%= cars[i].endD.toLocaleString() %>
                                 </option>
                                 <% } %>
                         </select>

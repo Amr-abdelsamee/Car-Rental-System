@@ -37,10 +37,10 @@
                                 <%= reservations[i].car_id %>
                             </th>
                             <th>
-                                <%= reservations[i].startD %>
+                                <%= reservations[i].startD.toLocaleString().split(',')[0] %>
                             </th>
                             <th>
-                                <%= reservations[i].endD %>
+                                <%= reservations[i].endD.toLocaleString().split(',')[0] %>
                             </th>
                         </tr>
                         <% } %>

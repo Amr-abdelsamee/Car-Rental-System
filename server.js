@@ -234,7 +234,6 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            console.log(result)
                             res.render("control/reservations", { reservations: result })
                         }
                     })
@@ -296,110 +295,119 @@ app.route("/admin")
 app.route("/add")
     .post(function (req, res) {
         let sql = ""
-        if (req.body.control_btn === "add_car") {
-            const { image } = req.files
-            console.log(image.data)
-            const color_name = Get_Color_Name.GetColorName(req.body.color);
-            const VALUES = [
-                null
-                , req.body.company
-                , req.body.model
-                , req.body.lic_no
-                , color_name
-                , req.body.stat
-                , parseInt(req.body.year)
-                , parseInt(req.body.miles)
-                , parseInt(req.body.price)
-                , parseInt(req.body.office)
-                , image.data
-            ]
-            sql = "INSERT INTO cars VALUES (?)";
-            db.query(sql, [VALUES], (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("NEW car added to the system!")
-                    console.log(VALUES)
-                    // success message should be added here ------------------------------<
-                    loadOneImage(req.body.lic_no)
-                    res.redirect("/admin")
-                }
-            })
+        let VALUES
 
+        switch (req.body.control_btn) {
+            case "add_car":
+                const { image } = req.files
+                console.log(image.data)
+                const color_name = Get_Color_Name.GetColorName(req.body.color);
+                VALUES = [
+                    null
+                    , req.body.company
+                    , req.body.model
+                    , req.body.lic_no
+                    , color_name
+                    , req.body.stat
+                    , parseInt(req.body.year)
+                    , parseInt(req.body.miles)
+                    , parseInt(req.body.price)
+                    , parseInt(req.body.office)
+                    , image.data
+                ]
+                sql = "INSERT INTO cars VALUES (?)";
+                db.query(sql, [VALUES], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("NEW car added to the system!")
+                        console.log(VALUES)
+                        // success message should be added here ------------------------------<
+                        loadOneImage(req.body.lic_no)
+                        res.redirect("/admin")
+                    }
+                })
+                break;
 
-        } else if (req.body.control_btn === "add_customer") {
+            case "add_customer":
+                VALUES = [
+                    null
+                    , req.body.fname
+                    , req.body.lname
+                    , req.body.email
+                    , req.body.password
+                    , req.body.address
+                    , req.body.phone
+                ]
+                sql = "INSERT INTO customers VALUES (?)";
+                db.query(sql, [VALUES], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("NEW customer added to the system!")
+                        console.log(VALUES)
+                        // success message should be added here ------------------------------<
+                        res.redirect("/admin")
+                    }
+                })
+                break;
 
-            const VALUES = [
-                null
-                , req.body.fname
-                , req.body.lname
-                , req.body.email
-                , req.body.password
-                , req.body.address
-                , req.body.phone
-            ]
+            case "add_admin":
+                VALUES = [
+                    req.body.email
+                    , req.body.password
+                ]
+                sql = "INSERT INTO admins (email,password) VALUES (?)";
+                db.query(sql, [VALUES], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("NEW admin added to the system!")
+                        console.log(VALUES)
+                        // success message should be added here ------------------------------<
+                        res.redirect("/admin")
+                    }
+                })
+                break;
 
-            sql = "INSERT INTO customers VALUES (?)";
-            db.query(sql, [VALUES], (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("NEW customer added to the system!")
-                    console.log(VALUES)
-                    // success message should be added here ------------------------------<
-                    res.redirect("/admin")
-                }
-            })
-        } else if (req.body.control_btn === "add_admin") {
-            const VALUES = [
-                req.body.email
-                , req.body.password
-            ]
-            sql = "INSERT INTO admins (email,password) VALUES (?)";
-            db.query(sql, [VALUES], (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("NEW admin added to the system!")
-                    console.log(VALUES)
-                    // success message should be added here ------------------------------<
-                    res.redirect("/admin")
-                }
-            })
-        } else if (req.body.control_btn === "add_office") {
-            const VALUES = [
-                null
-                , req.body.location
-            ]
-            sql = "INSERT INTO offices VALUES (?)";
-            db.query(sql, [VALUES], (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("NEW office added to the system!")
-                    console.log(VALUES)
-                    // success message should be added here ------------------------------<
-                    res.redirect("/admin")
-                }
-            })
-        } else if (req.body.control_btn === "add_res") {
-            const VALUES = [
-                req.body.customer_id
-                , req.body.car_id
-                , req.body.sdate
-                , req.body.edate
-            ]
-            sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
-            db.query(sql, [VALUES], (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("NEW reservation is made!")
-                    console.log(VALUES)
-                    // success message should be added here ------------------------------<
-                    res.redirect("/admin")
-                }
-            })
+            case "add_office":
+                VALUES = [
+                    null
+                    , req.body.location
+                ]
+                sql = "INSERT INTO offices VALUES (?)";
+                db.query(sql, [VALUES], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("NEW office added to the system!")
+                        console.log(VALUES)
+                        // success message should be added here ------------------------------<
+                        res.redirect("/admin")
+                    }
+                })
+                break;
+
+            case "add_res":
+                VALUES = [
+                    req.body.customer_id
+                    , req.body.car_id
+                    , req.body.sdate
+                    , req.body.edate
+                ]
+                sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
+                db.query(sql, [VALUES], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log("NEW reservation is made!")
+                        console.log(VALUES)
+                        // success message should be added here ------------------------------<
+                        res.redirect("/admin")
+                    }
+                })
+                break;
+
         }
     });
 
@@ -694,13 +702,13 @@ app.route("/overview")
         res.redirect("main");
     })
     .post(function (req, res) {
-        const VALUE = [req.body.car_id_btn]
+        const VALUE = req.body.car_id_btn
         let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
-        db.query(sql, VALUE, (err, result) => {
+        db.query(sql, VALUE, (err, results) => {
             if (err) {
                 console.log(err)
             } else {
-                res.render("cars/car_overview", { car: result[0] })
+                res.render("cars/car_overview", { car: results[0] })
             }
         })
     });
@@ -712,13 +720,13 @@ app.route("/reserve")
     .post(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
-            const VALUE = [req.body.reserve_btn]
-            let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?";
-            db.query(sql, VALUE, (err, result) => {
+            const VALUE = req.body.reserve_btn
+            let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?; SELECT startD, endD FROM reservations WHERE car_id=? ORDER BY startD";
+            db.query(sql, [VALUE, VALUE], (err, results) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    res.render("cars/reserve", { car: result[0] })
+                    res.render("cars/reserve", { car: results[0][0], reservations: results[1] })
                 }
             })
         }
@@ -726,6 +734,70 @@ app.route("/reserve")
             res.redirect("signin")
         }
     });
+
+
+
+app.route("/confirmReservation")
+    .get(function (req, res) {
+        res.redirect("main");
+    })
+    .post(function (req, res) {
+        app_session = req.session
+        if (app_session.userPermission) {
+            let now = Date.parse(new Date().toLocaleString());
+            let start = Date.parse(new Date(req.body.sdate));
+            let end = Date.parse(new Date(req.body.edate));
+
+            if (start < now || end < now || start === end || end < start) {
+                res.status(204).send()
+            }
+            else {
+                const VALUE = [
+                    req.body.car_id,
+                    req.body.sdate.toLocaleString(),
+                    req.body.edate.toLocaleString(),
+                    req.body.sdate.toLocaleString(),
+                    req.body.edate.toLocaleString()
+                ]
+                sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
+                db.query(sql, VALUE, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        if (result.length) {
+                            for (let i = 0; i < result.length; i++) {
+                                console.log("car can not be reserved:")
+                                console.log("res no.:", result[i].reserve_no)
+                                console.log("Start date: ", result[i].startD.toLocaleString())
+                                console.log("End date: ", result[i].endD.toLocaleString())
+                            }
+                            res.status(204).send()
+                        } else {
+                            const VALUE = [
+                                app_session.user_id,
+                                req.body.car_id,
+                                req.body.sdate,
+                                req.body.edate,
+                            ]
+                            sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
+                            db.query(sql, [VALUE], (err, results) => {
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    console.log(new Date().toLocaleString() + ":: reservation made by user ID:" + app_session.user_id + " car ID:" + req.body.car_id)
+                                    res.redirect("main")
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+        else {
+            res.redirect("signin")
+        }
+    });
+
 
 //? ---------------------------------------------< End of Main route section >-------------------------------------------------------
 
@@ -735,7 +807,6 @@ app.route("/profile")
         app_session = req.session
         if (app_session.userPermission) {
             const VALUE = [app_session.user_id]
-
             sql = "SELECT * FROM cars AS C JOIN reservations AS R ON C.car_id=R.car_id WHERE R.customer_id= ?;SELECT * FROM customers WHERE customer_id= ?;";
             db.query(sql, [VALUE, VALUE], (err, results) => {
                 if (err) {
@@ -751,7 +822,7 @@ app.route("/profile")
     })
     .post(function (req, res) {
         if (req.body.car_lic) {
-            sql = "DELETE FROM reservations WHERE car_id = ?";
+            sql = "DELETE FROM reservations WHERE reserve_no = ?";
             const VALUE = req.body.car_lic
             db.query(sql, VALUE, (err, result) => {
                 if (err) {

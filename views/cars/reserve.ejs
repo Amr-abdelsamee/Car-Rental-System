@@ -1,4 +1,4 @@
-    <%- include("../header") -%>
+<%- include("../header") -%>
     <link href="../css/bootstrap.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/car_overview.css" type="text/css">
     <title>reserve</title>
@@ -6,23 +6,67 @@
 
     <body>
 
-        <div class="container">
-            <div class="container-header"><a class="back-button" href="main">Back</a></div>
+        <div class="container" style="height: 68vh !important; width: 60%; ">
+            <div class="container-header"><a class="back-button" onclick="window.history.go(-1); return false;">Back</a>
+            </div>
             <div class="sub-container">
                 <div class="left-block">
-                    <img  class="car-image" src="../images/cars/<%= car.car_id %>.jpg" alt="car image">
+                    <img class="car-image" src="../images/cars/<%= car.car_id %>.jpg" alt="car image">
                 </div>
                 <div class="right-block">
-                    <h2> <%= car.company %> <%= car.model %> <%= car.year %></h2>
-                    <hr>
-                    <!-- must select the date here -->
-                    <h3>Price/day: <%= car.price %>$</h3>
-                    <form action="reserve" method="get">
-                    <button class="reserve-button" name="reserve_btn" value="reserve">Confrim</button></form>
+                    <form action="confirmReservation" method="post">
+                        <h2>
+                            <%= car.company %>
+                                <%= car.model %>
+                                    <%= car.year %>
+                        </h2>
+                        <hr style="margin: 10px 0; border-top: 2px solid  ;">
+                        <br>
+                        <h4>Car reserved days:</h4>
+                        <hr style="margin: 10px 0;">
+                        <div class="table-responsive">
+                            <div class="scroll_bar">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead class="bg-color">
+                                        <tr>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(var i=0; i < reservations.length; i++){ %>
+                                            <tr>
+                                                <th>
+                                                    <%= reservations[i].startD.toLocaleString() %>
+                                                </th>
+                                                <th>
+                                                    <%= reservations[i].endD.toLocaleString() %>
+                                                </th>
+                                            </tr>
+                                            <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="reserve-date">
+                            <div>
+                                <h4>Start date:</h4>
+                                <input type="date" name="sdate" required>
+                            </div>
+                            <div>
+                                <h4>End date:</h4>
+                                <input type="date" name="edate" required>
+                            </div>
+                        </div>
+                        <input type="hidden" name="car_id" value="<%= car.car_id %>">
+                        <!-- must select the date here -->
+                        <h3>Price/day: <%= car.price %>$</h3>
+                        <button class="reserve-button" name="reserve_btn" value="reserve">Confrim</button>
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="container-footer"></div>
+        <div class="container-footer" style="width: 60%;"></div>
 
 
 
