@@ -1,0 +1,49 @@
+<%- include("control") %>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Add a new Car</h2>
+        </div>
+    </div>
+
+    <hr />
+    <form action="/confirmed" method="post" enctype="multipart/form-data">
+        <div class="add panel-back">
+            <h4>Company</h4>
+            <input type="text" class="input_field" name="company" value="<%= car.company %>" required>
+            <h4>Color</h4>
+            <input type="color" value="#0000" name="color" value="<%= car.color %>" required>
+            <h4>Status</h4>
+            <select name="stat" class="input_field" >
+                <option value="Active">Active</option>
+                <option value="Rented">Rented</option>
+                <option value="Out of service">Out of service</option>
+            </select>
+            <h4>Office</h4>
+            <select name="office" class="input_field">
+                <% for(var i=0; i < offices.length; i++){ %>
+                    <option value="<%= offices[i].office_id %>">
+                        <%= offices[i].location %>
+                    </option>
+                    <% } %>
+            </select>
+            <h4>Model</h4>
+            <input type="text" class="input_field" name="model" value="<%= car.model %>" required>
+            <h4>Year</h4>
+            <input type="text" class="input_field" name="year" value="<%= car.year %>" required>
+            <h4>Miles</h4>
+            <input type="text" class="input_field" name="miles" value="<%= car.miles %>" required>
+            <h4>Price</h4>
+            <input type="text" class="input_field" name="price" value="<%= car.price %>" required>
+            <h4>licence No</h4>
+            <input type="text" class="input_field" name="lic_no" value="<%= car.lic_no %>" readonly>
+            <h4>Image</h4>
+            <input type="file" name="image" accept="image/*" required>
+            
+            <input type="hidden" class="input_field" name="car_id" value="<%= car.car_id %>">
+
+            <div class="orange-button">
+                <button name="control_btn" value="edit_car" type="submit" class="btn btn-danger square-btn">Save</button>
+            </div>
+    </form>
+    </div>

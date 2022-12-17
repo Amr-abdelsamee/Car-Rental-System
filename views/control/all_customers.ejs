@@ -65,8 +65,8 @@
             </div>
         </form>
         <div class="row">
-            <form action="/delete" method="post">
-                <select name="customer_id" class="input_field">
+            <form action="/change" method="post">
+                <select name="index" class="input_field">
                     <option value="" disabled selected>Customer to delete</option>
                     <% for(var i=0; i < customers.length; i++){ %>
                         <option value="<%= customers[i].customer_id %>">
@@ -77,8 +77,12 @@
                 </select>
                 <br>
                 <div class="orange-button" style="float: left !important;">
-                    <button name="delete_control_btn" value="delete_customer" type="submit"
+                    <button name="delete_btn" value="delete_customer" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
+                </div>
+                <div class="orange-button" style="float: left !important; margin: 0 !important;">
+                    <button name="edit_btn" value="edit_customer" type="submit"
+                        class="btn btn-danger square-btn">Edit</button>
                 </div>
             </form>
         </div>

@@ -1,0 +1,32 @@
+<%- include("control") %>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Add a new Customer</h2>
+        </div>
+    </div>
+
+    <hr />
+    <form action="/confirmed" method="post">
+
+        <div class="add panel-back">
+            <h4>First name</h4>
+            <input type="text" class="input_field" name="fname" value="<%= customer.fname %>"  required>
+            <h4>Last name</h4>
+            <input type="text" class="input_field" name="lname" value="<%= customer.lname %>"  required>
+            <h4>Email</h4>
+            <input type="text" class="input_field" name="email" value="<%= customer.email %>"  required>
+            <h4>Password</h4>
+            <input type="text" class="input_field" name="password"  required>
+            <h4>Address</h4>
+            <input type="text" class="input_field" name="address" value="<%= customer.address %>"  required>
+            <h4>Phone</h4>
+            <input type="text" class="input_field" name="phone" value="<%= customer.phone %> " required>
+
+            <input type="hidden" class="input_field" name="customer_id" value="<%= customer.customer_id %>">
+
+            <div class="orange-button">
+                <button name="control_btn" value="edit_customer" type="submit" class="btn btn-danger square-btn">Save</button>
+            </div>
+    </form>
+    </div>

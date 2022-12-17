@@ -40,8 +40,8 @@
             </div>
         </form>
         <div class="row">
-            <form action="/delete" method="post">
-                <select name="admin_email" class="input_field">
+            <form action="/change" method="post">
+                <select name="index" class="input_field">
                     <option value="" disabled selected>Admin email</option>
                     <% for(var i=0; i < admins.length; i++){ %>
                         <option value="<%= admins[i].email %>">
@@ -51,7 +51,7 @@
                 </select>
                 <br>
                 <div class="orange-button" style="float: left !important;">
-                    <button name="delete_control_btn" value="delete_admin" type="submit"
+                    <button name="delete_btn" value="delete_admin" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
                 </div>
             </form>
@@ -95,8 +95,8 @@
         </form>
         <br>
         <div class="row">
-            <form action="/delete" method="post">
-                <select name="office_id" class="input_field">
+            <form action="/change" method="post">
+                <select name="index" class="input_field">
                     <option value="" disabled selected>Office</option>
                     <% for(var i=0; i < offices.length; i++){ %>
                         <option value="<%= offices[i].office_id %>">
@@ -106,7 +106,7 @@
                 </select>
                 <br>
                 <div class="orange-button" style="float: left !important;">
-                    <button name="delete_control_btn" value="delete_office" type="submit"
+                    <button name="delete_btn" value="delete_office" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
                 </div>
             </form>

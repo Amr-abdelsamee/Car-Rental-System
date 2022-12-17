@@ -8,10 +8,6 @@
 
     <hr />
 
-
-
-
-
     <div class="panel-body">
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
@@ -58,8 +54,8 @@
         </form>
 
         <div class="row">
-            <form action="/delete" method="post">
-                <select name="reserve_no" class="input_field" >
+            <form action="/change" method="post">
+                <select name="index" class="input_field" >
                     <option value=""  disabled selected >Reserve No.</option>
                     <% for(var i=0; i < reservations.length; i++){ %>
                         <option value="<%= reservations[i].reserve_no %>">
@@ -69,7 +65,7 @@
                 </select>
                 <br>
                 <div class="orange-button" style="float: left !important;">
-                    <button name="delete_control_btn" value="delete_res" type="submit"
+                    <button name="delete_btn" value="delete_res" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
                 </div>
             </form>
