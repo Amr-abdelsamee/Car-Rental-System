@@ -11,19 +11,60 @@
                     <source src="../videos/bg/bmw.mp4" type="video/mp4">
                 </video>
             </div>
-            
+
             <div class="main-container">
-                <div class="row filters-container">
-                <form action="" method="post">
-                    <select name="filters" class="input_field filters-input-field">
-                        <option value="" disabled selected>pick a filter</option>
-                        <option value="filter1">filter 1</option>
-                        <option value="filter1">filter 1</option>
-                        <option value="filter1">filter 1</option>
-                    </select>
-                    <button class="filters_btn" name="filters_btn" value="apply_filter" type="submit">Apply</button>
-            </form>
+                <div class="collapsible-menu">
+                    <form action="filters" method="post">
+                        <input type="checkbox" id="menu">
+                        <label for="menu">Filters</label>
+                        <div class="collapsible-container">
+                            <div class=" filters-container">
+                                <div class="block1">
+                                    <span class="filter-text">Office:</span>
+                                    <select name="filter_office" class="input_field filters-input-field">
+                                        <option value="0" selected>All</option>
+                                        <% for(var i=0; i < offices.length; i++){ %>
+                                            <option value="<%= offices[i].office_id %>">
+                                                <%= offices[i].location %>
+                                            </option>
+                                            <% } %>
+                                    </select>
+                                </div>
+                                <div class="block2"><span class="filter-text">Company:</span> <input type="text"
+                                        class="input_field filters-input-field" name="filter_company"></div>
+                                <div class="block3"><span class="filter-text">Model:</span> <input type="text"
+                                        class="input_field filters-input-field" name="filter_model"></div>
+                                <div class="block4"><span class="filter-text">Year:</span> <input type="text"
+                                        class="input_field filters-input-field" name="filter_year"></div>
+                                <div class="block5"><span class="filter-text">licence No:</span> <input type="text"
+                                        class="input_field filters-input-field" name="filter_lic"></div>
+                                <div class="block6"><span class="filter-text">Price:</span><input type="text" class="input_field filters-input-field" name="filter_lprice" placeholder="From"> </div>
+                                <div class="block7"> <input type="text" class="input_field filters-input-field" name="filter_hprice" placeholder="To"></div>
+                                <div class="block8">
+                                    <span class="filter-text">Available:</span>
+                                    <div>
+                                        <span class="filter-text" style="margin-left: 10px;font-size: 17px;">-
+                                            From:</span>
+                                        <input type="date" name="filter_sdate" min="new Date()" style="float: right; margin-right: 50px;">
+                                    </div>
+                                    <div style="margin-top: 25px;">
+                                        <span class="filter-text" style="margin-left: 10px;font-size: 17px;">-
+                                            To:</span>
+                                        <input type="date" name="filter_edate" style="float: right; margin-right: 50px;">
+                                    </div>
+                                </div>
+                                <div class="block9">
+                                    <button class="filters_btn" name="filters_btn" value="apply_filter"
+                                        type="submit">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
+
+                <p class="filter-message">
+                    <%= filters_message %>
+                </p>
                 <div class="row">
                     <% for(var i=0; i < cars.length; i++){ %>
                         <div class="col-md-3 col-sm-6 col-xs-6">
@@ -31,15 +72,16 @@
                                 <div class="car-box">
                                     <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
                                         alt="car image">
-                                        <p class="text-muted car-card-text">location: <%= cars[i].location %></p>
+                                    <p class="text-muted car-card-text">location: <%= cars[i].location %>
+                                    </p>
                                     <p class="text-muted car-card-text">
-                                        <%= cars[i].company %>
-                                            <%= cars[i].model %>
+                                        <%= cars[i].company %> <%= cars[i].model %> <%= cars[i].year %>
                                     </p>
                                     <p class="text-muted car-card-text" style="background-color:'red';">
                                         <%= cars[i].color %>
                                     </p>
-                                    <p class="text-muted car-card-text" style="margin-bottom: 10px; font-weight: 800 !important;">
+                                    <p class="text-muted car-card-text"
+                                        style="margin-bottom: 10px; font-weight: 800 !important;">
                                         <%= cars[i].price %>$
                                     </p>
                                     <form action="overview" method="post">
@@ -52,12 +94,7 @@
                             </div>
                         </div>
                         <% } %>
-
                 </div>
             </div>
-
-
-
-
 
             <%- include("footer") %>

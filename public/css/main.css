@@ -39,8 +39,8 @@ body {
 
 
 .vidoe-bg {
-    margin: 0 auto;
     height: 200px;
+    margin: 0 auto;
     width: var(--WIDTH);
 }
 
@@ -53,24 +53,115 @@ video {
 
 
 .filters-container {
-    margin-left: 10px ;
+    width: 50%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+
 }
 
-.filters-input-field{
-    width: 20% !important;
-    font-size: 20px !important;
-    padding: 0;
+.block1 {
+    grid-area: 1 / 1 / 2 / 3;
 }
+
+.block2 {
+    grid-area: 2 / 1 / 3 / 3;
+}
+
+.block3 {
+    grid-area: 3 / 1 / 4 / 3;
+}
+
+.block4 {
+    grid-area: 4 / 1 / 5 / 3;
+}
+
+.block5 {
+    grid-area: 5 / 1 / 6 / 3;
+}
+
+.block6 {
+    grid-area: 1 / 3 / 2 / 5;
+}
+
+.block7 {
+    grid-area: 2 / 3 / 3 / 5;
+}
+
+.block8 {
+    grid-area: 3 / 3 / 6 / 5;
+}
+
+.block9 {
+    grid-area: 5 / 5 / 6 / 6;
+}
+
+
+.filters-input-field {
+    padding: 0;
+    float: right;
+    margin-right: 30px;
+    width: 50% !important;
+    font-size: 20px !important;
+}
+
+.filter-text {
+    font-size: 20px;
+    font-weight: 600;
+}
+
 .filters-input-field:focus {
     border-bottom: 4px solid #0FA564;
 }
 
-.filters_btn{
-    background-color: white;
+.filters_btn {
     border: none;
+    color: white;
     font-size: 19px;
+    background-color: black;
+}
+
+.collapsible-container {
+    display: none;
+}
+
+.collapsible-menu label {
+    border-radius: 30px;
+    padding: 5px;
+    color: white;
+    display: block;
+    cursor: pointer;
+    font-size: 20px;
+    user-select: none;
+    margin-bottom: 5px;
+    width: fit-content;
+    background-color: black;
+    border: 2px solid black
+}
+
+input#menu {
+    display: none;
+}
+
+input:checked+label {
+    color: black;
+    background-color: white;
+    border: 2px solid black
 }
 
 
+input:checked~.collapsible-container {
+    display: block;
+}
 
-
+.filter-message{
+    margin: 0 auto;
+    font-size: 25px;
+    font-weight: 800;
+    margin-top: 20px;
+}

@@ -51,6 +51,11 @@ video {
     transition: border-color 0.2s;
 }
 
+.profile-inputs{
+    width: 20% !important;
+    float: right;
+    font-size: 15rem;
+}
 
 .input_field:focus {
     border-bottom: 3px solid #f00;

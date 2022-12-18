@@ -14,19 +14,24 @@
                 <br>
                 <ul>
                     <li>
-                        First name: <%= user.fname %>
+                        <h4>First name:</h4>
+                        <%= user.fname %>
                     </li>
                     <li>
-                        Last name: <%= user.lname %>
+                        <h4>Last name:</h4>
+                        <%= user.lname %>
                     </li>
                     <li>
-                        Email: <%= user.email %>
+                        <h4>Email:</h4>
+                        <%= user.email %>
                     </li>
                     <li>
-                        Address: <%= user.address %>
+                        <h4>Address:</h4>
+                        <%= user.address %>
                     </li>
                     <li>
-                        Phone: <%= user.phone %>
+                        <h4>Phone:</h4>
+                        <%= user.phone %>
                     </li>
                 </ul>
 
@@ -37,28 +42,31 @@
                 <div class="row">
                     <% for(var i=0; i < cars.length; i++){ %>
                         <div class="col-md-3 col-sm-6 col-xs-6">
-                            <div class="panel panel-back noti-box" >
+                            <div class="panel panel-back noti-box">
                                 <div class="text-box">
                                     <div class="car-box">
-                                    <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
-                                        alt="car image">
+                                        <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
+                                            alt="car image">
 
-                                    <p class="text-muted car-card-text">
-                                        <%= cars[i].company %>
-                                            <%= cars[i].model %>
-                                    </p>
-                                    <p class="text-muted car-card-text" style="background-color:'red';">
-                                        color: <%= cars[i].color %>
-                                    </p>
-                                    <p class="text-muted car-card-text">
-                                        price: <%= cars[i].price %>$
-                                    </p>
-                                    <p class="text-muted car-card-text">
-                                        from: <%= cars[i].startD.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'}) %>
-                                    </p>
-                                    <p class="text-muted car-card-text">
-                                        to: <%= cars[i].endD.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'}) %>
-                                    </p>
+                                        <p class="text-muted car-card-text">
+                                            <%= cars[i].company %>
+                                                <%= cars[i].model %>
+                                        </p>
+                                        <p class="text-muted car-card-text" style="background-color:'red';">
+                                            color: <%= cars[i].color %>
+                                        </p>
+                                        <p class="text-muted car-card-text">
+                                            price: <%= cars[i].price %>$
+                                        </p>
+                                        <p class="text-muted car-card-text">
+                                            from: <%= cars[i].startD.toLocaleString([], {year: 'numeric' ,
+                                                month: 'numeric' , day: 'numeric' , hour: '2-digit' , minute: '2-digit'
+                                                }) %>
+                                        </p>
+                                        <p class="text-muted car-card-text">
+                                            to: <%= cars[i].endD.toLocaleString([], {year: 'numeric' , month: 'numeric'
+                                                , day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -72,7 +80,8 @@
                             <% for(var i=0; i < cars.length; i++){ %>
                                 <option value="<%= cars[i].reserve_no %>">
                                     <%= cars[i].company %> - <%= cars[i].model %>
-                                                - <%= cars[i].office %> - <%= cars[i].startD.toLocaleString() %>:<%= cars[i].endD.toLocaleString() %>
+                                            - <%= cars[i].office %> - <%= cars[i].startD.toLocaleString() %>:<%=
+                                                        cars[i].endD.toLocaleString() %>
                                 </option>
                                 <% } %>
                         </select>

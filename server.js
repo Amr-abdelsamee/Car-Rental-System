@@ -678,16 +678,16 @@ app.route("/signout")
 app.route("/main")
     .get(function (req, res) {
         app_session = req.session
-        sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
-        db.query(sql, (err, result) => {
+        sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id; SELECT * FROM offices";
+        db.query(sql, (err, results) => {
             if (err) {
                 console.log(err)
             } else {
                 if (app_session.userPermission) {
-                    res.render("main", { cars: result, hideClass: "", user: app_session.user_name })
+                    res.render("main", { cars: results[0], hideClass: "", user: app_session.user_name, filters_message: "", offices: results[1] })
                 }
                 else {
-                    res.render("main", { cars: result, hideClass: "hide-logout", user: "Guest" })
+                    res.render("main", { cars: results[0], hideClass: "hide-logout", user: "Guest", filters_message: "", offices: results[1] })
                 }
             }
         })
@@ -696,6 +696,157 @@ app.route("/main")
     .post(function (req, res) {
 
     });
+
+
+
+app.route("/filters")
+    .get(function (req, res) {
+        res.redirect("main")
+    })
+    .post(function (req, res) {
+        app_session = req.session
+        let rec_VALUES = {
+            office: parseInt(req.body.filter_office),
+            company: req.body.filter_company,
+            model: req.body.filter_model,
+            year: req.body.filter_year,
+            lic_no: req.body.filter_lic,
+            low_price: parseInt(req.body.filter_lprice),
+            high_price: parseInt(req.body.filter_hprice),
+            sdate: req.body.filter_sdate,
+            edate: req.body.filter_edate
+        }
+        let ac_VALUES = []
+        let fmessage = ""
+
+        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
+        //  SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE  C.car_id NOT IN (SELECT car_id FROM reservations AS R WHERE (  '2022-12-18' BETWEEN R.startD AND R.endD) OR ( '2022-12-24' BETWEEN R.startD AND R.endD) OR R.startD BETWEEN '2022-12-18' AND '2022-12-24' );
+
+
+        if (rec_VALUES.office) {
+            if (rec_VALUES.office === 0) {
+                sql += " WHERE C.office_id"
+            } else {
+                sql += " WHERE C.office_id=?"
+                ac_VALUES.push(rec_VALUES.office)
+            }
+        }
+        if (rec_VALUES.company) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.company=?"
+            ac_VALUES.push(rec_VALUES.company)
+        }
+        if (rec_VALUES.model) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.model=?"
+            ac_VALUES.push(rec_VALUES.model)
+        }
+        if (rec_VALUES.year) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.year=?"
+            ac_VALUES.push(rec_VALUES.year)
+        }
+        if (rec_VALUES.lic_no) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.lic_no=?"
+            ac_VALUES.push(rec_VALUES.lic_no)
+        }
+        if (rec_VALUES.low_price) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.price >= ?"
+            ac_VALUES.push(rec_VALUES.low_price)
+        }
+        if (rec_VALUES.high_price) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.price <= ?"
+            ac_VALUES.push(rec_VALUES.high_price)
+        }
+        if (rec_VALUES.sdate) {
+            if (!ac_VALUES.length) {
+                sql += " WHERE "
+            }
+            ac_VALUES.push(rec_VALUES.sdate.toLocaleString())
+            sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE (  ? BETWEEN R.startD AND R.endD) OR ( ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ? )"
+            if (!rec_VALUES.edate) {
+                let next_day_date = new Date()
+                next_day_date.setDate(rec_VALUES.sdate.getDate() + 1)
+                ac_VALUES.push(next_day_date.toLocaleString())
+                ac_VALUES.push(rec_VALUES.sdate.toLocaleString())
+                ac_VALUES.push(next_day_date.toLocaleString())
+            }
+        }
+        if (rec_VALUES.edate) {
+            if (!ac_VALUES.length) {
+                sql += " WHERE "
+            }
+            ac_VALUES.push(rec_VALUES.edate.toLocaleString())
+            if (!rec_VALUES.sdate) {
+                sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE (  ? BETWEEN R.startD AND R.endD) OR ( ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ? )"
+                let now_date = new Date()
+                ac_VALUES.push(now_date.toLocaleString())
+                ac_VALUES.push(rec_VALUES.edate.toLocaleString())
+                ac_VALUES.push(now_date.toLocaleString())
+            } else {
+                ac_VALUES.push(rec_VALUES.sdate.toLocaleString())
+                ac_VALUES.push(rec_VALUES.edate.toLocaleString())
+            }
+        }
+
+        // let now = Date.parse(new Date().toLocaleString());
+        // let start = Date.parse(new Date(req.body.sdate));
+        // let end = Date.parse(new Date(req.body.edate));
+
+        // if (start < now || end < now || start === end || end < start) {
+        //     res.status(204).send()
+        // }
+
+
+        sql += "; SELECT * FROM offices"
+        console.log(rec_VALUES)
+        console.log("ac_VALUES: ",ac_VALUES)
+        console.log(sql)
+        db.query(sql, ac_VALUES, (err, results) => {
+            if (err) {
+                console.log(err)
+            } else {
+                if (results[0].length === 0) {
+                    fmessage = "No results"
+                }
+                if (app_session.userPermission) {
+                    res.render("main", { cars: results[0], hideClass: "", user: app_session.user_name, filters_message: fmessage, offices: results[1] })
+                }
+                else {
+                    res.render("main", { cars: results[0], hideClass: "hide-logout", user: "Guest", filters_message: fmessage, offices: results[1] })
+                }
+            }
+        })
+
+    })
+
 
 app.route("/overview")
     .get(function (req, res) {
