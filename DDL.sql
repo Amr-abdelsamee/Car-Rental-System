@@ -26,8 +26,8 @@ CREATE TABLE reservations(
     reserve_no int auto_increment PRIMARY KEY, 
     customer_id int not null,
     car_id int not null,
-    startD DATE not null,
-    endD DATE not null,
+    startD datetime not null,
+    endD datetime not null,
     res_date datetime DEFAULT current_timestamp() not null,
 );
 CREATE TABLE admins(
