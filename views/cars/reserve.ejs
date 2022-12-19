@@ -5,8 +5,8 @@
     </head>
 
     <body>
-
-        <div class="container" style="height: 68vh !important; width: 60%; ">
+        <script src="filters.js" ></script>
+        <div class="container" style="height: 70vh !important; width: 60%; ">
             <div class="container-header"><a class="back-button" onclick="window.history.go(-1); return false;">Back</a>
             </div>
             <div class="sub-container">
@@ -51,11 +51,11 @@
                         <div class="reserve-date">
                             <div>
                                 <h4>Start date:</h4>
-                                <input type="date" name="sdate" required>
+                                <input type="date" name="sdate" min="<%= minDate %>" max="<%= maxDate %>" required>
                             </div>
                             <div>
                                 <h4>End date:</h4>
-                                <input type="date" name="edate" required>
+                                <input type="date" name="edate" min="<%= minDate %>" max="<%= maxDate %>" required>
                             </div>
                         </div>
                         <input type="hidden" name="car_id" value="<%= car.car_id %>">
@@ -69,5 +69,5 @@
         <div class="container-footer" style="width: 60%;"></div>
 
 
-
+        
     </body>

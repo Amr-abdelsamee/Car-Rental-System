@@ -683,11 +683,26 @@ app.route("/main")
             if (err) {
                 console.log(err)
             } else {
+                let currentDate = new Date().toJSON().slice(0, 10)
                 if (app_session.userPermission) {
-                    res.render("main", { cars: results[0], hideClass: "", user: app_session.user_name, filters_message: "", offices: results[1] })
+                    res.render("main", {
+                        cars: results[0],
+                        hideClass: "",
+                        user: app_session.user_name,
+                        filters_message: "",
+                        offices: results[1],
+                        startDate: currentDate
+                    })
                 }
                 else {
-                    res.render("main", { cars: results[0], hideClass: "hide-logout", user: "Guest", filters_message: "", offices: results[1] })
+                    res.render("main", {
+                        cars: results[0],
+                        hideClass: "hide-logout",
+                        user: "Guest",
+                        filters_message: "",
+                        offices: results[1],
+                        startDate: currentDate
+                    })
                 }
             }
         })
@@ -700,7 +715,7 @@ app.route("/main")
 
 
 app.route("/filters")
-    .get(function (req, res) {
+    .get(function(req, res){
         res.redirect("main")
     })
     .post(function (req, res) {
@@ -711,9 +726,9 @@ app.route("/filters")
             model: req.body.filter_model,
             year: req.body.filter_year,
             lic_no: req.body.filter_lic,
-            low_price: parseInt(req.body.filter_lprice),
-            high_price: parseInt(req.body.filter_hprice),
-            sdate: req.body.filter_sdate,
+            low_price: req.body.filter_lprice,
+            high_price: req.body.filter_hprice,
+            sdate: new Date(req.body.filter_sdate).toJSON().slice(0, 10),
             edate: req.body.filter_edate
         }
         let ac_VALUES = []
@@ -774,7 +789,7 @@ app.route("/filters")
                 sql += " WHERE "
             }
             sql += "C.price >= ?"
-            ac_VALUES.push(rec_VALUES.low_price)
+            ac_VALUES.push(parseInt(rec_VALUES.low_price))
         }
         if (rec_VALUES.high_price) {
             if (ac_VALUES.length) {
@@ -783,51 +798,37 @@ app.route("/filters")
                 sql += " WHERE "
             }
             sql += "C.price <= ?"
-            ac_VALUES.push(rec_VALUES.high_price)
+            ac_VALUES.push(parseInt(rec_VALUES.high_price))
         }
+"   "
+
         if (rec_VALUES.sdate) {
             if (!ac_VALUES.length) {
                 sql += " WHERE "
+            }else{
+                sql += " AND"
             }
-            ac_VALUES.push(rec_VALUES.sdate.toLocaleString())
-            sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE (  ? BETWEEN R.startD AND R.endD) OR ( ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ? )"
-            if (!rec_VALUES.edate) {
-                let next_day_date = new Date()
-                next_day_date.setDate(rec_VALUES.sdate.getDate() + 1)
-                ac_VALUES.push(next_day_date.toLocaleString())
-                ac_VALUES.push(rec_VALUES.sdate.toLocaleString())
-                ac_VALUES.push(next_day_date.toLocaleString())
-            }
+            sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+            let startDate = rec_VALUES.sdate + " 10:00:00";
+            // startDate.setHours(10, 0, 0)
+            ac_VALUES.push(startDate)
+            ac_VALUES.push(startDate)
         }
+
         if (rec_VALUES.edate) {
-            if (!ac_VALUES.length) {
-                sql += " WHERE "
-            }
-            ac_VALUES.push(rec_VALUES.edate.toLocaleString())
-            if (!rec_VALUES.sdate) {
-                sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE (  ? BETWEEN R.startD AND R.endD) OR ( ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ? )"
-                let now_date = new Date()
-                ac_VALUES.push(now_date.toLocaleString())
-                ac_VALUES.push(rec_VALUES.edate.toLocaleString())
-                ac_VALUES.push(now_date.toLocaleString())
-            } else {
-                ac_VALUES.push(rec_VALUES.sdate.toLocaleString())
-                ac_VALUES.push(rec_VALUES.edate.toLocaleString())
-            }
+            sql +=" OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+            let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
+            // endDate.setHours(9, 0, 0)
+            ac_VALUES.push(endDate)
+            ac_VALUES.push(endDate)
         }
 
-        // let now = Date.parse(new Date().toLocaleString());
-        // let start = Date.parse(new Date(req.body.sdate));
-        // let end = Date.parse(new Date(req.body.edate));
-
-        // if (start < now || end < now || start === end || end < start) {
-        //     res.status(204).send()
-        // }
 
 
-        sql += "; SELECT * FROM offices"
+
+        sql += "); SELECT * FROM offices"
         console.log(rec_VALUES)
-        console.log("ac_VALUES: ",ac_VALUES)
+        console.log("ac_VALUES: ", ac_VALUES)
         console.log(sql)
         db.query(sql, ac_VALUES, (err, results) => {
             if (err) {
@@ -836,11 +837,26 @@ app.route("/filters")
                 if (results[0].length === 0) {
                     fmessage = "No results"
                 }
+                let currentDate = new Date().toJSON().slice(0, 10)
                 if (app_session.userPermission) {
-                    res.render("main", { cars: results[0], hideClass: "", user: app_session.user_name, filters_message: fmessage, offices: results[1] })
+                    res.render("main", {
+                        cars: results[0],
+                        hideClass: "",
+                        user: app_session.user_name,
+                        filters_message: fmessage,
+                        offices: results[1],
+                        startDate: currentDate
+                    })
                 }
                 else {
-                    res.render("main", { cars: results[0], hideClass: "hide-logout", user: "Guest", filters_message: fmessage, offices: results[1] })
+                    res.render("main", {
+                        cars: results[0],
+                        hideClass: "hide-logout",
+                        user: "Guest",
+                        filters_message: fmessage,
+                        offices: results[1],
+                        startDate: currentDate
+                    })
                 }
             }
         })
@@ -877,7 +893,18 @@ app.route("/reserve")
                 if (err) {
                     console.log(err)
                 } else {
-                    res.render("cars/reserve", { car: results[0][0], reservations: results[1] })
+                    let currentDate = new Date().toJSON().slice(0, 10)
+                    let maxDate = new Date()
+                    maxDate.setFullYear(maxDate.getFullYear() + 1)
+                    maxDate = maxDate.toJSON().slice(0, 10)
+                    // console.log("min date: ", currentDate)
+                    // console.log("max date: ", maxDate)
+                    res.render("cars/reserve", {
+                        car: results[0][0],
+                        reservations: results[1],
+                        minDate: currentDate,
+                        maxDate: maxDate,
+                    })
                 }
             })
         }
@@ -895,20 +922,28 @@ app.route("/confirmReservation")
     .post(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
-            let now = Date.parse(new Date().toLocaleString());
-            let start = Date.parse(new Date(req.body.sdate));
-            let end = Date.parse(new Date(req.body.edate));
 
-            if (start < now || end < now || start === end || end < start) {
+            let startDate = new Date(req.body.sdate);
+            let endDate = new Date(req.body.edate);
+            startDate.setHours(10, 0, 0)
+            endDate.setHours(9, 0, 0)
+
+            console.log("Dstart ", startDate.toLocaleString())
+            console.log("Dtend ", endDate.toLocaleString())
+
+            let start = Date.parse(startDate);
+            let end = Date.parse(endDate);
+
+            if (start === end || end < start) {
                 res.status(204).send()
             }
             else {
                 const VALUE = [
                     req.body.car_id,
-                    req.body.sdate.toLocaleString(),
-                    req.body.edate.toLocaleString(),
-                    req.body.sdate.toLocaleString(),
-                    req.body.edate.toLocaleString()
+                    startDate,
+                    endDate,
+                    startDate,
+                    endDate
                 ]
                 sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
                 db.query(sql, VALUE, (err, result) => {
@@ -927,8 +962,8 @@ app.route("/confirmReservation")
                             const VALUE = [
                                 app_session.user_id,
                                 req.body.car_id,
-                                req.body.sdate,
-                                req.body.edate,
+                                startDate,
+                                endDate
                             ]
                             sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
                             db.query(sql, [VALUE], (err, results) => {

@@ -45,7 +45,7 @@
                                     <div>
                                         <span class="filter-text" style="margin-left: 10px;font-size: 17px;">-
                                             From:</span>
-                                        <input type="date" name="filter_sdate" min="new Date()" style="float: right; margin-right: 50px;">
+                                        <input type="date" name="filter_sdate" value="<%= startDate %>" style="float: right; margin-right: 50px;">
                                     </div>
                                     <div style="margin-top: 25px;">
                                         <span class="filter-text" style="margin-left: 10px;font-size: 17px;">-
@@ -79,6 +79,9 @@
                                     </p>
                                     <p class="text-muted car-card-text" style="background-color:'red';">
                                         <%= cars[i].color %>
+                                    </p>
+                                    <p class="text-muted car-card-text" style="background-color:'red';">
+                                        <%= cars[i].lic_no %>
                                     </p>
                                     <p class="text-muted car-card-text"
                                         style="margin-bottom: 10px; font-weight: 800 !important;">
