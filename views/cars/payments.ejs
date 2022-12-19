@@ -1,0 +1,39 @@
+<%- include("../header") -%>
+
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/car_overview.css" type="text/css">
+    <title>Payments</title>
+    </head>
+
+    <body>
+
+        <div class="container" style="width:30%;height: 50vh;">
+            <div class="container-header"></div>
+            <div class="sub-container" style="height:100% !important;padding: 20px;text-align: center;">
+                <span style="color: green;font-size: 40px;margin-bottom: 10px;"> Car reserved Successfully!</span>
+                <h3>
+                    <%= car.company %>
+                        <%= car.model %>
+                            <%= car.year %>
+                </h3>
+                
+                <hr style="width: 100%;">
+                <h4>Price/day: <%= car.price %>$ </h4>
+                <h4>Total days: <%= payment.days %>
+                </h4>
+                <h4>Total cost: <%= payment.cost %>$ </h4>
+                <hr style="width: 100%;">
+
+                <h3>pay now?</h3>
+                <form action="payments" method="post">
+                    <button class="reserve-button" name="yes_pay_btn" value="<%= payment.reserve_no %>">Yes</button>
+                    <button class="reserve-button" name="no_pay_btn" value="<%= payment.reserve_no %>">No</button>
+                </form>
+
+                <div class="container-footer" style="width: 100%;margin-top: 20px;"></div>
+            </div>
+        </div>
+
+
+
+    </body>

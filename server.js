@@ -709,13 +709,12 @@ app.route("/main")
 
     })
     .post(function (req, res) {
-
     });
 
 
 
 app.route("/filters")
-    .get(function(req, res){
+    .get(function (req, res) {
         res.redirect("main")
     })
     .post(function (req, res) {
@@ -735,8 +734,6 @@ app.route("/filters")
         let fmessage = ""
 
         let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
-        //  SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE  C.car_id NOT IN (SELECT car_id FROM reservations AS R WHERE (  '2022-12-18' BETWEEN R.startD AND R.endD) OR ( '2022-12-24' BETWEEN R.startD AND R.endD) OR R.startD BETWEEN '2022-12-18' AND '2022-12-24' );
-
 
         if (rec_VALUES.office) {
             if (rec_VALUES.office === 0) {
@@ -800,12 +797,12 @@ app.route("/filters")
             sql += "C.price <= ?"
             ac_VALUES.push(parseInt(rec_VALUES.high_price))
         }
-"   "
+        "   "
 
         if (rec_VALUES.sdate) {
             if (!ac_VALUES.length) {
                 sql += " WHERE "
-            }else{
+            } else {
                 sql += " AND"
             }
             sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
@@ -816,7 +813,7 @@ app.route("/filters")
         }
 
         if (rec_VALUES.edate) {
-            sql +=" OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+            sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
             let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
             // endDate.setHours(9, 0, 0)
             ac_VALUES.push(endDate)
@@ -922,15 +919,10 @@ app.route("/confirmReservation")
     .post(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
-
             let startDate = new Date(req.body.sdate);
             let endDate = new Date(req.body.edate);
             startDate.setHours(10, 0, 0)
             endDate.setHours(9, 0, 0)
-
-            console.log("Dstart ", startDate.toLocaleString())
-            console.log("Dtend ", endDate.toLocaleString())
-
             let start = Date.parse(startDate);
             let end = Date.parse(endDate);
 
@@ -945,7 +937,7 @@ app.route("/confirmReservation")
                     startDate,
                     endDate
                 ]
-                sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
+                let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
                 db.query(sql, VALUE, (err, result) => {
                     if (err) {
                         console.log(err)
@@ -961,17 +953,24 @@ app.route("/confirmReservation")
                         } else {
                             const VALUE = [
                                 app_session.user_id,
-                                req.body.car_id,
+                                parseInt(req.body.car_id),
                                 startDate,
                                 endDate
                             ]
-                            sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
-                            db.query(sql, [VALUE], (err, results) => {
+                            let sql1 = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?);";
+                            let sql2 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;"
+                            let sql3 = "SELECT reserve_no, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id WHERE R.customer_id= ? AND R.car_id= ? AND R.startD= ? AND R.endD= ?;";
+                            let sql = sql1 + sql2 + sql3
+                            db.query(sql, [VALUE, VALUE[1], VALUE[0], VALUE[1], VALUE[2], VALUE[3]], (err, results) => {
                                 if (err) {
                                     console.log(err)
                                 } else {
                                     console.log(new Date().toLocaleString() + ":: reservation made by user ID:" + app_session.user_id + " car ID:" + req.body.car_id)
-                                    res.redirect("main")
+                                    res.render("cars/payments", {
+                                        customer: app_session.user_id,
+                                        car: results[1][0],
+                                        payment: results[2][0]
+                                    })
                                 }
                             })
                         }
@@ -983,6 +982,25 @@ app.route("/confirmReservation")
             res.redirect("signin")
         }
     });
+
+
+app.route("/payments")
+    .get(function (req, res) {
+        res.redirect("main")
+    })
+    .post(function (req, res) {
+        app_session = req.session
+        if (app_session.userPermission) {
+            if (req.body.yes_pay_btn) {
+                console.log("Customer with id:"+ app_session.user_id +" just paid !")
+                res.status(204).send()
+            }
+            else if (req.body.no_pay_btn) {
+                console.log("Customer with id:"+ app_session.user_id +" did not pay !")
+                res.redirect("main")
+            }
+        }
+    })
 
 
 //? ---------------------------------------------< End of Main route section >-------------------------------------------------------
