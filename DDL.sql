@@ -17,7 +17,7 @@ CREATE TABLE customers(
     customer_id int auto_increment PRIMARY KEY, 
     fname varchar(255) not null,
     lname varchar(255) not null,
-    email varchar(255) not null,
+    email varchar(255) not null UNIQUE ,
     `password` varchar(255) not null,
     `address` varchar(255) not null,
     phone int not null
@@ -36,7 +36,7 @@ CREATE TABLE admins(
 );
 CREATE TABLE offices(
     office_id int auto_increment not null PRIMARY KEY, 
-    `location` varchar(255) not null
+    `location` varchar(50) not null UNIQUE 
 );
 
 ALTER TABLE reservations ADD FOREIGN KEY (car_id) 
