@@ -85,10 +85,7 @@
                         <button class="filters_btn" name="search_btn" value="search_cars"
                         type="submit">Apply</button>
                     </div>
-
                     </div>
-
-                    
                 </div>
             </form>
         
@@ -104,6 +101,7 @@
                 <thead class="bg-color-red">
                     <tr>
                         <th>#</th>
+                        <th>Car ID</th>
                         <th>Company</th>
                         <th>Model</th>
                         <th>Status</th>
@@ -112,45 +110,44 @@
                         <th>Miles</th>
                         <th>Price</th>
                         <th>Licence No</th>
-                        <th>Car ID</th>
                         <th>Office</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% for(var i=0; i < cars.length; i++){ %>
+                    <% for(var i=0; i < allCars.length; i++){ %>
                         <tr>
                             <th>
                                 <%= i+1 %>
                             </th>
                             <th>
-                                <%= cars[i].company %>
+                                <%= allCars[i].car_id %>
                             </th>
                             <th>
-                                <%= cars[i].model %>
+                                <%= allCars[i].company %>
                             </th>
                             <th>
-                                <%= cars[i].status %>
+                                <%= allCars[i].model %>
                             </th>
                             <th>
-                                <%= cars[i].color %>
+                                <%= allCars[i].status %>
                             </th>
                             <th>
-                                <%= cars[i].year %>
+                                <%= allCars[i].color %>
                             </th>
                             <th>
-                                <%= cars[i].miles %>
+                                <%= allCars[i].year %>
                             </th>
                             <th>
-                                <%= cars[i].price %>
+                                <%= allCars[i].miles %>
                             </th>
                             <th>
-                                <%= cars[i].lic_no %>
+                                <%= allCars[i].price %>
                             </th>
                             <th>
-                                <%= cars[i].car_id %>
+                                <%= allCars[i].lic_no %>
                             </th>
                             <th>
-                                <%= cars[i].location %>
+                                <%= allCars[i].location %>
                             </th>
                         </tr>
                         <% } %>
@@ -167,10 +164,10 @@
             <form action="/change" method="post">
                 <select name="index" class="input_field">
                     <option value="" disabled selected>Car to delete</option>
-                    <% for(var i=0; i < cars.length; i++){ %>
-                        <option value="<%= cars[i].lic_no %>">
-                            <%= cars[i].car_id %> - <%= cars[i].company %> - <%= cars[i].model %>
-                                        - <%= cars[i].lic_no %>- <%= cars[i].office %>
+                    <% for(var i=0; i < freeCars.length; i++){ %>
+                        <option value="<%= freeCars[i].lic_no %>">
+                            <%= freeCars[i].car_id %> - <%= freeCars[i].company %> - <%= freeCars[i].model %>
+                                        - <%= freeCars[i].lic_no %>- <%= freeCars[i].office %>
                         </option>
                         <% } %>
                 </select>
@@ -191,17 +188,17 @@
 
 
         <div class="row">
-            <% for(var i=0; i < cars.length; i++){ %>
+            <% for(var i=0; i < allCars.length; i++){ %>
                 <div class="col-md-3 col-sm-6 col-xs-6">
                     <div class="panel panel-back noti-box">
                         <div class="text-box">
-                            <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg" alt="car image">
-                            <p class="text-muted car-card-text">car ID: <%= cars[i].car_id %>
+                            <img class="car-image" src="../images/cars/<%= allCars[i].car_id %>.jpg" alt="car image">
+                            <p class="text-muted car-card-text">car ID: <%= allCars[i].car_id %>
                             </p>
-                            <p class="text-muted car-card-text">Status:<%= cars[i].status %></p>
+                            <p class="text-muted car-card-text">Status:<%= allCars[i].status %></p>
                             <p class="text-muted car-card-text">
-                                model: <%= cars[i].company %>
-                                    <%= cars[i].model %>
+                                model: <%= allCars[i].company %>
+                                    <%= allCars[i].model %>
                             </p>
 
                         </div>

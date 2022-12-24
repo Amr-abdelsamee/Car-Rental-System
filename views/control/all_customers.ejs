@@ -52,41 +52,15 @@
                     <button class="filters_btn" name="search_btn" value="search_customers"
                     type="submit">Apply</button>
                 </div>
-
                 </div>
-
                 
             </div>
         </form>
 
 
-
         <p class="search_message">
             <%= search_message %>
         </p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         <div class="table-responsive">
@@ -97,38 +71,34 @@
                         <th>First name</th>
                         <th>Last name</th>
                         <th>Email</th>
-                        <th>Password</th>
                         <th>Address</th>
                         <th>Phone</th>
                         <th>Customer ID</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% for(var i=0; i < customers.length; i++){ %>
+                    <% for(var i=0; i < allCustomers.length; i++){ %>
                         <tr>
                             <th>
                                 <%= i+1 %>
                             </th>
                             <th>
-                                <%= customers[i].fname %>
+                                <%= allCustomers[i].fname %>
                             </th>
                             <th>
-                                <%= customers[i].lname %>
+                                <%= allCustomers[i].lname %>
                             </th>
                             <th>
-                                <%= customers[i].email %>
+                                <%= allCustomers[i].email %>
                             </th>
                             <th>
-                                <%= customers[i].password %>
+                                <%= allCustomers[i].address %>
                             </th>
                             <th>
-                                <%= customers[i].address %>
+                                <%= allCustomers[i].phone %>
                             </th>
                             <th>
-                                <%= customers[i].phone %>
-                            </th>
-                            <th>
-                                <%= customers[i].customer_id %>
+                                <%= allCustomers[i].customer_id %>
                             </th>
                         </tr>
                         <% } %>
@@ -145,10 +115,10 @@
             <form action="/change" method="post">
                 <select name="index" class="input_field">
                     <option value="" disabled selected>Customer to delete</option>
-                    <% for(var i=0; i < customers.length; i++){ %>
-                        <option value="<%= customers[i].customer_id %>">
-                            <%= customers[i].customer_id %> - <%= customers[i].fname %> <%= customers[i].lname %>
-                                        - <%= customers[i].email %>
+                    <% for(var i=0; i < freeCustomers.length; i++){ %>
+                        <option value="<%= freeCustomers[i].customer_id %>">
+                            <%= freeCustomers[i].customer_id %> - <%= freeCustomers[i].fname %> <%= freeCustomers[i].lname %>
+                                        - <%= freeCustomers[i].email %>
                         </option>
                         <% } %>
                 </select>

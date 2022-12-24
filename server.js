@@ -40,7 +40,7 @@ app.use(favicon(__dirname + '/public/images/favicon.png')); // favicon location
 
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({
-    secret: "thisismysecrctekey",
+    secret: process.env.SKEY,
     saveUninitialized: true,
     cookie: { maxAge: oneDay },
     resave: false
@@ -141,19 +141,22 @@ app.route("/admin")
             let menu_btn = req.body.control_btn;
             let sql = ""
             switch (menu_btn) {
-                
+
                 case "dashboard":
                     load_dashBoard(app_session.admin_id, res);
                     break;
                 case "all_cars":
-                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;SELECT * FROM offices";
-                    db.query(sql, (err, result) => {
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;";
+                    sql+= "SELECT * FROM offices;"
+                    sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations) ";
+                    db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
                         } else {
                             res.render("control/all_cars", {
-                                cars: result[0],
-                                offices: result[1],
+                                allCars: results[0],
+                                offices: results[1],
+                                freeCars: results[2],
                                 startDate: new Date().toJSON().slice(0, 10),
                                 search_message: ""
                             })
@@ -161,25 +164,27 @@ app.route("/admin")
                     })
                     break;
                 case "all_customers":
-                    sql = "SELECT * FROM customers";
-                    db.query(sql, (err, result) => {
+                    sql = "SELECT * FROM customers;";
+                    sql += "SELECT * FROM customers where customer_id NOT IN(SELECT DISTINCT customer_id FROM reservations)"
+                    db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
                         } else {
                             res.render("control/all_customers", {
-                                customers: result,
+                                allCustomers: results[0],
+                                freeCustomers: results[1],
                                 search_message: ""
                             })
                         }
                     })
                     break;
                 case "reservations":
-                    sql = "SELECT reserve_no, fname, lname, car_id, startD, endD,rented FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id";
+                    sql = "SELECT reserve_no, fname, lname, R.customer_id, car_id, startD, endD,rented FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/reservations", { 
+                            res.render("control/reservations", {
                                 reservations: result,
                                 search_message: "",
                             })
@@ -257,613 +262,635 @@ app.route("/add")
         res.redirect("control")
     })
     .post(function (req, res) {
-        let sql = ""
-        let VALUES
-
-        switch (req.body.control_btn) {
-            case "add_car":
-                const { image } = req.files
-                console.log(image.data)
-                const color_name = Get_Color_Name.GetColorName(req.body.color);
-                VALUES = [
-                    null
-                    , req.body.company
-                    , req.body.model
-                    , req.body.lic_no
-                    , color_name
-                    , req.body.stat
-                    , parseInt(req.body.year)
-                    , parseInt(req.body.miles)
-                    , parseInt(req.body.price)
-                    , parseInt(req.body.office)
-                    , image.data
-                ]
-                sql = "INSERT INTO cars VALUES (?)";
-                db.query(sql, [VALUES], (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("NEW car added to the system!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                        loadOneImage(req.body.lic_no)
-                        res.redirect("/admin")
-                    }
-                })
-                break;
-
-            case "add_customer":
-                VALUES = [
-                    null
-                    , req.body.fname
-                    , req.body.lname
-                    , req.body.email
-                    , md5(req.body.password)
-                    , req.body.address
-                    , req.body.phone
-                ]
-                sql = "INSERT INTO customers VALUES (?)";
-                db.query(sql, [VALUES], (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("NEW customer added to the system!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                        res.redirect("/admin")
-                    }
-                })
-                break;
-
-            case "add_admin":
-                VALUES = [
-                    req.body.email
-                    , md5(req.body.password)
-                ]
-                sql = "INSERT INTO admins (email,password) VALUES (?)";
-                db.query(sql, [VALUES], (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("NEW admin added to the system!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                        res.redirect("/admin")
-                    }
-                })
-                break;
-
-            case "add_office":
-                VALUES = [
-                    null
-                    , req.body.location
-                ]
-                sql = "INSERT INTO offices VALUES (?)";
-                db.query(sql, [VALUES], (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("NEW office added to the system!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                        res.redirect("/admin")
-                    }
-                })
-                break;
-
-            case "add_res":
-
-                const dates = make_date(req.body.sdate, req.body.edate)
-
-                if (dates.valid) {
-                    const VALUE = [
-                        req.body.car_id,
-                        dates.startD,
-                        dates.endD,
-                        dates.startD,
-                        dates.endD
+        app_session = req.session
+        if (app_session.adminPermission) {
+            let sql = ""
+            let VALUES
+            switch (req.body.control_btn) {
+                case "add_car":
+                    const { image } = req.files
+                    console.log(image.data)
+                    const color_name = Get_Color_Name.GetColorName(req.body.color);
+                    VALUES = [
+                        null
+                        , req.body.company
+                        , req.body.model
+                        , req.body.lic_no
+                        , color_name
+                        , req.body.stat
+                        , parseInt(req.body.year)
+                        , parseInt(req.body.miles)
+                        , parseInt(req.body.price)
+                        , parseInt(req.body.office)
+                        , image.data
                     ]
-                    let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
-                    db.query(sql, VALUE, (err, result) => {
+                    sql = "INSERT INTO cars VALUES (?)";
+                    db.query(sql, [VALUES], (err, result) => {
                         if (err) {
                             console.log(err)
                         } else {
-                            if (result.length) {
-                                console.log("car is not available in these dates")
-                                res.status(204).send()
-                            } else {
-                                VALUES = [
-                                    req.body.customer_id
-                                    , req.body.car_id
-                                    , req.body.payment
-                                    , dates.startD
-                                    , dates.endD
-                                ]
-                                sql = "INSERT INTO reservations(customer_id, car_id, payment, startD, endD ) VALUES (?)";
-                                db.query(sql, [VALUES], (err, result) => {
-                                    if (err) {
-                                        console.log(err)
-                                    } else {
-                                        console.log("NEW reservation is made!")
-                                        console.log(VALUES)
-                                        // success message should be added here ------------------------------<
-                                        res.redirect("/admin")
-                                    }
-                                })
-                            }
+                            console.log("NEW car added to the system!")
+                            console.log(VALUES)
+                            // success message should be added here ------------------------------<
+                            loadOneImage(req.body.lic_no)
+                            res.redirect("/admin")
                         }
                     })
-                }
-                else {
-                    console.log("dates are not valid!")
-                    res.status(204).send()
-                }
-                break;
-        }
+                    break;
 
+                case "add_customer":
+                    VALUES = [
+                        null
+                        , req.body.fname
+                        , req.body.lname
+                        , req.body.email
+                        , md5(req.body.password)
+                        , req.body.address
+                        , req.body.phone
+                    ]
+                    sql = "INSERT INTO customers VALUES (?)";
+                    db.query(sql, [VALUES], (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log("NEW customer added to the system!")
+                            console.log(VALUES)
+                            // success message should be added here ------------------------------<
+                            res.redirect("/admin")
+                        }
+                    })
+                    break;
+
+                case "add_admin":
+                    VALUES = [
+                        req.body.email
+                        , md5(req.body.password)
+                    ]
+                    sql = "INSERT INTO admins (email,password) VALUES (?)";
+                    db.query(sql, [VALUES], (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log("NEW admin added to the system!")
+                            console.log(VALUES)
+                            // success message should be added here ------------------------------<
+                            res.redirect("/admin")
+                        }
+                    })
+                    break;
+
+                case "add_office":
+                    VALUES = [
+                        null
+                        , req.body.location
+                    ]
+                    sql = "INSERT INTO offices VALUES (?)";
+                    db.query(sql, [VALUES], (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log("NEW office added to the system!")
+                            console.log(VALUES)
+                            // success message should be added here ------------------------------<
+                            res.redirect("/admin")
+                        }
+                    })
+                    break;
+
+                case "add_res":
+
+                    const dates = make_date(req.body.sdate, req.body.edate)
+
+                    if (dates.valid) {
+                        const VALUE = [
+                            req.body.car_id,
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD
+                        ]
+                        let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
+                        db.query(sql, VALUE, (err, result) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                if (result.length) {
+                                    console.log("car is not available in these dates")
+                                    res.status(204).send()
+                                } else {
+                                    VALUES = [
+                                        req.body.customer_id
+                                        , req.body.car_id
+                                        , req.body.payment
+                                        , dates.startD
+                                        , dates.endD
+                                    ]
+                                    sql = "INSERT INTO reservations(customer_id, car_id, payment, startD, endD ) VALUES (?)";
+                                    db.query(sql, [VALUES], (err, result) => {
+                                        if (err) {
+                                            console.log(err)
+                                        } else {
+                                            console.log("NEW reservation is made!")
+                                            console.log(VALUES)
+                                            // success message should be added here ------------------------------<
+                                            res.redirect("/admin")
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    }
+                    else {
+                        console.log("dates are not valid!")
+                        res.status(204).send()
+                    }
+                    break;
+            }
+        } else {
+            res.redirect("control")
+        }
     });
 
 
 app.route("/change")
     .post(function (req, res) {
-        if (req.body.index) {
-            if (req.body.edit_btn) {
-                let sql = ""
-                const VALUE = req.body.index
-                switch (req.body.edit_btn) {
-                    case "edit_car":
-                        sql = "SELECT * FROM offices; SELECT * FROM cars WHERE lic_no = ?";
-                        db.query(sql, VALUE, (err, result) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                res.render("control/edit_car", { offices: result[0], car: result[1][0] })
-                            }
-                        })
-                        break;
-                    case "edit_customer":
-                        sql = "SELECT * FROM customers WHERE customer_id=?";
-                        db.query(sql, VALUE, (err, result) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                res.render("control/edit_customer", { customer: result[0] })
-                            }
-                        })
-                        break;
+        app_session = req.session
+        if (app_session.adminPermission) {
+            if (req.body.index) {
+                if (req.body.edit_btn) {
+                    let sql = ""
+                    const VALUE = req.body.index
+                    switch (req.body.edit_btn) {
+                        case "edit_car":
+                            sql = "SELECT * FROM offices; SELECT * FROM cars WHERE lic_no = ?";
+                            db.query(sql, VALUE, (err, result) => {
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    res.render("control/edit_car", { offices: result[0], car: result[1][0] })
+                                }
+                            })
+                            break;
+                        case "edit_customer":
+                            sql = "SELECT * FROM customers WHERE customer_id=?";
+                            db.query(sql, VALUE, (err, result) => {
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    res.render("control/edit_customer", { customer: result[0] })
+                                }
+                            })
+                            break;
+                    }
                 }
-            }
-            else if (req.body.delete_btn) {
-                delete_entry(req.body.delete_btn, req.body.index, res)
-                res.redirect(req.get('referer'));
+                else if (req.body.delete_btn) {
+                    delete_entry(req.body.delete_btn, req.body.index, res)
+                    res.redirect(req.get('referer'));
+                }
+            } else {
+                //returns a 204 No Content response
+                res.status(204).send()
             }
         } else {
-            //returns a 204 No Content response
-            res.status(204).send()
+            res.redirect("control")
         }
     })
 
 
 app.route("/confirmed")
     .post(function (req, res) {
-        let sql = ""
-        let VALUES
-        switch (req.body.control_btn) {
-            case "edit_car":
-                const { image } = req.files
-                const color_name = Get_Color_Name.GetColorName(req.body.color);
-                VALUES = [
-                    req.body.company
-                    , req.body.model
-                    , req.body.lic_no
-                    , color_name
-                    , req.body.stat
-                    , parseInt(req.body.year)
-                    , parseInt(req.body.miles)
-                    , parseInt(req.body.price)
-                    , parseInt(req.body.office)
-                    , image.data
-                    , req.body.car_id
-                ]
+        app_session = req.session
+        if (app_session.adminPermission) {
+            let sql = ""
+            let VALUES
+            switch (req.body.control_btn) {
+                case "edit_car":
+                    const { image } = req.files
+                    const color_name = Get_Color_Name.GetColorName(req.body.color);
+                    VALUES = [
+                        req.body.company
+                        , req.body.model
+                        , req.body.lic_no
+                        , color_name
+                        , req.body.stat
+                        , parseInt(req.body.year)
+                        , parseInt(req.body.miles)
+                        , parseInt(req.body.price)
+                        , parseInt(req.body.office)
+                        , image.data
+                        , req.body.car_id
+                    ]
 
-                sql = "UPDATE cars SET  company=?, model=?, lic_no=?, color=?, `status`=?, `year`=?, miles=?, price=?, office_id=?, `image`= ? WHERE car_id=?";
-                db.query(sql, VALUES, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("car with licence No.:", req.body.lic_no, " has been modified!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                        loadOneImage(req.body.lic_no)
-                    }
-                })
-                break;
-            case "edit_customer":
-                VALUES = [
-                    req.body.fname
-                    , req.body.lname
-                    , req.body.email
-                    , req.body.password
-                    , req.body.address
-                    , req.body.phone
-                    , req.body.customer_id
-                ]
+                    sql = "UPDATE cars SET  company=?, model=?, lic_no=?, color=?, `status`=?, `year`=?, miles=?, price=?, office_id=?, `image`= ? WHERE car_id=?";
+                    db.query(sql, VALUES, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log("car with licence No.:", req.body.lic_no, " has been modified!")
+                            console.log(VALUES)
+                            // success message should be added here ------------------------------<
+                            loadOneImage(req.body.lic_no)
+                        }
+                    })
+                    break;
+                case "edit_customer":
+                    VALUES = [
+                        req.body.fname
+                        , req.body.lname
+                        , req.body.email
+                        , req.body.password
+                        , req.body.address
+                        , req.body.phone
+                        , req.body.customer_id
+                    ]
 
 
-                sql = "UPDATE customers SET fname=?, lname=?, email=?, `password`=?, `address`=?, phone=? WHERE customer_id=?";
-                db.query(sql, VALUES, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("customer information has been modified!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                    }
-                })
-                break;
+                    sql = "UPDATE customers SET fname=?, lname=?, email=?, `password`=?, `address`=?, phone=? WHERE customer_id=?";
+                    db.query(sql, VALUES, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log("customer information has been modified!")
+                            console.log(VALUES)
+                            // success message should be added here ------------------------------<
+                        }
+                    })
+                    break;
+            }
+            res.redirect("/admin")
+        } else {
+            res.redirect("control")
         }
-        res.redirect("/admin")
     })
 
 
 app.route("/search")
     .post(function (req, res) {
-        let ac_VALUES = []
-        let fmessage = ""
-        let rec_VALUES
-        let sql = ""
+        app_session = req.session
+        if (app_session.adminPermission) {
+            let ac_VALUES = []
+            let fmessage = ""
+            let rec_VALUES
+            let sql = ""
 
-        switch (req.body.search_btn) {
+            switch (req.body.search_btn) {
 
-            case "search_cars":
+                case "search_cars":
 
-                rec_VALUES = {
-                    id: req.body.search_car_id,
-                    office: parseInt(req.body.search_car_office),
-                    company: req.body.search_car_company,
-                    status: req.body.search_car_status,
-                    model: req.body.search_car_model,
-                    year: req.body.search_car_year,
-                    low_price: req.body.search_car_lprice,
-                    high_price: req.body.search_car_hprice,
-                    sdate: new Date(req.body.search_car_sdate).toJSON().slice(0, 10),
-                    edate: req.body.search_car_edate
-                }
-
-                sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
-
-                if (rec_VALUES.office) {
-                    if (rec_VALUES.office === 0) {
-                        sql += " WHERE C.office_id"
-                    } else {
-                        sql += " WHERE C.office_id=?"
-                        ac_VALUES.push(rec_VALUES.office)
+                    rec_VALUES = {
+                        id: req.body.search_car_id,
+                        office: parseInt(req.body.search_car_office),
+                        company: req.body.search_car_company,
+                        status: req.body.search_car_status,
+                        model: req.body.search_car_model,
+                        year: req.body.search_car_year,
+                        low_price: req.body.search_car_lprice,
+                        high_price: req.body.search_car_hprice,
+                        sdate: new Date(req.body.search_car_sdate).toJSON().slice(0, 10),
+                        edate: req.body.search_car_edate
                     }
-                }
 
-                if (rec_VALUES.company) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.company=?"
-                    ac_VALUES.push(rec_VALUES.company)
-                }
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
 
-                if (rec_VALUES.id) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.car_id=?"
-                    ac_VALUES.push(parseInt(rec_VALUES.id))
-                }
-
-                if (rec_VALUES.status) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.status=?"
-                    ac_VALUES.push(rec_VALUES.status)
-                }
-
-                if (rec_VALUES.model) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.model=?"
-                    ac_VALUES.push(rec_VALUES.model)
-                }
-
-                if (rec_VALUES.year) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.year=?"
-                    ac_VALUES.push(rec_VALUES.year)
-                }
-
-                if (rec_VALUES.lic_no) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.lic_no=?"
-                    ac_VALUES.push(rec_VALUES.lic_no)
-                }
-
-                if (rec_VALUES.low_price) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.price >= ?"
-                    ac_VALUES.push(parseInt(rec_VALUES.low_price))
-                }
-
-                if (rec_VALUES.high_price) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.price <= ?"
-                    ac_VALUES.push(parseInt(rec_VALUES.high_price))
-                }
-
-                if (rec_VALUES.sdate) {
-                    if (!ac_VALUES.length) {
-                        sql += " WHERE "
-                    } else {
-                        sql += " AND"
-                    }
-                    sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
-                    let startDate = rec_VALUES.sdate + " 10:00:00";
-                    ac_VALUES.push(startDate)
-                    ac_VALUES.push(startDate)
-                }
-
-                if (rec_VALUES.edate) {
-                    sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
-                    let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
-                    ac_VALUES.push(endDate)
-                    ac_VALUES.push(endDate)
-                }
-
-
-                sql += "); SELECT * FROM offices"
-                // console.log("ac_VALUES: ", ac_VALUES)
-                // console.log(sql)
-                db.query(sql, ac_VALUES, (err, results) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        if (results[0].length === 0) {
-                            fmessage = "No results"
+                    if (rec_VALUES.office) {
+                        if (rec_VALUES.office === 0) {
+                            sql += " WHERE C.office_id"
+                        } else {
+                            sql += " WHERE C.office_id=?"
+                            ac_VALUES.push(rec_VALUES.office)
                         }
-                        else {
-                            fmessage = ""
+                    }
+
+                    if (rec_VALUES.company) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
                         }
-                        res.render("control/all_cars", {
-                            cars: results[0],
-                            offices: results[1],
-                            startDate: new Date().toJSON().slice(0, 10),
-                            search_message: fmessage
-                        })
+                        sql += "C.company=?"
+                        ac_VALUES.push(rec_VALUES.company)
                     }
-                })
-                break;
 
-            case "search_customers":
-
-                rec_VALUES = {
-                    id: req.body.search_customer_id,
-                    fname: req.body.search_customer_fname,
-                    lname: req.body.search_customer_lname,
-                    email: req.body.search_customer_email,
-                    address: req.body.search_customer_address,
-                    phone: req.body.search_customer_phone,
-                }
-
-                sql = "SELECT * FROM customers AS C "
-
-                if (rec_VALUES.id) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.customer_id=?"
-                    ac_VALUES.push(parseInt(rec_VALUES.id))
-                }
-
-                if (rec_VALUES.fname) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.fname=?"
-                    ac_VALUES.push(rec_VALUES.fname)
-                }
-
-                if (rec_VALUES.lname) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.lname=?"
-                    ac_VALUES.push(rec_VALUES.lname)
-                }
-
-                if (rec_VALUES.email) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.email = ?"
-                    ac_VALUES.push(rec_VALUES.email)
-                }
-
-                if (rec_VALUES.address) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.address = ?"
-                    ac_VALUES.push(rec_VALUES.address)
-                }
-
-                if (rec_VALUES.phone) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.phone = ?"
-                    ac_VALUES.push(parseInt(rec_VALUES.phone))
-                }
-
-                sql += ";"
-
-                db.query(sql, ac_VALUES, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        if (result.length === 0) {
-                            fmessage = "No results"
+                    if (rec_VALUES.id) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
                         }
-                        else {
-                            fmessage = ""
+                        sql += "C.car_id=?"
+                        ac_VALUES.push(parseInt(rec_VALUES.id))
+                    }
+
+                    if (rec_VALUES.status) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
                         }
-                        res.render("control/all_customers", {
-                            customers: result,
-                            search_message: fmessage
-                        })
+                        sql += "C.status=?"
+                        ac_VALUES.push(rec_VALUES.status)
                     }
-                })
-                break;
 
-            case "search_reservations":
-                rec_VALUES = {
-                    reservationID: req.body.search_res_resID,
-                    customerID: req.body.search_res_customerID,
-                    carID: req.body.search_res_carID,
-                    fname: req.body.search_res_fname,
-                    rented: req.body.search_res_rented,
-                    sdate: req.body.search_res_sdate,
-                    edate: req.body.search_res_edate
-                    
-                }
-
-                sql = "SELECT * FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id "
-
-
-                if (rec_VALUES.reservationID) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "R.reserve_no=?"
-                    ac_VALUES.push(parseInt(rec_VALUES.reservationID))
-                }
-
-                if (rec_VALUES.customerID) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "R.customer_id=?"
-                    ac_VALUES.push(parseInt(rec_VALUES.customerID))
-                }
-
-                if (rec_VALUES.carID) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "R.car_id=?"
-                    ac_VALUES.push(parseInt(rec_VALUES.carID))
-                }
-
-                if (rec_VALUES.fname) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "C.fname=?"
-                    ac_VALUES.push(rec_VALUES.fname)
-                }
-
-                if (rec_VALUES.rented) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "R.rented=?"
-                    ac_VALUES.push(rec_VALUES.rented)
-                }
-
-                if (rec_VALUES.sdate) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "R.startD=?"
-                    ac_VALUES.push(rec_VALUES.sdate + " 10:00:00")
-                }
-
-                if (rec_VALUES.edate) {
-                    if (ac_VALUES.length) {
-                        sql += " AND "
-                    } else {
-                        sql += " WHERE "
-                    }
-                    sql += "R.endD=?"
-                    ac_VALUES.push(rec_VALUES.edate +" 09:00:00")
-                }
-
-
-                sql += ";"
-                 console.log("ac_VALUES: ", ac_VALUES)
-                 console.log(sql)
-                db.query(sql, ac_VALUES, (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        if (result.length === 0) {
-                            fmessage = "No results"
+                    if (rec_VALUES.model) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
                         }
-                        else {
-                            fmessage = ""
-                        }
-                        res.render("control/reservations", { 
-                            reservations: result,
-                            search_message: fmessage
-                        })
-                        
+                        sql += "C.model=?"
+                        ac_VALUES.push(rec_VALUES.model)
                     }
-                })
-                break;
+
+                    if (rec_VALUES.year) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.year=?"
+                        ac_VALUES.push(rec_VALUES.year)
+                    }
+
+                    if (rec_VALUES.lic_no) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.lic_no=?"
+                        ac_VALUES.push(rec_VALUES.lic_no)
+                    }
+
+                    if (rec_VALUES.low_price) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.price >= ?"
+                        ac_VALUES.push(parseInt(rec_VALUES.low_price))
+                    }
+
+                    if (rec_VALUES.high_price) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.price <= ?"
+                        ac_VALUES.push(parseInt(rec_VALUES.high_price))
+                    }
+
+                    if (rec_VALUES.sdate) {
+                        if (!ac_VALUES.length) {
+                            sql += " WHERE "
+                        } else {
+                            sql += " AND"
+                        }
+                        sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+                        let startDate = rec_VALUES.sdate + " 10:00:00";
+                        ac_VALUES.push(startDate)
+                        ac_VALUES.push(startDate)
+                    }
+
+                    if (rec_VALUES.edate) {
+                        sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+                        let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
+                        ac_VALUES.push(endDate)
+                        ac_VALUES.push(endDate)
+                    }
+
+
+                    sql += ");"
+                    sql += " SELECT * FROM offices;"
+                    sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations);";
+                    // console.log("ac_VALUES: ", ac_VALUES)
+                    // console.log(sql)
+                    db.query(sql, ac_VALUES, (err, results) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            if (results[0].length === 0) {
+                                fmessage = "No results"
+                            }
+                            else {
+                                fmessage = ""
+                            }
+                            res.render("control/all_cars", {
+                                allCars: results[0],
+                                offices: results[1],
+                                freeCars: results[2],
+                                startDate: new Date().toJSON().slice(0, 10),
+                                search_message: fmessage
+                            })
+                        }
+                    })
+                    break;
+
+                case "search_customers":
+
+                    rec_VALUES = {
+                        id: req.body.search_customer_id,
+                        fname: req.body.search_customer_fname,
+                        lname: req.body.search_customer_lname,
+                        email: req.body.search_customer_email,
+                        address: req.body.search_customer_address,
+                        phone: req.body.search_customer_phone,
+                    }
+
+                    sql = "SELECT * FROM customers AS C "
+
+                    if (rec_VALUES.id) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.customer_id=?"
+                        ac_VALUES.push(parseInt(rec_VALUES.id))
+                    }
+
+                    if (rec_VALUES.fname) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.fname=?"
+                        ac_VALUES.push(rec_VALUES.fname)
+                    }
+
+                    if (rec_VALUES.lname) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.lname=?"
+                        ac_VALUES.push(rec_VALUES.lname)
+                    }
+
+                    if (rec_VALUES.email) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.email = ?"
+                        ac_VALUES.push(rec_VALUES.email)
+                    }
+
+                    if (rec_VALUES.address) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.address = ?"
+                        ac_VALUES.push(rec_VALUES.address)
+                    }
+
+                    if (rec_VALUES.phone) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.phone = ?"
+                        ac_VALUES.push(parseInt(rec_VALUES.phone))
+                    }
+
+                    sql += ";"
+                    sql += "SELECT * FROM customers where customer_id NOT IN(SELECT DISTINCT customer_id FROM reservations)"
+                    db.query(sql, ac_VALUES, (err, results) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            if (results[0].length === 0) {
+                                fmessage = "No results"
+                            }
+                            else {
+                                fmessage = ""
+                            }
+                            res.render("control/all_customers", {
+                                allCustomers: results[0],
+                                freeCustomers: results[1],
+                                search_message: fmessage
+                            })
+                        }
+                    })
+                    break;
+
+                case "search_reservations":
+                    rec_VALUES = {
+                        reservationID: req.body.search_res_resID,
+                        customerID: req.body.search_res_customerID,
+                        carID: req.body.search_res_carID,
+                        fname: req.body.search_res_fname,
+                        rented: req.body.search_res_rented,
+                        sdate: req.body.search_res_sdate,
+                        edate: req.body.search_res_edate
+
+                    }
+
+                    sql = "SELECT * FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id "
+
+
+                    if (rec_VALUES.reservationID) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "R.reserve_no=?"
+                        ac_VALUES.push(parseInt(rec_VALUES.reservationID))
+                    }
+
+                    if (rec_VALUES.customerID) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "R.customer_id=?"
+                        ac_VALUES.push(parseInt(rec_VALUES.customerID))
+                    }
+
+                    if (rec_VALUES.carID) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "R.car_id=?"
+                        ac_VALUES.push(parseInt(rec_VALUES.carID))
+                    }
+
+                    if (rec_VALUES.fname) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "C.fname=?"
+                        ac_VALUES.push(rec_VALUES.fname)
+                    }
+
+                    if (rec_VALUES.rented) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "R.rented=?"
+                        ac_VALUES.push(rec_VALUES.rented)
+                    }
+
+                    if (rec_VALUES.sdate) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "R.startD=?"
+                        ac_VALUES.push(rec_VALUES.sdate + " 10:00:00")
+                    }
+
+                    if (rec_VALUES.edate) {
+                        if (ac_VALUES.length) {
+                            sql += " AND "
+                        } else {
+                            sql += " WHERE "
+                        }
+                        sql += "R.endD=?"
+                        ac_VALUES.push(rec_VALUES.edate + " 09:00:00")
+                    }
+
+
+                    sql += ";"
+                    console.log("ac_VALUES: ", ac_VALUES)
+                    console.log(sql)
+                    db.query(sql, ac_VALUES, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            if (result.length === 0) {
+                                fmessage = "No results"
+                            }
+                            else {
+                                fmessage = ""
+                            }
+                            res.render("control/reservations", {
+                                reservations: result,
+                                search_message: fmessage
+                            })
+
+                        }
+                    })
+                    break;
+            }
+        } else {
+            res.redirect("control")
         }
     })
 //? -------------------------------------------< End of sign up route section >-------------------------------------------------
@@ -1390,7 +1417,6 @@ function loadAllImages() {
         }
     })
 }
-
 
 //used in add cars
 function loadOneImage(lic_no) {

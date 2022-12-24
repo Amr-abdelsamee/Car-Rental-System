@@ -5,18 +5,15 @@
             <h2>All Reservations</h2>
         </div>
     </div>
-
     <hr />
 
     <div class="panel-body">
-        
-
-
         <form action="search" method="post">
             <input type="checkbox" id="menu">
             <label for="menu">Search</label>
             <div class="collapsible-container">
                 <div class=" filters-container">
+
                     <div class="block1">
                         <span class="filter-text">Reservation ID:</span>
                         <input type="number" class="input_field filters-input-field" name="search_res_resID">
@@ -46,7 +43,6 @@
                         </select>
                     </div>
 
-
                     <div class="block8">
                         <span class="filter-text">Start from:</span>
                         <input type="date" class="input_field filters-input-field" name="search_res_sdate">
@@ -57,47 +53,19 @@
                         <input type="date" class="input_field filters-input-field" name="search_res_edate">
                     </div>
 
-
-
                     <div class="block6">
                     <button class="filters_btn" name="search_btn" value="search_reservations"
                     type="submit">Apply</button>
                 </div>
-
                 </div>
-
                 
             </div>
         </form>
 
 
-
         <p class="search_message">
             <%= search_message %>
         </p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         <div class="table-responsive">
@@ -107,6 +75,7 @@
                         <th>#</th>
                         <th>Reserve No</th>
                         <th>Customer name</th>
+                        <th>Customer ID</th>
                         <th>Car ID</th>
                         <th>Start Date</th>
                         <th>End Date</th>
@@ -124,6 +93,9 @@
                             </th>
                             <th>
                                 <%= reservations[i].fname %> <%= reservations[i].lname %>
+                            </th>
+                            <th>
+                                <%= reservations[i].customer_id %>
                             </th>
                             <th>
                                 <%= reservations[i].car_id %>
