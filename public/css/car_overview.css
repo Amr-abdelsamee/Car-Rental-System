@@ -1,5 +1,5 @@
 :root {
-    --width: 60%;
+    --width: 70%;
 }
 
 body {
@@ -13,10 +13,10 @@ body {
 .container {
     width: var(--width);
     /* min-height: 500px; */
-    height: 65vh;
-    padding: 0;
+    height: 70vh;
+
     margin: 0 auto;
-    margin-top: 7%;
+    margin-top: 5%;
     background-color: white;
 }
 
@@ -149,7 +149,7 @@ img.car-image {
     justify-content: space-between;
 }
 .reserve-date input{
-    width: 90%;
+    width: 120%;
     outline: none;
 
     border: none;
