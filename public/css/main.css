@@ -31,10 +31,14 @@ body {
 
 
 .main-footer {
+    padding-top: 10px;
+    font-size: 20px;
+    text-align: center;
     width: var(--WIDTH);
     height: 80px;
     margin: 0 auto 10px auto;
     background-color: black;
+    color: white;
 }
 
 

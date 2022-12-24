@@ -5,15 +5,15 @@
         <a href="main">Home</a>
         <a href="">About</a>
         <a href="">Contacts</a>
-        <!-- <a href="">Profile</a> -->
     </div>
     <div class="profile">
-        <a href="signIn"><lord-icon src="https://cdn.lordicon.com/dxjqoygy.json" trigger="morph"
+        <a href="signIn" ><lord-icon src="https://cdn.lordicon.com/dxjqoygy.json" trigger="morph"
                 style="width:50px;height:50px">
-            </lord-icon></a>
-        <span>
+            </lord-icon>
+        </a>
+        <a class="profile-name" href="signIn">
             <%= user %>
-        </span>
+        </a>
         <form action="/signout" method="post">
         <div class="logout-btn  <%= hideClass %> ">
             <button class="btn btn-danger square-btn" >Logout</button>
