@@ -29,7 +29,7 @@ CREATE TABLE reservations(
     startD datetime NOT NULL,
     endD datetime NOT NULL,
     res_date datetime DEFAULT current_timestamp() NOT NULL,
-    `rented` ENUM('Yes','No') NOT NULL,
+    `rented` ENUM('Yes','No') NOT NULL
 );
 CREATE TABLE admins(
     email varchar(255) NOT NULL PRIMARY KEY,
