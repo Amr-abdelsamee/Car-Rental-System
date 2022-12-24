@@ -43,7 +43,6 @@ node_modules/
 jspm_packages/
 
 #test data
-CARS DATA/
 public/images/cars
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
