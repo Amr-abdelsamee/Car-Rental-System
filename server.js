@@ -992,7 +992,7 @@ app.route("/signout")
 app.route("/main")
     .get(function (req, res) {
         app_session = req.session
-        sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id; SELECT * FROM offices";
+        sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE status='Active'; SELECT * FROM offices";
         db.query(sql, (err, results) => {
             if (err) {
                 console.log(err)
