@@ -24,6 +24,7 @@ const favicon = require('serve-favicon'); // for icon
 const Get_Color_Name = require("hex-color-to-color-name")
 
 const fs = require('fs'); // for images
+const { log } = require('console');
 
 const app = express();
 app.set('views', __dirname + '/views/');
@@ -166,31 +167,6 @@ app.route("/admin_signout")
         });
     });
 
-function load_dashBoard(admin, res) {
-    let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
-    let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
-    let sql3 = "SELECT COUNT(customer_id) AS count FROM customers;"
-    let sql4 = "SELECT COUNT(reserve_no) AS count FROM reservations;";
-    let sql5 = "SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;"
-    let sql6 = "SELECT reserve_no, fname, lname, car_id, startD, endD,res_date FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id ORDER BY  res_date DESC  limit 10;"
-    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.render("control/dashboard", {
-                admin: admin,
-                cars: results[0],
-                cars_count: results[1][0].count,
-                customers_count: results[2][0].count,
-                res_count: results[3][0].count,
-                total_profits: results[4][0].total_profits,
-                recent_res: results[5],
-            })
-        }
-    })
-}
-
 
 app.route("/admin")
     .get(function (req, res) {
@@ -229,7 +205,7 @@ app.route("/admin")
                     })
                     break;
                 case "reservations":
-                    sql = "SELECT reserve_no, fname, lname, car_id, startD, endD FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id";
+                    sql = "SELECT reserve_no, fname, lname, car_id, startD, endD,rented FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
@@ -275,12 +251,21 @@ app.route("/admin")
                     res.render("control/add_office")
                     break;
                 case "add_res":
+                    let currentDate = new Date().toJSON().slice(0, 10)
+                    let maxDate = new Date()
+                    maxDate.setFullYear(maxDate.getFullYear() + 1)
+                    maxDate = maxDate.toJSON().slice(0, 10)
                     sql = "SELECT * FROM cars; SELECT * from customers";
                     db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/admin_reserve", { cars: results[0], customers: results[1] })
+                            res.render("control/admin_reserve", {
+                                cars: results[0],
+                                customers: results[1],
+                                minDate: currentDate,
+                                maxDate: maxDate
+                            })
                         }
                     })
                     break;
@@ -293,6 +278,9 @@ app.route("/admin")
 
 
 app.route("/add")
+    .get(function (req, res) {
+        res.redirect("control")
+    })
     .post(function (req, res) {
         let sql = ""
         let VALUES
@@ -389,26 +377,55 @@ app.route("/add")
                 break;
 
             case "add_res":
-                VALUES = [
-                    req.body.customer_id
-                    , req.body.car_id
-                    , req.body.sdate
-                    , req.body.edate
-                ]
-                sql = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?)";
-                db.query(sql, [VALUES], (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        console.log("NEW reservation is made!")
-                        console.log(VALUES)
-                        // success message should be added here ------------------------------<
-                        res.redirect("/admin")
-                    }
-                })
-                break;
 
+                const dates = make_date(req.body.sdate, req.body.edate)
+
+                if (dates.valid) {
+                    const VALUE = [
+                        req.body.car_id,
+                        dates.startD,
+                        dates.endD,
+                        dates.startD,
+                        dates.endD
+                    ]
+                    let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
+                    db.query(sql, VALUE, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            if (result.length) {
+                                console.log("car is not available in these dates")
+                                res.status(204).send()
+                            } else {
+                                VALUES = [
+                                    req.body.customer_id
+                                    , req.body.car_id
+                                    , req.body.payment
+                                    , dates.startD
+                                    , dates.endD
+                                ]
+                                sql = "INSERT INTO reservations(customer_id, car_id, payment, startD, endD ) VALUES (?)";
+                                db.query(sql, [VALUES], (err, result) => {
+                                    if (err) {
+                                        console.log(err)
+                                    } else {
+                                        console.log("NEW reservation is made!")
+                                        console.log(VALUES)
+                                        // success message should be added here ------------------------------<
+                                        res.redirect("/admin")
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+                else {
+                    console.log("dates are not valid!")
+                    res.status(204).send()
+                }
+                break;
         }
+
     });
 
 
@@ -919,23 +936,15 @@ app.route("/confirmReservation")
     .post(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
-            let startDate = new Date(req.body.sdate);
-            let endDate = new Date(req.body.edate);
-            startDate.setHours(10, 0, 0)
-            endDate.setHours(9, 0, 0)
-            let start = Date.parse(startDate);
-            let end = Date.parse(endDate);
+            let dates = make_date(req.body.sdate, req.body.edate)
 
-            if (start === end || end < start) {
-                res.status(204).send()
-            }
-            else {
+            if (dates.valid) {
                 const VALUE = [
                     req.body.car_id,
-                    startDate,
-                    endDate,
-                    startDate,
-                    endDate
+                    dates.startD,
+                    dates.endD,
+                    dates.startD,
+                    dates.endD
                 ]
                 let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
                 db.query(sql, VALUE, (err, result) => {
@@ -954,8 +963,8 @@ app.route("/confirmReservation")
                             const VALUE = [
                                 app_session.user_id,
                                 parseInt(req.body.car_id),
-                                startDate,
-                                endDate
+                                dates.startD,
+                                dates.endD
                             ]
                             let sql1 = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?);";
                             let sql2 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;"
@@ -969,13 +978,17 @@ app.route("/confirmReservation")
                                     res.render("cars/payments", {
                                         customer: app_session.user_id,
                                         car: results[1][0],
-                                        payment: results[2][0]
+                                        payment: results[2][0],
+                                        sdate: dates.startD,
+                                        edate: dates.endD
                                     })
                                 }
                             })
                         }
                     }
                 })
+            } else {
+                res.status(204).send()
             }
         }
         else {
@@ -991,14 +1004,35 @@ app.route("/payments")
     .post(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
+
+            let pay = "No"
+            let res_no
+
             if (req.body.yes_pay_btn) {
-                console.log("Customer with id:"+ app_session.user_id +" just paid !")
-                res.status(204).send()
+                console.log("Customer with id:" + app_session.user_id + " just paid !")
+                pay = "Yes"
+                res_no = req.body.yes_pay_btn
             }
             else if (req.body.no_pay_btn) {
-                console.log("Customer with id:"+ app_session.user_id +" did not pay !")
-                res.redirect("main")
+                console.log("Customer with id:" + app_session.user_id + " did not pay !")
+                pay = "No"
+                res_no = req.body.no_pay_btn
             }
+
+            const VALUE = [
+                pay,
+                res_no
+            ]
+
+            let sql = "UPDATE reservations SET rented = ? WHERE reserve_no=?";
+            db.query(sql, [VALUE[0], VALUE[1]], (err, results) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log(new Date().toLocaleString() + ":payments status for user with ID:" + app_session.user_id + " has been saved!")
+                    res.redirect("profile")
+                }
+            })
         }
     })
 
@@ -1011,12 +1045,13 @@ app.route("/profile")
         app_session = req.session
         if (app_session.userPermission) {
             const VALUE = [app_session.user_id]
-            sql = "SELECT * FROM cars AS C JOIN reservations AS R ON C.car_id=R.car_id WHERE R.customer_id= ?;SELECT * FROM customers WHERE customer_id= ?;";
-            db.query(sql, [VALUE, VALUE], (err, results) => {
+
+            sql = "SELECT *, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id JOIN customers AS CU ON R.customer_id=CU.customer_id WHERE R.customer_id= ?";
+            db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    res.render("profile", { cars: results[0], user: results[1][0] })
+                    res.render("profile", { user: result })
                 }
             })
         }
@@ -1025,23 +1060,104 @@ app.route("/profile")
         }
     })
     .post(function (req, res) {
-        if (req.body.car_lic) {
-            sql = "DELETE FROM reservations WHERE reserve_no = ?";
-            const VALUE = req.body.car_lic
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
+
+
+        sql = "SELECT startD FROM reservations WHERE reserve_no = ?";
+        const VALUE = req.body.res_no_btn
+
+        db.query(sql, VALUE, (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log(result[0].startD)
+                let currentDate = new Date()
+                let startDate = new Date(result[0].startD);
+                if (Date.parse(startDate) < Date.parse(currentDate)) {
+                    console.log("you can not delete this reservation!")
+                    res.status(204).send()
                 } else {
-                    console.log("A user canceled a reservation!")
-                    res.redirect("/profile")
+                    sql = "DELETE FROM reservations WHERE reserve_no = ?";
+                    const VALUE = req.body.res_no_btn
+                    db.query(sql, VALUE, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log("A user canceled a reservation!")
+                            res.redirect("profile")
+                        }
+                    })
                 }
-            })
-        } else {
-            res.redirect("/profile")
-        }
+            }
+        })
+
+
     })
 //? ---------------------------------------------< End of profile route section >-------------------------------------------------------
 
+
+
+//? ---------------------------------------------< 404 route section >-------------------------------------------------------
+app.get('*', function (req, res) {
+    res.status(404).send('404 Not Found');
+});
+//? ---------------------------------------------< End of 404 route section >------------------------------------------------
+
+
+//? ---------------------------------------------< all functions >-------------------------------------------------------
+function load_dashBoard(admin, res) {
+    let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
+    let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
+    let sql3 = "SELECT COUNT(customer_id) AS count FROM customers;"
+    let sql4 = "SELECT COUNT(reserve_no) AS count FROM reservations;";
+    let sql5 = "SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;"
+    let sql6 = "SELECT reserve_no, fname, lname, car_id, startD, endD,res_date FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id ORDER BY  res_date DESC  limit 10;"
+    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.render("control/dashboard", {
+                admin: admin,
+                cars: results[0],
+                cars_count: results[1][0].count,
+                customers_count: results[2][0].count,
+                res_count: results[3][0].count,
+                total_profits: results[4][0].total_profits,
+                recent_res: results[5],
+            })
+        }
+    })
+}
+
+
+
+
+
+function make_date(sDate, eDate) {
+
+    let startDate = new Date(sDate);
+    let endDate = new Date(eDate);
+    startDate.setHours(10, 0, 0)
+    endDate.setHours(9, 0, 0)
+
+    let start = Date.parse(startDate);
+    let end = Date.parse(endDate);
+
+    let response = {
+        valid: false,
+        startD: startDate,
+        endD: endDate
+    }
+
+    if (start === end || end < start) {
+        response.valid = false
+    } else {
+        response.valid = true
+    }
+    return response;
+}
+
+//? ---------------------------------------------< ------------- >-------------------------------------------------------
 
 app.listen(process.env.PORT || 3000, function () {
     console.log(new Date().toLocaleString() + ":: Server started..")
