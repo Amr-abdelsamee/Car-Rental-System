@@ -17,6 +17,7 @@ require('dotenv').config(); // for .env file
 const express = require("express"); // express module for routes
 const session = require("express-session");
 const fileUpload = require('express-fileupload');
+const md5 = require('md5');
 const mysql = require("mysql") // mysql database
 const bodyParser = require("body-parser"); // for requestes parsing
 const favicon = require('serve-favicon'); // for icon
@@ -82,7 +83,7 @@ app.route("/control")
     })
     .post(function (req, res) {
         app_session = req.session
-        const VALUES = [req.body.password, req.body.username]
+        const VALUES = [md5(req.body.password), req.body.username]
         let sql = "SELECT * FROM `admins` WHERE `password`= ? AND email=?";
         db.query(sql, VALUES, (err, result) => {
             if (err) {
@@ -297,7 +298,7 @@ app.route("/add")
                     , req.body.fname
                     , req.body.lname
                     , req.body.email
-                    , req.body.password
+                    , md5(req.body.password)
                     , req.body.address
                     , req.body.phone
                 ]
@@ -317,7 +318,7 @@ app.route("/add")
             case "add_admin":
                 VALUES = [
                     req.body.email
-                    , req.body.password
+                    , md5(req.body.password)
                 ]
                 sql = "INSERT INTO admins (email,password) VALUES (?)";
                 db.query(sql, [VALUES], (err, result) => {
@@ -896,7 +897,7 @@ app.route("/signin")
     })
     .post(function (req, res) {
         app_session = req.session
-        const VALUES = [req.body.password, req.body.username]
+        const VALUES = [md5(req.body.password), req.body.username]
         sql = "SELECT * FROM `customers` WHERE `password`= ? AND email=?";
         db.query(sql, VALUES, (err, result) => {
             if (err) {
@@ -928,7 +929,7 @@ app.route("/signup")
             , req.body.fname
             , req.body.lname
             , req.body.email
-            , req.body.password
+            , md5(req.body.password)
             , req.body.address
             , parseInt(req.body.phone)
         ]
