@@ -19,6 +19,7 @@
                         <th>Car ID</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Payment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,6 +42,9 @@
                             </th>
                             <th>
                                 <%= reservations[i].endD.toLocaleString().split(',')[0] %>
+                            </th>
+                            <th>
+                                <%= reservations[i].rented %>
                             </th>
                         </tr>
                         <% } %>
