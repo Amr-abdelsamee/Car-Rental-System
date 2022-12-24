@@ -1,6 +1,7 @@
 <%- include("header") -%>
     <link href="../css/bootstrap.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/car_overview.css" type="text/css">
+    <link rel="stylesheet" href="../css/main.css" type="text/css">
     <title>My profile</title>
     </head>
 
@@ -15,86 +16,80 @@
                 <ul>
                     <li>
                         <h4>First name:</h4>
-                        <%= user.fname %>
+                        <%= user[0].fname %>
                     </li>
                     <li>
                         <h4>Last name:</h4>
-                        <%= user.lname %>
+                        <%= user[0].lname %>
                     </li>
                     <li>
                         <h4>Email:</h4>
-                        <%= user.email %>
+                        <%= user[0].email %>
                     </li>
                     <li>
                         <h4>Address:</h4>
-                        <%= user.address %>
+                        <%= user[0].address %>
                     </li>
                     <li>
                         <h4>Phone:</h4>
-                        <%= user.phone %>
+                        <%= user[0].phone %>
                     </li>
                 </ul>
 
                 <hr style="width: 100%;">
-                <h3>My cars</h3>
-                <hr>
+                <h3>My reservations</h3>
+                <hr style=" border-top: 1px solid  ;">
                 <br>
                 <div class="row">
-                    <% for(var i=0; i < cars.length; i++){ %>
+                    <% for(var i=0; i < user.length; i++){ %>
                         <div class="col-md-3 col-sm-6 col-xs-6">
                             <div class="panel panel-back noti-box">
                                 <div class="text-box">
                                     <div class="car-box">
-                                        <img class="car-image" src="../images/cars/<%= cars[i].car_id %>.jpg"
+                                        <img class="car-image" src="../images/cars/<%= user[i].car_id %>.jpg"
                                             alt="car image">
 
                                         <p class="text-muted car-card-text">
-                                            <%= cars[i].company %>
-                                                <%= cars[i].model %>
-                                        </p>
-                                        <p class="text-muted car-card-text" style="background-color:'red';">
-                                            color: <%= cars[i].color %>
+                                            <%= user[i].company %>
+                                                <%= user[i].model %>
+
                                         </p>
                                         <p class="text-muted car-card-text">
-                                            price: <%= cars[i].price %>$
+                                            <%= user[i].startD.toLocaleString([], {year: 'numeric' , month: 'numeric' ,
+                                                day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
                                         </p>
                                         <p class="text-muted car-card-text">
-                                            from: <%= cars[i].startD.toLocaleString([], {year: 'numeric' ,
-                                                month: 'numeric' , day: 'numeric' , hour: '2-digit' , minute: '2-digit'
-                                                }) %>
+                                            <%= user[i].endD.toLocaleString([], {year: 'numeric' , month: 'numeric' ,
+                                                day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
+                                        </p>
+
+                                        <p class="text-muted car-card-text">
+                                            Total cost: <%= user[i].cost %>$
                                         </p>
                                         <p class="text-muted car-card-text">
-                                            to: <%= cars[i].endD.toLocaleString([], {year: 'numeric' , month: 'numeric'
-                                                , day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
+                                            Paid: <%= user[i].rented %>
                                         </p>
+                                        <form action="overview" method="post">
+                                            <button class="view-btn" name="car_id_btn" style="margin-bottom: 10px;" value="<%= user[i].car_id %>"
+                                                type="submit">
+                                                View car
+                                            </button>
+                                        </form>
+                                        <form action="profile" method="post">
+                                            <button class="view-btn" name="res_no_btn" value="<%= user[i].reserve_no %>"
+                                                type="submit">
+                                                Cancel
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <% } %>
                 </div>
-                <div class="row" style="margin-left:20px; margin-bottom: 30px;">
-                    <form action="profile" method="post">
-                        <select name="car_lic" class="input_field" style="width: 50%; font-size: 15px;">
-                            <option value="" disabled selected>Car to delete</option>
-                            <% for(var i=0; i < cars.length; i++){ %>
-                                <option value="<%= cars[i].reserve_no %>">
-                                    <%= cars[i].company %> - <%= cars[i].model %>
-                                            - <%= cars[i].office %> - <%= cars[i].startD.toLocaleString() %>:<%=
-                                                        cars[i].endD.toLocaleString() %>
-                                </option>
-                                <% } %>
-                        </select>
-                        <br>
-                        <div class="orange-button">
-                            <button name="delete_control_btn" value="delete_res" type="submit"
-                                class="btn btn-danger square-btn">Remove</button>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
-        <div class="container-footer" style="width: 70%;"></div>
+        <div class="container-footer" style="width: 70%; margin-bottom: 20px;"></div>
 
 
 
