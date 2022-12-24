@@ -83,7 +83,10 @@ app.route("/control")
     })
     .post(function (req, res) {
         app_session = req.session
-        const VALUES = [md5(req.body.password), req.body.username]
+        const VALUES = [
+            md5(req.body.password+process.env.SALT), 
+            req.body.username
+        ]
         let sql = "SELECT * FROM `admins` WHERE `password`= ? AND email=?";
         db.query(sql, VALUES, (err, result) => {
             if (err) {
@@ -324,7 +327,7 @@ app.route("/add")
                 case "add_admin":
                     VALUES = [
                         req.body.email
-                        , md5(req.body.password)
+                        , md5(req.body.password+process.env.SALT)
                     ]
                     sql = "INSERT INTO admins (email,password) VALUES (?)";
                     db.query(sql, [VALUES], (err, result) => {
@@ -924,7 +927,7 @@ app.route("/signin")
     })
     .post(function (req, res) {
         app_session = req.session
-        const VALUES = [md5(req.body.password), req.body.username]
+        const VALUES = [md5(req.body.password+process.env.SALT), req.body.username]
         sql = "SELECT * FROM `customers` WHERE `password`= ? AND email=?";
         db.query(sql, VALUES, (err, result) => {
             if (err) {
@@ -956,7 +959,7 @@ app.route("/signup")
             , req.body.fname
             , req.body.lname
             , req.body.email
-            , md5(req.body.password)
+            , md5(req.body.password+process.env.SALT)
             , req.body.address
             , parseInt(req.body.phone)
         ]
