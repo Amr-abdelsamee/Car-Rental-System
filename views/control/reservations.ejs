@@ -1,5 +1,5 @@
 <%- include("control") %>
-
+<link rel="stylesheet" href="../css/filters.css" type="text/css">
     <div class="row">
         <div class="col-md-12">
             <h2>All Reservations</h2>
@@ -9,6 +9,97 @@
     <hr />
 
     <div class="panel-body">
+        
+
+
+        <form action="search" method="post">
+            <input type="checkbox" id="menu">
+            <label for="menu">Search</label>
+            <div class="collapsible-container">
+                <div class=" filters-container">
+                    <div class="block1">
+                        <span class="filter-text">Reservation ID:</span>
+                        <input type="number" class="input_field filters-input-field" name="search_res_resID">
+                    </div>
+
+                    <div class="block2">
+                        <span class="filter-text">Customer ID:</span>
+                        <input type="number" class="input_field filters-input-field" name="search_res_customerID">
+                    </div>
+
+                    <div class="block3">
+                        <span class="filter-text">Car ID:</span>
+                        <input type="number" class="input_field filters-input-field" name="search_res_carID">
+                    </div>
+
+                    <div class="block4">
+                        <span class="filter-text">First name:</span>
+                        <input type="text" class="input_field filters-input-field" name="search_res_fname">
+                    </div>
+
+                    <div class="block5">
+                        <span class="filter-text">Rented:</span>
+                        <select name="search_res_rented" class="input_field filters-input-field">
+                            <option value="" selected>All</option>
+                            <option value="Yes" >Yes</option>
+                            <option value="No" >No</option>
+                        </select>
+                    </div>
+
+
+                    <div class="block8">
+                        <span class="filter-text">Start from:</span>
+                        <input type="date" class="input_field filters-input-field" name="search_res_sdate">
+                    </div>
+
+                    <div class="block9">
+                        <span class="filter-text">End at:</span>
+                        <input type="date" class="input_field filters-input-field" name="search_res_edate">
+                    </div>
+
+
+
+                    <div class="block6">
+                    <button class="filters_btn" name="search_btn" value="search_reservations"
+                    type="submit">Apply</button>
+                </div>
+
+                </div>
+
+                
+            </div>
+        </form>
+
+
+
+        <p class="search_message">
+            <%= search_message %>
+        </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
                 <thead class="bg-color-red">
@@ -19,7 +110,7 @@
                         <th>Car ID</th>
                         <th>Start Date</th>
                         <th>End Date</th>
-                        <th>Payment</th>
+                        <th>Rented</th>
                     </tr>
                 </thead>
                 <tbody>

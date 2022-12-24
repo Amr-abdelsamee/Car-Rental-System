@@ -140,19 +140,7 @@ app.route("/admin")
             let menu_btn = req.body.control_btn;
             let sql = ""
             switch (menu_btn) {
-                case "search":
-                    sql = "SELECT * FROM offices;";
-                    db.query(sql, (err, result) => {
-                        if (err) {
-                            console.log(err)
-                        } else {
-                            res.render("control/search", {
-                                offices: result,
-                                startDate: new Date().toJSON().slice(0, 10)
-                            })
-                        }
-                    })
-                    break;
+                
                 case "dashboard":
                     load_dashBoard(app_session.admin_id, res);
                     break;
@@ -162,11 +150,12 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/all_cars", { 
+                            res.render("control/all_cars", {
                                 cars: result[0],
                                 offices: result[1],
                                 startDate: new Date().toJSON().slice(0, 10),
-                                search_message: "" })
+                                search_message: ""
+                            })
                         }
                     })
                     break;
@@ -176,7 +165,10 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/all_customers", { customers: result })
+                            res.render("control/all_customers", {
+                                customers: result,
+                                search_message: ""
+                            })
                         }
                     })
                     break;
@@ -186,7 +178,10 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/reservations", { reservations: result })
+                            res.render("control/reservations", { 
+                                reservations: result,
+                                search_message: "",
+                            })
                         }
                     })
                     break;
@@ -511,159 +506,362 @@ app.route("/confirmed")
 
 
 app.route("/search")
-    .post(function(req, res){
-        switch(req.body.search_btn){
-            case "search_cars":
-                
-        let rec_VALUES = {
-            id: req.body.search_car_id,
-            office: parseInt(req.body.search_car_office),
-            company: req.body.search_car_company,
-            status: req.body.search_car_status,
-            model: req.body.search_car_model,
-            year: req.body.search_car_year,
-            low_price: req.body.search_car_lprice,
-            high_price: req.body.search_car_hprice,
-            sdate: new Date(req.body.search_car_sdate).toJSON().slice(0, 10),
-            edate: req.body.search_car_edate
-        }
+    .post(function (req, res) {
         let ac_VALUES = []
         let fmessage = ""
+        let rec_VALUES
+        let sql = ""
 
-        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
+        switch (req.body.search_btn) {
 
-        if (rec_VALUES.office) {
-            if (rec_VALUES.office === 0) {
-                sql += " WHERE C.office_id"
-            } else {
-                sql += " WHERE C.office_id=?"
-                ac_VALUES.push(rec_VALUES.office)
-            }
-        }
+            case "search_cars":
 
-        if (rec_VALUES.company) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.company=?"
-            ac_VALUES.push(rec_VALUES.company)
-        }
-
-        if (rec_VALUES.id) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.car_id=?"
-            ac_VALUES.push(rec_VALUES.id)
-        }
-
-        if (rec_VALUES.status) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.status=?"
-            ac_VALUES.push(rec_VALUES.status)
-        }
-
-        if (rec_VALUES.model) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.model=?"
-            ac_VALUES.push(rec_VALUES.model)
-        }
-
-        if (rec_VALUES.year) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.year=?"
-            ac_VALUES.push(rec_VALUES.year)
-        }
-
-        if (rec_VALUES.lic_no) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.lic_no=?"
-            ac_VALUES.push(rec_VALUES.lic_no)
-        }
-
-        if (rec_VALUES.low_price) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.price >= ?"
-            ac_VALUES.push(parseInt(rec_VALUES.low_price))
-        }
-
-        if (rec_VALUES.high_price) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.price <= ?"
-            ac_VALUES.push(parseInt(rec_VALUES.high_price))
-        }
-
-        if (rec_VALUES.sdate) {
-            if (!ac_VALUES.length) {
-                sql += " WHERE "
-            } else {
-                sql += " AND"
-            }
-            sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
-            let startDate = rec_VALUES.sdate + " 10:00:00";
-            ac_VALUES.push(startDate)
-            ac_VALUES.push(startDate)
-        }
-
-        if (rec_VALUES.edate) {
-            sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
-            let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
-            ac_VALUES.push(endDate)
-            ac_VALUES.push(endDate)
-        }
-
-
-        sql += "); SELECT * FROM offices"
-        // console.log(rec_VALUES)
-        // console.log("ac_VALUES: ", ac_VALUES)
-        // console.log(sql)
-        db.query(sql, ac_VALUES, (err, results) => {
-            if (err) {
-                console.log(err)
-            } else {
-                if (results[0].length === 0) {
-                    fmessage = "No results"
+                rec_VALUES = {
+                    id: req.body.search_car_id,
+                    office: parseInt(req.body.search_car_office),
+                    company: req.body.search_car_company,
+                    status: req.body.search_car_status,
+                    model: req.body.search_car_model,
+                    year: req.body.search_car_year,
+                    low_price: req.body.search_car_lprice,
+                    high_price: req.body.search_car_hprice,
+                    sdate: new Date(req.body.search_car_sdate).toJSON().slice(0, 10),
+                    edate: req.body.search_car_edate
                 }
-                else{
-                    fmessage = ""
+
+                sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
+
+                if (rec_VALUES.office) {
+                    if (rec_VALUES.office === 0) {
+                        sql += " WHERE C.office_id"
+                    } else {
+                        sql += " WHERE C.office_id=?"
+                        ac_VALUES.push(rec_VALUES.office)
+                    }
                 }
-                    res.render("control/all_cars", { 
-                        cars: results[0],
-                        offices: results[1],
-                        startDate: new Date().toJSON().slice(0, 10),
-                        search_message: fmessage })
-            }
-        })
-            break;
+
+                if (rec_VALUES.company) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.company=?"
+                    ac_VALUES.push(rec_VALUES.company)
+                }
+
+                if (rec_VALUES.id) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.car_id=?"
+                    ac_VALUES.push(parseInt(rec_VALUES.id))
+                }
+
+                if (rec_VALUES.status) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.status=?"
+                    ac_VALUES.push(rec_VALUES.status)
+                }
+
+                if (rec_VALUES.model) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.model=?"
+                    ac_VALUES.push(rec_VALUES.model)
+                }
+
+                if (rec_VALUES.year) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.year=?"
+                    ac_VALUES.push(rec_VALUES.year)
+                }
+
+                if (rec_VALUES.lic_no) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.lic_no=?"
+                    ac_VALUES.push(rec_VALUES.lic_no)
+                }
+
+                if (rec_VALUES.low_price) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.price >= ?"
+                    ac_VALUES.push(parseInt(rec_VALUES.low_price))
+                }
+
+                if (rec_VALUES.high_price) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.price <= ?"
+                    ac_VALUES.push(parseInt(rec_VALUES.high_price))
+                }
+
+                if (rec_VALUES.sdate) {
+                    if (!ac_VALUES.length) {
+                        sql += " WHERE "
+                    } else {
+                        sql += " AND"
+                    }
+                    sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+                    let startDate = rec_VALUES.sdate + " 10:00:00";
+                    ac_VALUES.push(startDate)
+                    ac_VALUES.push(startDate)
+                }
+
+                if (rec_VALUES.edate) {
+                    sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+                    let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
+                    ac_VALUES.push(endDate)
+                    ac_VALUES.push(endDate)
+                }
+
+
+                sql += "); SELECT * FROM offices"
+                // console.log("ac_VALUES: ", ac_VALUES)
+                // console.log(sql)
+                db.query(sql, ac_VALUES, (err, results) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        if (results[0].length === 0) {
+                            fmessage = "No results"
+                        }
+                        else {
+                            fmessage = ""
+                        }
+                        res.render("control/all_cars", {
+                            cars: results[0],
+                            offices: results[1],
+                            startDate: new Date().toJSON().slice(0, 10),
+                            search_message: fmessage
+                        })
+                    }
+                })
+                break;
+
             case "search_customers":
+
+                rec_VALUES = {
+                    id: req.body.search_customer_id,
+                    fname: req.body.search_customer_fname,
+                    lname: req.body.search_customer_lname,
+                    email: req.body.search_customer_email,
+                    address: req.body.search_customer_address,
+                    phone: req.body.search_customer_phone,
+                }
+
+                sql = "SELECT * FROM customers AS C "
+
+                if (rec_VALUES.id) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.customer_id=?"
+                    ac_VALUES.push(parseInt(rec_VALUES.id))
+                }
+
+                if (rec_VALUES.fname) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.fname=?"
+                    ac_VALUES.push(rec_VALUES.fname)
+                }
+
+                if (rec_VALUES.lname) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.lname=?"
+                    ac_VALUES.push(rec_VALUES.lname)
+                }
+
+                if (rec_VALUES.email) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.email = ?"
+                    ac_VALUES.push(rec_VALUES.email)
+                }
+
+                if (rec_VALUES.address) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.address = ?"
+                    ac_VALUES.push(rec_VALUES.address)
+                }
+
+                if (rec_VALUES.phone) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.phone = ?"
+                    ac_VALUES.push(parseInt(rec_VALUES.phone))
+                }
+
+                sql += ";"
+
+                db.query(sql, ac_VALUES, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        if (result.length === 0) {
+                            fmessage = "No results"
+                        }
+                        else {
+                            fmessage = ""
+                        }
+                        res.render("control/all_customers", {
+                            customers: result,
+                            search_message: fmessage
+                        })
+                    }
+                })
+                break;
+
+            case "search_reservations":
+                rec_VALUES = {
+                    reservationID: req.body.search_res_resID,
+                    customerID: req.body.search_res_customerID,
+                    carID: req.body.search_res_carID,
+                    fname: req.body.search_res_fname,
+                    rented: req.body.search_res_rented,
+                    sdate: req.body.search_res_sdate,
+                    edate: req.body.search_res_edate
+                    
+                }
+
+                sql = "SELECT * FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id "
+
+
+                if (rec_VALUES.reservationID) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "R.reserve_no=?"
+                    ac_VALUES.push(parseInt(rec_VALUES.reservationID))
+                }
+
+                if (rec_VALUES.customerID) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "R.customer_id=?"
+                    ac_VALUES.push(parseInt(rec_VALUES.customerID))
+                }
+
+                if (rec_VALUES.carID) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "R.car_id=?"
+                    ac_VALUES.push(parseInt(rec_VALUES.carID))
+                }
+
+                if (rec_VALUES.fname) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "C.fname=?"
+                    ac_VALUES.push(rec_VALUES.fname)
+                }
+
+                if (rec_VALUES.rented) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "R.rented=?"
+                    ac_VALUES.push(rec_VALUES.rented)
+                }
+
+                if (rec_VALUES.sdate) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "R.startD=?"
+                    ac_VALUES.push(rec_VALUES.sdate + " 10:00:00")
+                }
+
+                if (rec_VALUES.edate) {
+                    if (ac_VALUES.length) {
+                        sql += " AND "
+                    } else {
+                        sql += " WHERE "
+                    }
+                    sql += "R.endD=?"
+                    ac_VALUES.push(rec_VALUES.edate +" 09:00:00")
+                }
+
+
+                sql += ";"
+                 console.log("ac_VALUES: ", ac_VALUES)
+                 console.log(sql)
+                db.query(sql, ac_VALUES, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        if (result.length === 0) {
+                            fmessage = "No results"
+                        }
+                        else {
+                            fmessage = ""
+                        }
+                        res.render("control/reservations", { 
+                            reservations: result,
+                            search_message: fmessage
+                        })
+                        
+                    }
+                })
                 break;
         }
     })
