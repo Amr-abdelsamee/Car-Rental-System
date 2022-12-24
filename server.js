@@ -69,48 +69,7 @@ db.connect((err) => {
 //? -------------------------------------------< End of Database Section >-------------------------------------------------------
 
 
-//used whhen admin login
-function loadAllImages() {
-    fs.mkdir('public\\images\\cars', { recursive: true }, (err) => {
-        if (err) throw err;
-    });
-    let sql = "SELECT car_id,image FROM cars";
-    db.query(sql, (err, result) => {
-        if (err) {
-            console.log(err)
-        } else {
-            for (var i = 0; i < result.length; i++) {
-                let imageName = result[i].car_id
-                let buffer = Buffer.from(result[i].image, 'binary');
-                fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
-                    if (err) console.log(err);
-                    else {
-                        console.log("Image " + imageName + ".jpg successfully loaded!");
-                    }
-                });
-            }
-        }
-    })
-}
-//used in add cars
-function loadOneImage(lic_no) {
-    // IN(SELECT  max(car_id) FROM cars )
-    let sql = "SELECT car_id,image FROM cars WHERE lic_no=?";
-    db.query(sql, lic_no, (err, result) => {
-        if (err) {
-            console.log(err)
-        } else {
-            let imageName = result[0].car_id
-            let buffer = Buffer.from(result[0].image, 'binary');
-            fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
-                if (err) console.log(err);
-                else {
-                    console.log("Image " + imageName + ".jpg successfully loaded!");
-                }
-            });
-        }
-    })
-}
+
 //? ---------------------------------------------< Admin route section >-------------------------------------------------------
 app.route("/control")
     .get(function (req, res) {
@@ -181,16 +140,33 @@ app.route("/admin")
             let menu_btn = req.body.control_btn;
             let sql = ""
             switch (menu_btn) {
-                case "dashboard":
-                    load_dashBoard(app_session.admin_id, res);
-                    break;
-                case "all_cars":
-                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id";
+                case "search":
+                    sql = "SELECT * FROM offices;";
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/all_cars", { cars: result })
+                            res.render("control/search", {
+                                offices: result,
+                                startDate: new Date().toJSON().slice(0, 10)
+                            })
+                        }
+                    })
+                    break;
+                case "dashboard":
+                    load_dashBoard(app_session.admin_id, res);
+                    break;
+                case "all_cars":
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;SELECT * FROM offices";
+                    db.query(sql, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            res.render("control/all_cars", { 
+                                cars: result[0],
+                                offices: result[1],
+                                startDate: new Date().toJSON().slice(0, 10),
+                                search_message: "" })
                         }
                     })
                     break;
@@ -215,7 +191,7 @@ app.route("/admin")
                     })
                     break;
                 case "setting":
-                    sql = "SELECT * FROM admins";
+                    sql = "SELECT * FROM admins;";
                     db.query(sql, (err, result1) => {
                         if (err) {
                             console.log(err)
@@ -225,7 +201,11 @@ app.route("/admin")
                                 if (err) {
                                     console.log(err)
                                 } else {
-                                    res.render("control/setting", { admins: result1, offices: result2 })
+                                    res.render("control/setting", {
+                                        admins: result1,
+                                        offices: result2,
+                                        startDate: new Date().toJSON().slice(0, 10)
+                                    })
                                 }
                             })
                         }
@@ -269,7 +249,6 @@ app.route("/admin")
                         }
                     })
                     break;
-
             }
         } else {
             res.redirect("control")
@@ -469,76 +448,6 @@ app.route("/change")
     })
 
 
-function delete_entry(btn_value, data_index) {
-    let sql = ""
-    const VALUE = data_index
-    console.log(btn_value, "___", data_index)
-
-    switch (btn_value) {
-        // to delete a car
-        case "delete_car":
-            sql = "DELETE FROM cars WHERE lic_no = ?";
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a car from the system!")
-                }
-            })
-            break;
-
-        // to delete a customer
-        case "delete_customer":
-            sql = "DELETE FROM customers WHERE customer_id = ?";
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a customer from the system!")
-
-                }
-            })
-            break;
-
-        // to delete an admin
-        case "delete_admin":
-            sql = "DELETE FROM admins WHERE email = ?";
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted another from the system!")
-                }
-            })
-            break;
-
-        // to delete an office
-        case "delete_office":
-            sql = "DELETE FROM offices WHERE office_id = ?";
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted an office from the system!")
-                }
-            })
-            break;
-
-        // to delete a reservation
-        case "delete_res":
-            sql = "DELETE FROM reservations WHERE reserve_no = ?";
-            db.query(sql, VALUE, (err, result) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log("An admin deleted a reservation from the system!")
-                }
-            })
-            break;
-    }
-    return;
-}
-
 app.route("/confirmed")
     .post(function (req, res) {
         let sql = ""
@@ -599,7 +508,168 @@ app.route("/confirmed")
         }
         res.redirect("/admin")
     })
+
+
+app.route("/search")
+    .post(function(req, res){
+        switch(req.body.search_btn){
+            case "search_cars":
+                
+        let rec_VALUES = {
+            id: req.body.search_car_id,
+            office: parseInt(req.body.search_car_office),
+            company: req.body.search_car_company,
+            status: req.body.search_car_status,
+            model: req.body.search_car_model,
+            year: req.body.search_car_year,
+            low_price: req.body.search_car_lprice,
+            high_price: req.body.search_car_hprice,
+            sdate: new Date(req.body.search_car_sdate).toJSON().slice(0, 10),
+            edate: req.body.search_car_edate
+        }
+        let ac_VALUES = []
+        let fmessage = ""
+
+        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
+
+        if (rec_VALUES.office) {
+            if (rec_VALUES.office === 0) {
+                sql += " WHERE C.office_id"
+            } else {
+                sql += " WHERE C.office_id=?"
+                ac_VALUES.push(rec_VALUES.office)
+            }
+        }
+
+        if (rec_VALUES.company) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.company=?"
+            ac_VALUES.push(rec_VALUES.company)
+        }
+
+        if (rec_VALUES.id) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.car_id=?"
+            ac_VALUES.push(rec_VALUES.id)
+        }
+
+        if (rec_VALUES.status) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.status=?"
+            ac_VALUES.push(rec_VALUES.status)
+        }
+
+        if (rec_VALUES.model) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.model=?"
+            ac_VALUES.push(rec_VALUES.model)
+        }
+
+        if (rec_VALUES.year) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.year=?"
+            ac_VALUES.push(rec_VALUES.year)
+        }
+
+        if (rec_VALUES.lic_no) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.lic_no=?"
+            ac_VALUES.push(rec_VALUES.lic_no)
+        }
+
+        if (rec_VALUES.low_price) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.price >= ?"
+            ac_VALUES.push(parseInt(rec_VALUES.low_price))
+        }
+
+        if (rec_VALUES.high_price) {
+            if (ac_VALUES.length) {
+                sql += " AND "
+            } else {
+                sql += " WHERE "
+            }
+            sql += "C.price <= ?"
+            ac_VALUES.push(parseInt(rec_VALUES.high_price))
+        }
+
+        if (rec_VALUES.sdate) {
+            if (!ac_VALUES.length) {
+                sql += " WHERE "
+            } else {
+                sql += " AND"
+            }
+            sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+            let startDate = rec_VALUES.sdate + " 10:00:00";
+            ac_VALUES.push(startDate)
+            ac_VALUES.push(startDate)
+        }
+
+        if (rec_VALUES.edate) {
+            sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+            let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
+            ac_VALUES.push(endDate)
+            ac_VALUES.push(endDate)
+        }
+
+
+        sql += "); SELECT * FROM offices"
+        // console.log(rec_VALUES)
+        // console.log("ac_VALUES: ", ac_VALUES)
+        // console.log(sql)
+        db.query(sql, ac_VALUES, (err, results) => {
+            if (err) {
+                console.log(err)
+            } else {
+                if (results[0].length === 0) {
+                    fmessage = "No results"
+                }
+                else{
+                    fmessage = ""
+                }
+                    res.render("control/all_cars", { 
+                        cars: results[0],
+                        offices: results[1],
+                        startDate: new Date().toJSON().slice(0, 10),
+                        search_message: fmessage })
+            }
+        })
+            break;
+            case "search_customers":
+                break;
+        }
+    })
 //? -------------------------------------------< End of sign up route section >-------------------------------------------------
+
+
 
 
 //? ---------------------------------------------< Root route section >--------------------------------------------------------
@@ -610,6 +680,7 @@ app.route("/")
     .post(function (req, res) {
     });
 //? ---------------------------------------------< End of root route section >---------------------------------------------------
+
 
 
 
@@ -735,13 +806,12 @@ app.route("/filters")
         res.redirect("main")
     })
     .post(function (req, res) {
-        app_session = req.session
+
         let rec_VALUES = {
             office: parseInt(req.body.filter_office),
             company: req.body.filter_company,
             model: req.body.filter_model,
             year: req.body.filter_year,
-            lic_no: req.body.filter_lic,
             low_price: req.body.filter_lprice,
             high_price: req.body.filter_hprice,
             sdate: new Date(req.body.filter_sdate).toJSON().slice(0, 10),
@@ -814,7 +884,6 @@ app.route("/filters")
             sql += "C.price <= ?"
             ac_VALUES.push(parseInt(rec_VALUES.high_price))
         }
-        "   "
 
         if (rec_VALUES.sdate) {
             if (!ac_VALUES.length) {
@@ -824,7 +893,6 @@ app.route("/filters")
             }
             sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
             let startDate = rec_VALUES.sdate + " 10:00:00";
-            // startDate.setHours(10, 0, 0)
             ac_VALUES.push(startDate)
             ac_VALUES.push(startDate)
         }
@@ -832,12 +900,9 @@ app.route("/filters")
         if (rec_VALUES.edate) {
             sql += " OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)"
             let endDate = new Date(rec_VALUES.edate).toJSON().slice(0, 10) + " 09:00:00";
-            // endDate.setHours(9, 0, 0)
             ac_VALUES.push(endDate)
             ac_VALUES.push(endDate)
         }
-
-
 
 
         sql += "); SELECT * FROM offices"
@@ -851,7 +916,7 @@ app.route("/filters")
                 if (results[0].length === 0) {
                     fmessage = "No results"
                 }
-                let currentDate = new Date().toJSON().slice(0, 10)
+
                 if (app_session.userPermission) {
                     res.render("main", {
                         cars: results[0],
@@ -859,7 +924,7 @@ app.route("/filters")
                         user: app_session.user_name,
                         filters_message: fmessage,
                         offices: results[1],
-                        startDate: currentDate
+                        startDate: new Date().toJSON().slice(0, 10)
                     })
                 }
                 else {
@@ -869,12 +934,11 @@ app.route("/filters")
                         user: "Guest",
                         filters_message: fmessage,
                         offices: results[1],
-                        startDate: currentDate
+                        startDate: new Date().toJSON().slice(0, 10)
                     })
                 }
             }
         })
-
     })
 
 
@@ -893,6 +957,7 @@ app.route("/overview")
             }
         })
     });
+
 
 app.route("/reserve")
     .get(function (req, res) {
@@ -1061,7 +1126,6 @@ app.route("/profile")
     })
     .post(function (req, res) {
 
-
         sql = "SELECT startD FROM reservations WHERE reserve_no = ?";
         const VALUE = req.body.res_no_btn
 
@@ -1089,8 +1153,6 @@ app.route("/profile")
                 }
             }
         })
-
-
     })
 //? ---------------------------------------------< End of profile route section >-------------------------------------------------------
 
@@ -1104,6 +1166,54 @@ app.get('*', function (req, res) {
 
 
 //? ---------------------------------------------< all functions >-------------------------------------------------------
+
+
+//used when admin login
+function loadAllImages() {
+    fs.mkdir('public\\images\\cars', { recursive: true }, (err) => {
+        if (err) throw err;
+    });
+    let sql = "SELECT car_id,image FROM cars";
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            for (var i = 0; i < result.length; i++) {
+                let imageName = result[i].car_id
+                let buffer = Buffer.from(result[i].image, 'binary');
+                fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
+                    if (err) console.log(err);
+                    else {
+                        console.log("Image " + imageName + ".jpg successfully loaded!");
+                    }
+                });
+            }
+        }
+    })
+}
+
+
+//used in add cars
+function loadOneImage(lic_no) {
+    // IN(SELECT  max(car_id) FROM cars )
+    let sql = "SELECT car_id,image FROM cars WHERE lic_no=?";
+    db.query(sql, lic_no, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            let imageName = result[0].car_id
+            let buffer = Buffer.from(result[0].image, 'binary');
+            fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
+                if (err) console.log(err);
+                else {
+                    console.log("Image " + imageName + ".jpg successfully loaded!");
+                }
+            });
+        }
+    })
+}
+
+
 function load_dashBoard(admin, res) {
     let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
     let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
@@ -1130,7 +1240,75 @@ function load_dashBoard(admin, res) {
 }
 
 
+function delete_entry(btn_value, data_index) {
+    let sql = ""
+    const VALUE = data_index
+    console.log(btn_value, "___", data_index)
 
+    switch (btn_value) {
+        // to delete a car
+        case "delete_car":
+            sql = "DELETE FROM cars WHERE lic_no = ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a car from the system!")
+                }
+            })
+            break;
+
+        // to delete a customer
+        case "delete_customer":
+            sql = "DELETE FROM customers WHERE customer_id = ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a customer from the system!")
+
+                }
+            })
+            break;
+
+        // to delete an admin
+        case "delete_admin":
+            sql = "DELETE FROM admins WHERE email = ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted another from the system!")
+                }
+            })
+            break;
+
+        // to delete an office
+        case "delete_office":
+            sql = "DELETE FROM offices WHERE office_id = ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted an office from the system!")
+                }
+            })
+            break;
+
+        // to delete a reservation
+        case "delete_res":
+            sql = "DELETE FROM reservations WHERE reserve_no = ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a reservation from the system!")
+                }
+            })
+            break;
+    }
+    return;
+}
 
 
 function make_date(sDate, eDate) {
@@ -1156,6 +1334,7 @@ function make_date(sDate, eDate) {
     }
     return response;
 }
+
 
 //? ---------------------------------------------< ------------- >-------------------------------------------------------
 
