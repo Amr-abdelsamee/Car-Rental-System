@@ -4,85 +4,6 @@
     <h2>Main Settings</h2>
     <hr />
     <br>
-    <h3>Search</h3>
-    <hr />
-
-
-
-
-    <form action="filters" method="post">
-        <input type="checkbox" id="menu">
-        <label for="menu">Filters</label>
-        <div class="collapsible-container">
-            <div class=" filters-container">
-                <div class="block1">
-                    <span class="filter-text">Office:</span>
-                    <select name="filter_office" class="input_field filters-input-field">
-                        <option value="0" selected>All</option>
-                        <% for(var i=0; i < offices.length; i++){ %>
-                            <option value="<%= offices[i].office_id %>">
-                                <%= offices[i].location %>
-                            </option>
-                            <% } %>
-                    </select>
-                </div>
-                <div class="block2"><span class="filter-text">Company:</span> <input type="text"
-                        class="input_field filters-input-field" name="filter_company"></div>
-                <div class="block3"><span class="filter-text">Model:</span> <input type="text"
-                        class="input_field filters-input-field" name="filter_model"></div>
-                <div class="block4"><span class="filter-text">Year:</span> <input type="text"
-                        class="input_field filters-input-field" name="filter_year"></div>
-                <div class="block5"><span class="filter-text">licence No:</span> <input type="text"
-                        class="input_field filters-input-field" name="filter_lic"></div>
-                <div class="block6"><span class="filter-text">Price:</span><input type="text"
-                        class="input_field filters-input-field" name="filter_lprice" placeholder="From"> </div>
-                <div class="block7"> <input type="text" class="input_field filters-input-field" name="filter_hprice"
-                        placeholder="To"></div>
-                <div class="block8">
-                    <span class="filter-text">Available:</span>
-                    <div>
-                        <span class="filter-text" style="margin-left: 10px;font-size: 17px;">-
-                            From:</span>
-                        <input type="date" name="filter_sdate" value="<%= startDate %>"
-                            style="float: right; margin-right: 50px;">
-                    </div>
-                    <div style="margin-top: 25px;">
-                        <span class="filter-text" style="margin-left: 10px;font-size: 17px;">-
-                            To:</span>
-                        <input type="date" name="filter_edate" style="float: right; margin-right: 50px;">
-                    </div>
-                </div>
-                <div class="block9">
-                    <button class="filters_btn" name="filters_btn" value="apply_filter" type="submit">Apply</button>
-                </div>
-            </div>
-        </div>
-    </form>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <h3>All Admins</h3>
     <hr />
@@ -93,7 +14,6 @@
                     <tr>
                         <th>#</th>
                         <th>Email</th>
-                        <th>Password</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -104,9 +24,6 @@
                             </th>
                             <th>
                                 <%= admins[i].email %>
-                            </th>
-                            <th>
-                                <%= admins[i].password %>
                             </th>
                         </tr>
                         <% } %>
