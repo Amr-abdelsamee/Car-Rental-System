@@ -26,10 +26,15 @@
                     </option>
                     <% } %>
             </select>
+            <h4>Payment</h4>
+            <select name="payment" class="input_field">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
             <h4>Start date</h4>
-            <input type="date" name="sdate" required>
+            <input type="date" name="sdate"  min="<%= minDate %>" max="<%= maxDate %>" required>
             <h4>End date</h4>
-            <input type="date" name="edate" required>
+            <input type="date" name="edate"  min="<%= minDate %>" max="<%= maxDate %>" required>
 
             <div class="orange-button">
                 <button name="control_btn" value="add_res" type="submit" class="btn btn-danger square-btn">Done</button>
