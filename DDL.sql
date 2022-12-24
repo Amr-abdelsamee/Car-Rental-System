@@ -2,41 +2,42 @@ CREATE DATABASE car_rental;
 USE car_rental;
 CREATE TABLE cars(
     car_id int auto_increment PRIMARY KEY,
-    company varchar(127) not null,
-    model varchar(127) not null,
-    lic_no varchar(11) not null UNIQUE,
-    color varchar(127) not null,
-    `status` varchar(127) not null,
-    `year` int not null,
-    miles float not null,
-    price int not null,
-    office_id int not null,
+    company varchar(127) NOT NULL,
+    model varchar(127) NOT NULL,
+    lic_no varchar(11) NOT NULL UNIQUE,
+    color varchar(127) NOT NULL,
+    `status` enum('Active','Out of service') NOT NULL,
+    `year` int NOT NULL,
+    miles float NOT NULL,
+    price int NOT NULL,
+    office_id int NOT NULL,
     `image` MEDIUMBLOB
 );
 CREATE TABLE customers(
     customer_id int auto_increment PRIMARY KEY, 
-    fname varchar(255) not null,
-    lname varchar(255) not null,
-    email varchar(255) not null UNIQUE ,
-    `password` varchar(255) not null,
-    `address` varchar(255) not null,
-    phone int not null
+    fname varchar(255) NOT NULL,
+    lname varchar(255) NOT NULL,
+    email varchar(255) NOT NULL UNIQUE ,
+    `password` varchar(255) NOT NULL,
+    `address` varchar(255) NOT NULL,
+    phone int NOT NULL
 );
 CREATE TABLE reservations(
     reserve_no int auto_increment PRIMARY KEY, 
-    customer_id int not null,
-    car_id int not null,
-    startD datetime not null,
-    endD datetime not null,
-    res_date datetime DEFAULT current_timestamp() not null,
+    customer_id int NOT NULL,
+    car_id int NOT NULL,
+    startD datetime NOT NULL,
+    endD datetime NOT NULL,
+    res_date datetime DEFAULT current_timestamp() NOT NULL,
+    `rented` ENUM('Yes','No') NOT NULL,
 );
 CREATE TABLE admins(
-    email varchar(255) not null PRIMARY KEY,
-    `password` varchar(255) not null
+    email varchar(255) NOT NULL PRIMARY KEY,
+    `password` varchar(255) NOT NULL
 );
 CREATE TABLE offices(
-    office_id int auto_increment not null PRIMARY KEY, 
-    `location` varchar(50) not null UNIQUE 
+    office_id int auto_increment NOT NULL PRIMARY KEY, 
+    `location` varchar(50) NOT NULL UNIQUE 
 );
 
 ALTER TABLE reservations ADD FOREIGN KEY (car_id) 
