@@ -16,23 +16,27 @@
                 <ul>
                     <li>
                         <h4>First name:</h4>
-                        <%= user[0].fname %>
+                        <%= user.fname %>
                     </li>
                     <li>
                         <h4>Last name:</h4>
-                        <%= user[0].lname %>
+                        <%= user.lname %>
+                    </li>
+                    <li>
+                        <h4>National ID:</h4>
+                        <%= user.national_ID %>
                     </li>
                     <li>
                         <h4>Email:</h4>
-                        <%= user[0].email %>
+                        <%= user.email %>
                     </li>
                     <li>
                         <h4>Address:</h4>
-                        <%= user[0].address %>
+                        <%= user.address %>
                     </li>
                     <li>
                         <h4>Phone:</h4>
-                        <%= user[0].phone %>
+                        <%= user.phone %>
                     </li>
                 </ul>
 
@@ -41,42 +45,50 @@
                 <hr style=" border-top: 1px solid  ;">
                 <br>
                 <div class="row">
-                    <% for(var i=0; i < user.length; i++){ %>
+                    <% for(var i=0; i < userRes.length; i++){ %>
                         <div class="col-md-3 col-sm-6 col-xs-6">
                             <div class="panel panel-back noti-box">
                                 <div class="text-box">
                                     <div class="car-box">
-                                        <img class="car-image" src="../images/cars/<%= user[i].car_id %>.jpg"
+                                        <img class="car-image" src="../images/cars/<%= userRes[i].car_id %>.jpg"
                                             alt="car image">
 
                                         <p class="text-muted car-card-text">
-                                            <%= user[i].company %>
-                                                <%= user[i].model %>
+                                            <%= userRes[i].company %>
+                                                <%= userRes[i].model %>
 
                                         </p>
                                         <p class="text-muted car-card-text">
-                                            <%= user[i].startD.toLocaleString([], {year: 'numeric' , month: 'numeric' ,
+                                            <%= userRes[i].startD.toLocaleString([], {year: 'numeric' , month: 'numeric' ,
                                                 day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
                                         </p>
                                         <p class="text-muted car-card-text">
-                                            <%= user[i].endD.toLocaleString([], {year: 'numeric' , month: 'numeric' ,
+                                            <%= userRes[i].endD.toLocaleString([], {year: 'numeric' , month: 'numeric' ,
                                                 day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
                                         </p>
 
                                         <p class="text-muted car-card-text">
-                                            Total cost: <%= user[i].cost %>$
+                                            Total cost: <%= userRes[i].cost %>$
                                         </p>
-                                        <p class="text-muted car-card-text">
-                                            Paid: <%= user[i].rented %>
-                                        </p>
+                                        <form action="profile" method="post">
+                                        <p class="text-muted car-card-text" style="display: inline;">
+                                            Paid: <%= userRes[i].rented %>
+                                            <% if (userRes[i].rented == "No"){%>
+                                                <button class="view-btn" name="pay_now_btn" value="<%= userRes[i].reserve_no %>"
+                                                    type="submit" style="width: 40%;display: inline;margin-bottom: 10px;">
+                                                    Pay now
+                                                </button>
+                                                <% } %> 
+                                            </p>
+                                        </form>
                                         <form action="overview" method="post">
-                                            <button class="view-btn" name="car_id_btn" style="margin-bottom: 10px;" value="<%= user[i].car_id %>"
+                                            <button class="view-btn" name="car_id_btn" style="margin-bottom: 10px;" value="<%= userRes[i].car_id %>"
                                                 type="submit">
                                                 View car
                                             </button>
                                         </form>
                                         <form action="profile" method="post">
-                                            <button class="view-btn" name="res_no_btn" value="<%= user[i].reserve_no %>"
+                                            <button class="view-btn" name="cancel_btn" value="<%= userRes[i].reserve_no %>"
                                                 type="submit">
                                                 Cancel
                                             </button>

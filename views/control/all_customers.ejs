@@ -68,9 +68,10 @@
                 <thead class="bg-color-red">
                     <tr>
                         <th>#</th>
+                        <th>Email</th>
                         <th>First name</th>
                         <th>Last name</th>
-                        <th>Email</th>
+                        <th>National ID</th>
                         <th>Address</th>
                         <th>Phone</th>
                         <th>Customer ID</th>
@@ -83,13 +84,16 @@
                                 <%= i+1 %>
                             </th>
                             <th>
+                                <%= allCustomers[i].email %>
+                            </th>
+                            <th>
                                 <%= allCustomers[i].fname %>
                             </th>
                             <th>
                                 <%= allCustomers[i].lname %>
                             </th>
                             <th>
-                                <%= allCustomers[i].email %>
+                                <%= allCustomers[i].national_ID %>
                             </th>
                             <th>
                                 <%= allCustomers[i].address %>
@@ -123,13 +127,17 @@
                         <% } %>
                 </select>
                 <br>
-                <div class="orange-button" style="float: left !important;">
+                <div class="orange-button" style="float: left !important; padding: 15px 10px;">
                     <button name="delete_btn" value="delete_customer" type="submit"
                         class="btn btn-danger square-btn">Delete</button>
                 </div>
-                <div class="orange-button" style="float: left !important; margin: 0 !important;">
+                <div class="orange-button" style="float: left !important; margin: 0 !important; padding: 15px 10px;">
                     <button name="edit_btn" value="edit_customer" type="submit"
                         class="btn btn-danger square-btn">Edit</button>
+                </div>
+                <div class="orange-button" style="float: left !important; margin: 0 !important; padding: 15px 10px;">
+                    <button name="edit_btn" value="edit_customer" type="submit"
+                        class="btn btn-danger square-btn">change password</button>
                 </div>
             </form>
         </div>
