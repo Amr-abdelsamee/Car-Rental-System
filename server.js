@@ -84,7 +84,7 @@ app.route("/control")
     .post(function (req, res) {
         app_session = req.session
         const VALUES = [
-            md5(req.body.password+process.env.SALT), 
+            md5(req.body.password + process.env.SALT),
             req.body.username
         ]
         let sql = "SELECT * FROM `admins` WHERE `password`= ? AND email=?";
@@ -103,7 +103,7 @@ app.route("/control")
                             app_session.userPermission = false
                             app_session.adminPermission = true
                             console.log(new Date().toLocaleString() + ":: admin logged in")
-                            load_dashBoard(VALUES[1], res)
+                            load_dashBoard(VALUES[1], res, "", "")
                         }
                     })
                 } else {
@@ -135,7 +135,7 @@ app.route("/admin")
     .get(function (req, res) {
         app_session = req.session
         if (app_session.adminPermission) {
-            load_dashBoard(app_session.admin_id, res);
+            load_dashBoard(app_session.admin_id, res, "", "");
         } else { res.redirect("control") }
     })
     .post(function (req, res) {
@@ -146,11 +146,11 @@ app.route("/admin")
             switch (menu_btn) {
 
                 case "dashboard":
-                    load_dashBoard(app_session.admin_id, res);
+                    load_dashBoard(app_session.admin_id, res, "", "");
                     break;
                 case "all_cars":
                     sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;";
-                    sql+= "SELECT * FROM offices;"
+                    sql += "SELECT * FROM offices;"
                     sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations) ";
                     db.query(sql, (err, results) => {
                         if (err) {
@@ -306,6 +306,7 @@ app.route("/add")
                         null
                         , req.body.fname
                         , req.body.lname
+                        , req.body.nationalID
                         , req.body.email
                         , md5(req.body.password)
                         , req.body.address
@@ -327,7 +328,7 @@ app.route("/add")
                 case "add_admin":
                     VALUES = [
                         req.body.email
-                        , md5(req.body.password+process.env.SALT)
+                        , md5(req.body.password + process.env.SALT)
                     ]
                     sql = "INSERT INTO admins (email,password) VALUES (?)";
                     db.query(sql, [VALUES], (err, result) => {
@@ -500,15 +501,15 @@ app.route("/confirmed")
                     VALUES = [
                         req.body.fname
                         , req.body.lname
+                        , req.body.nationalID
                         , req.body.email
-                        , req.body.password
+
                         , req.body.address
                         , req.body.phone
                         , req.body.customer_id
                     ]
 
-
-                    sql = "UPDATE customers SET fname=?, lname=?, email=?, `password`=?, `address`=?, phone=? WHERE customer_id=?";
+                    sql = "UPDATE customers SET fname=?, lname=?, national_ID=?, email=?, `address`=?, phone=? WHERE customer_id=?";
                     db.query(sql, VALUES, (err, result) => {
                         if (err) {
                             console.log(err)
@@ -891,6 +892,10 @@ app.route("/search")
                         }
                     })
                     break;
+
+                case "daily_report":
+                    load_dashBoard(app_session.admin_id, res, req.body.search_profit_sdate, req.body.search_profit_edate);
+                    break;
             }
         } else {
             res.redirect("control")
@@ -927,8 +932,11 @@ app.route("/signin")
     })
     .post(function (req, res) {
         app_session = req.session
-        const VALUES = [md5(req.body.password+process.env.SALT), req.body.username]
-        sql = "SELECT * FROM `customers` WHERE `password`= ? AND email=?";
+        const VALUES = [
+            req.body.username,
+            md5(req.body.password + process.env.SALT)
+        ]
+        sql = "SELECT * FROM `customers` WHERE email=? AND `password`=?";
         db.query(sql, VALUES, (err, result) => {
             if (err) {
                 console.log(err)
@@ -942,7 +950,6 @@ app.route("/signin")
                     res.redirect("main")
                 } else {
                     console.log(new Date().toLocaleString() + ":: sign in failed!")
-                    console.log(VALUES)
                     res.redirect("/signin")
                 }
             }
@@ -958,8 +965,9 @@ app.route("/signup")
             null
             , req.body.fname
             , req.body.lname
+            , req.body.nationalID
             , req.body.email
-            , md5(req.body.password+process.env.SALT)
+            , md5(req.body.password + process.env.SALT)
             , req.body.address
             , parseInt(req.body.phone)
         ]
@@ -1049,78 +1057,42 @@ app.route("/filters")
         let ac_VALUES = []
         let fmessage = ""
 
-        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id "
+        let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE status='Active' "
 
         if (rec_VALUES.office) {
             if (rec_VALUES.office === 0) {
-                sql += " WHERE C.office_id"
+                sql += "AND C.office_id "
             } else {
-                sql += " WHERE C.office_id=?"
+                sql += "AND C.office_id=? "
                 ac_VALUES.push(rec_VALUES.office)
             }
         }
         if (rec_VALUES.company) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.company=?"
+            sql += "AND C.company=? "
             ac_VALUES.push(rec_VALUES.company)
         }
         if (rec_VALUES.model) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.model=?"
+            sql += "AND C.model=? "
             ac_VALUES.push(rec_VALUES.model)
         }
         if (rec_VALUES.year) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.year=?"
+            sql += "AND C.year=? "
             ac_VALUES.push(rec_VALUES.year)
         }
         if (rec_VALUES.lic_no) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.lic_no=?"
+            sql += "AND C.lic_no=? "
             ac_VALUES.push(rec_VALUES.lic_no)
         }
         if (rec_VALUES.low_price) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.price >= ?"
+            sql += "AND C.price >= ? "
             ac_VALUES.push(parseInt(rec_VALUES.low_price))
         }
         if (rec_VALUES.high_price) {
-            if (ac_VALUES.length) {
-                sql += " AND "
-            } else {
-                sql += " WHERE "
-            }
-            sql += "C.price <= ?"
+            sql += "AND C.price <= ? "
             ac_VALUES.push(parseInt(rec_VALUES.high_price))
         }
-
         if (rec_VALUES.sdate) {
-            if (!ac_VALUES.length) {
-                sql += " WHERE "
-            } else {
-                sql += " AND"
-            }
-            sql += " C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
+            sql += "AND C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)"
             let startDate = rec_VALUES.sdate + " 10:00:00";
             ac_VALUES.push(startDate)
             ac_VALUES.push(startDate)
@@ -1338,14 +1310,18 @@ app.route("/profile")
     .get(function (req, res) {
         app_session = req.session
         if (app_session.userPermission) {
-            const VALUE = [app_session.user_id]
+            const VALUE = [app_session.user_id, app_session.user_id]
 
-            sql = "SELECT *, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id JOIN customers AS CU ON R.customer_id=CU.customer_id WHERE R.customer_id= ?";
-            db.query(sql, VALUE, (err, result) => {
+            sql = "SELECT * FROM customers WHERE customer_id=?; SELECT *, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id  WHERE R.customer_id= ?";
+            db.query(sql, VALUE, (err, results) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    res.render("profile", { user: result })
+                    console.log(results)
+                    res.render("profile", {
+                        user: results[0][0],
+                        userRes: results[1]
+                    })
                 }
             })
         }
@@ -1354,34 +1330,51 @@ app.route("/profile")
         }
     })
     .post(function (req, res) {
+        if (req.body.cancel_btn) {
+            sql = "SELECT startD FROM reservations WHERE reserve_no = ?";
+            const VALUE = req.body.cancel_btn
 
-        sql = "SELECT startD FROM reservations WHERE reserve_no = ?";
-        const VALUE = req.body.res_no_btn
-
-        db.query(sql, VALUE, (err, result) => {
-            if (err) {
-                console.log(err)
-            } else {
-                console.log(result[0].startD)
-                let currentDate = new Date()
-                let startDate = new Date(result[0].startD);
-                if (Date.parse(startDate) < Date.parse(currentDate)) {
-                    console.log("you can not delete this reservation!")
-                    res.status(204).send()
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
                 } else {
-                    sql = "DELETE FROM reservations WHERE reserve_no = ?";
-                    const VALUE = req.body.res_no_btn
-                    db.query(sql, VALUE, (err, result) => {
-                        if (err) {
-                            console.log(err)
-                        } else {
-                            console.log("A user canceled a reservation!")
-                            res.redirect("profile")
-                        }
-                    })
+                    console.log(result[0].startD)
+                    let currentDate = new Date()
+                    let startDate = new Date(result[0].startD);
+                    if (Date.parse(startDate) < Date.parse(currentDate)) {
+                        console.log("you can not delete this reservation!")
+                        res.status(204).send()
+                    } else {
+                        sql = "DELETE FROM reservations WHERE reserve_no = ?";
+                        const VALUE = req.body.cancel_btn
+                        db.query(sql, VALUE, (err, result) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                console.log("A user canceled a reservation!")
+                                res.redirect("profile")
+                            }
+                        })
+                    }
                 }
-            }
-        })
+            })
+        }
+        if (req.body.pay_now_btn) {
+
+            sql = "UPDATE reservations SET rented='Yes' WHERE reserve_no=? ";
+            const VALUE = req.body.pay_now_btn
+
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("A user paid reservation no " + VALUE + "!")
+                    res.redirect("profile")
+                }
+            })
+
+
+        }
     })
 //? ---------------------------------------------< End of profile route section >-------------------------------------------------------
 
@@ -1442,26 +1435,77 @@ function loadOneImage(lic_no) {
 }
 
 
-function load_dashBoard(admin, res) {
+function load_dashBoard(admin, res, sDate, eDate) {
+
+    let startDate
+    let endDate
+
+    if (sDate) {
+        startDate = sDate
+    }
+    else {
+        startDate = new Date().toJSON().slice(0, 10) + " 10:00:00"
+    }
+
+    if (eDate) {
+        endDate = eDate
+    }
+    else {
+        endDate = new Date()
+        endDate.setDate(endDate.getDate() + 5);
+        endDate = endDate.toJSON().slice(0, 10) + " 9:00:00"
+    }
+
+
     let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
     let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
     let sql3 = "SELECT COUNT(customer_id) AS count FROM customers;"
     let sql4 = "SELECT COUNT(reserve_no) AS count FROM reservations;";
     let sql5 = "SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;"
     let sql6 = "SELECT reserve_no, fname, lname, car_id, startD, endD,res_date FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id ORDER BY  res_date DESC  limit 10;"
-    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6
-    db.query(sql, (err, results) => {
+    let sql7 = "SET @from = ?;\
+    SET @to = ?;\
+    WITH dates AS\
+    (   \
+        SELECT @from + INTERVAL seq DAY AS `days`\
+          FROM seq_0_to_99999999\
+         WHERE seq BETWEEN 0 and (SELECT TIMESTAMPDIFF(DAY, @from, @to))\
+    )\
+    SELECT days, SUM(C.price) AS total_profit, COUNT(C.car_id) AS cars_num FROM dates\
+       JOIN reservations AS R\
+       JOIN cars AS C ON R.car_id=C.car_id \
+      WHERE days BETWEEN R.startD AND R.endD\
+      GROUP BY days\
+      UNION\
+      SELECT days,0,0 FROM dates WHERE days NOT IN(\
+      SELECT days FROM dates\
+       JOIN reservations AS R\
+       JOIN cars AS C ON R.car_id=C.car_id \
+      WHERE days BETWEEN R.startD AND R.endD\
+      )\
+      ORDER BY days\
+      ;";
+
+    const VALUES = [
+        startDate
+        , endDate
+    ]
+    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7
+    db.query(sql, VALUES, (err, results) => {
         if (err) {
             console.log(err)
         } else {
+            console.log(results[8])
             res.render("control/dashboard", {
-                admin: admin,
-                cars: results[0],
-                cars_count: results[1][0].count,
-                customers_count: results[2][0].count,
-                res_count: results[3][0].count,
-                total_profits: results[4][0].total_profits,
-                recent_res: results[5],
+                admin: admin
+                , cars: results[0]
+                , cars_count: results[1][0].count
+                , customers_count: results[2][0].count
+                , res_count: results[3][0].count
+                , total_profits: results[4][0].total_profits
+                , recent_res: results[5]
+                , search_message: ""
+                , profitsReport: results[8]
             })
         }
     })
