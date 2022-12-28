@@ -29,6 +29,7 @@ CREATE TABLE reservations(
     startD datetime NOT NULL,
     endD datetime NOT NULL,
     res_date datetime DEFAULT current_timestamp() NOT NULL,
+    cost INT(11) NOT NULL,
     `rented` ENUM('Yes','No') NOT NULL
 );
 CREATE TABLE admins(

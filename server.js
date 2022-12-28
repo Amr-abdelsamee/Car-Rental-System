@@ -103,7 +103,7 @@ app.route("/control")
                             app_session.userPermission = false
                             app_session.adminPermission = true
                             console.log(new Date().toLocaleString() + ":: admin logged in")
-                            load_dashBoard(VALUES[1], res, "", "")
+                            load_dashBoard(VALUES[1], res, "", "", "", "")
                         }
                     })
                 } else {
@@ -135,7 +135,7 @@ app.route("/admin")
     .get(function (req, res) {
         app_session = req.session
         if (app_session.adminPermission) {
-            load_dashBoard(app_session.admin_id, res, "", "");
+            load_dashBoard(app_session.admin_id, res, "", "","","");
         } else { res.redirect("control") }
     })
     .post(function (req, res) {
@@ -308,7 +308,7 @@ app.route("/add")
                         , req.body.lname
                         , req.body.nationalID
                         , req.body.email
-                        , md5(req.body.password)
+                        , md5(req.body.password + process.env.SALT)
                         , req.body.address
                         , req.body.phone
                     ]
@@ -896,6 +896,10 @@ app.route("/search")
                 case "daily_report":
                     load_dashBoard(app_session.admin_id, res, req.body.search_profit_sdate, req.body.search_profit_edate);
                     break;
+
+                    case "income_statemet":
+                    load_dashBoard(app_session.admin_id, res,"","", req.body.search_income_sdate, req.body.search_income_edate);
+                    break;
             }
         } else {
             res.redirect("control")
@@ -1226,17 +1230,22 @@ app.route("/confirmReservation")
                             }
                             res.status(204).send()
                         } else {
+
+                            let time = dates.endD.getTime() - dates.startD.getTime() + 60000;
+                            let days = Math.ceil(time / (1000 * 3600 * 24));
+
                             const VALUE = [
                                 app_session.user_id,
                                 parseInt(req.body.car_id),
                                 dates.startD,
-                                dates.endD
+                                dates.endD,
+                                days * req.body.car_price
                             ]
-                            let sql1 = "INSERT INTO reservations(customer_id, car_id, startD, endD ) VALUES (?);";
+                            let sql1 = "INSERT INTO reservations(customer_id, car_id, startD, endD, cost ) VALUES (?);";
                             let sql2 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;"
                             let sql3 = "SELECT reserve_no, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id WHERE R.customer_id= ? AND R.car_id= ? AND R.startD= ? AND R.endD= ?;";
                             let sql = sql1 + sql2 + sql3
-                            db.query(sql, [VALUE, VALUE[1], VALUE[0], VALUE[1], VALUE[2], VALUE[3]], (err, results) => {
+                            db.query(sql, [VALUE, VALUE[1], VALUE[0], VALUE[1], VALUE[2], VALUE[3], VALUE[4]], (err, results) => {
                                 if (err) {
                                     console.log(err)
                                 } else {
@@ -1435,10 +1444,13 @@ function loadOneImage(lic_no) {
 }
 
 
-function load_dashBoard(admin, res, sDate, eDate) {
+function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) {
 
     let startDate
     let endDate
+
+    let startDateIncome
+    let endDateIncome
 
     if (sDate) {
         startDate = sDate
@@ -1456,6 +1468,23 @@ function load_dashBoard(admin, res, sDate, eDate) {
         endDate = endDate.toJSON().slice(0, 10) + " 9:00:00"
     }
 
+    if (sDate_incomeS) {
+        startDateIncome = sDate_incomeS
+    } else {
+        startDateIncome = new Date()
+        startDateIncome.setDate(startDateIncome.getDate() - 5);
+        startDateIncome = startDateIncome.toJSON().slice(0, 10)
+    }
+
+    if (eDate_incomeS) {
+        endDateIncome = eDate_incomeS
+    } else {
+        
+        endDateIncome = new Date()
+        endDateIncome.setDate(endDateIncome.getDate() + 5);
+        endDateIncome = endDateIncome.toJSON().slice(0, 10)
+    }
+
 
     let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
     let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
@@ -1471,26 +1500,21 @@ function load_dashBoard(admin, res, sDate, eDate) {
           FROM seq_0_to_99999999\
          WHERE seq BETWEEN 0 and (SELECT TIMESTAMPDIFF(DAY, @from, @to))\
     )\
-    SELECT days, SUM(C.price) AS total_profit, COUNT(C.car_id) AS cars_num FROM dates\
-       JOIN reservations AS R\
-       JOIN cars AS C ON R.car_id=C.car_id \
-      WHERE days BETWEEN R.startD AND R.endD\
+    SELECT days, IFNULL(SUM(C.price),0) AS total_profit, COUNT(C.car_id) AS cars_num FROM reservations AS R\
+      JOIN cars AS C ON R.car_id=C.car_id \
+      RIGHT JOIN dates ON (days BETWEEN R.startD AND R.endD)\
       GROUP BY days\
-      UNION\
-      SELECT days,0,0 FROM dates WHERE days NOT IN(\
-      SELECT days FROM dates\
-       JOIN reservations AS R\
-       JOIN cars AS C ON R.car_id=C.car_id \
-      WHERE days BETWEEN R.startD AND R.endD\
-      )\
       ORDER BY days\
       ;";
-
+    let sql8 = "SELECT DATE(res_date)AS resDate, COUNT(res_date)AS num_res, SUM(cost)AS income FROM reservations WHERE res_date BETWEEN ? AND ? GROUP BY DATE(res_date)";
     const VALUES = [
         startDate
         , endDate
+        , startDateIncome
+        , endDateIncome
     ]
-    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7
+    console.log(VALUES)
+    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7 + sql8
     db.query(sql, VALUES, (err, results) => {
         if (err) {
             console.log(err)
@@ -1506,6 +1530,7 @@ function load_dashBoard(admin, res, sDate, eDate) {
                 , recent_res: results[5]
                 , search_message: ""
                 , profitsReport: results[8]
+                , incomeTable: results[9]
             })
         }
     })

@@ -63,7 +63,7 @@
     <hr />
 
 
-    <form action="search" method="post">
+    <form action="search" method="post" >
         <input type="checkbox" id="menu">
         <label for="menu">Search</label>
         <div class="collapsible-container">
@@ -75,8 +75,8 @@
                         <input type="date" class="input_field filters-input-field" name="search_profit_edate">
                     </div>
                 </div>
-                <div class="block2">
-                <button class="filters_btn" name="search_btn" value="daily_report"
+                <div class="block2" >
+                <button class="filters_btn" name="search_btn" value="daily_report" 
                 type="submit">Apply</button>
             </div>
             </div>
@@ -84,7 +84,7 @@
     </form>
 
 
-    <div class="row">
+    <div class="row" >
         <div class="col-md-12">
             <h3>Daily Report</h3>
         </div>
@@ -122,6 +122,74 @@
             </div>
         </div>
     </div>
+    <hr />
+
+
+    <form action="search" method="post" >
+        <input type="checkbox" id="menu2">
+        <label for="menu2">Search</label>
+        <div class="collapsible-container">
+            <div class=" filters-container" style="height: 100px;">
+                <div class="block1">
+                    <span class="filter-text">Date:</span>
+                    <div>
+                        <input type="date" class="input_field filters-input-field" name="search_income_sdate">
+                        <input type="date" class="input_field filters-input-field" name="search_income_edate">
+                    </div>
+                </div>
+                <div class="block2" >
+                <button class="filters_btn" name="search_btn" value="income_statemet" 
+                type="submit">Apply</button>
+            </div>
+            </div>
+        </div>
+    </form>
+
+
+    <div class="row" >
+        <div class="col-md-12">
+            <h3>Income statement</h3>
+        </div>
+    </div>
+    <hr style="width: 50%; float: left; margin: 0;">
+    <div class="row">
+        <div class="panel-body">
+            <div class="table-responsive">
+                <div style="overflow: scroll;height: 300px;">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="bg-color-red">
+                        <th>Reservation date</th>
+                        <th>Num of reservations</th>
+                        <th>Income</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < incomeTable.length; i++){ %>
+                            <tr>
+                                <th>
+                                    <%= incomeTable[i].resDate.toLocaleString("sv-SE").slice(0, 10) %>
+                                </th>
+                                <th>
+                                    <%= incomeTable[i].num_res %>
+                                </th>
+                                <th>
+                                    <%= incomeTable[i].income %>
+                                </th>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+
+
+
+
+
+
 
 
     <div class="row">
@@ -151,7 +219,7 @@
                                     <%= i+1 %>
                                 </th>
                                 <th>
-                                    <%= recent_res[i].res_date.toLocaleString() %>
+                                    <%= recent_res[i].res_date.toLocaleString("sv-SE") %>
                                 </th>
                                 <th>
                                     <%= recent_res[i].fname %>
@@ -161,10 +229,10 @@
                                     <%= recent_res[i].car_id %>
                                 </th>
                                 <th>
-                                    <%= recent_res[i].startD.toLocaleString() %>
+                                    <%= recent_res[i].startD.toLocaleString("sv-SE") %>
                                 </th>
                                 <th>
-                                    <%= recent_res[i].endD.toLocaleString() %>
+                                    <%= recent_res[i].endD.toLocaleString("sv-SE") %>
                                 </th>
                                 <th>
                                     <%= recent_res[i].reserve_no %>
