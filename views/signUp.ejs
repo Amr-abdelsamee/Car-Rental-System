@@ -11,7 +11,7 @@
 
     <div class="customer-sign-container">
       <h1>Sign Up</h1>
-      <form id="form" action="/signup" method="post">
+      <form id="form" action="/signup" method="post" onsubmit="Validation()">
         <p class="signinMessage"></p>
         <input class="input_field" name="fname" placeholder="First name" autocomplete="off" type="text" required
           autofocus>
@@ -26,6 +26,46 @@
         <p>Already have an account? <a id="log" href="signIn">SignIn</a></p>
     </div>
     </form>
+    <script>
+       function validation(){
+        var fname = document.forms["form"]["fname"].value;
+        var lname = document.forms["form"]["lname"].value;
+        var nationalID = document.forms["form"]["nationalID"].value;
+        var email = document.forms["form"]["email"].value;
+        var password = document.forms["form"]["password"].value;
+        var address = document.forms["form"]["address"].value;
+        var phone = document.forms["form"]["phone"].value;
+        if(fname == "" || lname == "" || nationalID == "" || email == "" || password == "" || address == "" || phone == ""){
+          alert("Please fill all the fields");
+          return false;
+        }
+        if (password.length < 8) {
+          alert("Password must be at least 8 characters long.");
+          return false;
+        }
+        if (isNaN(nationalID)) {
+          alert("National ID must be a number");
+          return false;
+        }
+        if (isNaN(phone)) {
+          alert("Phone must be a number");
+          return false;
+        }
+        if (phone.length != 11) {
+          alert("Phone must be 11 digits");
+          return false;
+        }
+        if (nationalID.length != 14) {
+          alert("National ID must be 14 digits");
+          return false;
+        }
+        alert("You have signed up successfully")
+        document.getElementById("form").submit();
+        
+
+       }
+      
+    </script>
 
 
   </body>
