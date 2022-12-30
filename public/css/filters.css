@@ -28,6 +28,12 @@ input#menu2 {
 
 
 
+input#menu3 {
+    display: none;
+}
+
+
+
 input:checked~.collapsible-container {
     display: block;
     margin-bottom: 50px;

@@ -1,0 +1,35 @@
+<%- include("control") %>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Add Service</h2>
+        </div>
+    </div>
+
+    <hr />
+    <form action="/add" method="post">
+
+        <div class="add panel-back">
+            <h4>Car</h4>
+            <select name="car_id" class="input_field">
+                <option value="<%= cars[0].car_id %>" selected>
+                    <%= cars[0].car_id %> - <%= cars[0].company %>
+                            <%= cars[0].model %> - <%= cars[0].year %>
+                </option>
+                <% for(var i=1; i < cars.length; i++){ %>
+                    <option value="<%= cars[i].car_id %>">
+                        <%= cars[i].car_id %> - <%= cars[i].company %>
+                                <%= cars[i].model %> - <%= cars[i].year %>
+                    </option>
+                    <% } %>
+            </select>
+            <h4>Start date</h4>
+            <input type="date" name="sdate" required>
+            <h4>End date</h4>
+            <input type="date" name="edate" required>
+            <div class="orange-button">
+                <button name="control_btn" value="add_schedule" type="submit"
+                    class="btn btn-danger square-btn">Done</button>
+            </div>
+    </form>
+    </div>

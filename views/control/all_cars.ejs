@@ -12,147 +12,147 @@
 
 
 
-
-            <form action="search" method="post">
-                <input type="checkbox" id="menu">
-                <label for="menu">Search</label>
-                <div class="collapsible-container">
-                    <div class=" filters-container">
-                        <div class="block1">
-                            <span class="filter-text">car ID:</span>
-                            <input type="number" class="input_field filters-input-field" name="search_car_id">
-                        </div>
-
-                        <div class="block2">
-                            <span class="filter-text">Office:</span>
-                            <select name="search_car_office" class="input_field filters-input-field">
-                                <option value="0" selected>All</option>
-                                <% for(var i=0; i < offices.length; i++){ %>
-                                    <option value="<%= offices[i].office_id %>">
-                                        <%= offices[i].location %>
-                                    </option>
-                                    <% } %>
-                            </select>
-                        </div>
-
-                        <div class="block3">
-                            <span class="filter-text">Status:</span>
-                            <select name="search_car_status" class="input_field filters-input-field">
-                                <option value="" selected>All</option>
-                                <option value="Active" >Active</option>
-                                <option value="Out of service" >Out of service</option>
-                            </select>
-                        </div>
-
-                        <div class="block4">
-                            <span class="filter-text">Company:</span>
-                            <input type="text" class="input_field filters-input-field" name="search_car_company">
-                        </div>
-
-                        <div class="block5">
-                            <span class="filter-text">Model:</span>
-                            <input type="text" class="input_field filters-input-field" name="search_car_model">
-                        </div>
-
-                        <div class="block6">
-                            <span class="filter-text">Year:</span>
-                            <input type="number" class="input_field filters-input-field" name="search_car_year">
-                        </div>
-
-                        <div class="block7">
-                            <span class="filter-text">licence No:</span>
-                            <input type="text" class="input_field filters-input-field" name="search_car_lic">
-                        </div>
-
-                        <div class="block8">
-                            <span class="filter-text">Price:</span>
-                            <input type="text" class="input_field filters-input-field" name="search_car_lprice"
-                                placeholder="From">
-                            <input type="text" class="input_field filters-input-field" name="search_car_hprice"
-                                placeholder="To">
-                        </div>
-
-                        <div class="block9">
-                            <span class="filter-text">Available dates:</span>
-                            <div>
-                                <input type="date" class="input_field filters-input-field" name="search_car_sdate"
-                                    value="<%= startDate %>">
-                                <input type="date" class="input_field filters-input-field" name="search_car_edate">
-                            </div>
-                        </div>
-
-                        <div class="block10">
-                        <button class="filters_btn" name="search_btn" value="search_cars"
-                        type="submit">Apply</button>
+        <form action="search" method="post">
+            <input type="checkbox" id="menu">
+            <label for="menu">Search</label>
+            <div class="collapsible-container">
+                <div class=" filters-container">
+                    <div class="block1">
+                        <span class="filter-text">car ID:</span>
+                        <input type="number" class="input_field filters-input-field" name="search_car_id">
                     </div>
+
+                    <div class="block2">
+                        <span class="filter-text">Office:</span>
+                        <select name="search_car_office" class="input_field filters-input-field">
+                            <option value="0" selected>All</option>
+                            <% for(var i=0; i < offices.length; i++){ %>
+                                <option value="<%= offices[i].office_id %>">
+                                    <%= offices[i].location %>
+                                </option>
+                                <% } %>
+                        </select>
+                    </div>
+
+                    <div class="block3">
+                        <span class="filter-text">Status:</span>
+                        <select name="search_car_status" class="input_field filters-input-field">
+                            <option value="" selected>All</option>
+                            <option value="Active">Active</option>
+                            <option value="Out of service">Out of service</option>
+                        </select>
+                    </div>
+
+                    <div class="block4">
+                        <span class="filter-text">Company:</span>
+                        <input type="text" class="input_field filters-input-field" name="search_car_company">
+                    </div>
+
+                    <div class="block5">
+                        <span class="filter-text">Model:</span>
+                        <input type="text" class="input_field filters-input-field" name="search_car_model">
+                    </div>
+
+                    <div class="block6">
+                        <span class="filter-text">Year:</span>
+                        <input type="number" class="input_field filters-input-field" name="search_car_year">
+                    </div>
+
+                    <div class="block7">
+                        <span class="filter-text">licence No:</span>
+                        <input type="text" class="input_field filters-input-field" name="search_car_lic">
+                    </div>
+
+                    <div class="block8">
+                        <span class="filter-text">Price:</span>
+                        <input type="text" class="input_field filters-input-field" name="search_car_lprice"
+                            placeholder="From">
+                        <input type="text" class="input_field filters-input-field" name="search_car_hprice"
+                            placeholder="To">
+                    </div>
+
+                    <div class="block9">
+                        <span class="filter-text">Available dates:</span>
+                        <div>
+                            <input type="date" class="input_field filters-input-field" name="search_car_sdate"
+                                value="<%= startDate %>">
+                            <input type="date" class="input_field filters-input-field" name="search_car_edate">
+                        </div>
+                    </div>
+
+                    <div class="block10">
+                        <button class="filters_btn" name="search_btn" value="search_cars" type="submit">Apply</button>
                     </div>
                 </div>
-            </form>
-        
+            </div>
+        </form>
 
-            <p class="search_message">
-                <%= search_message %>
-            </p>
+        <p class="search_message">
+            <%= cars_search_message %>
+        </p>
+
 
 
 
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
-                <thead class="bg-color-red">
-                    <tr>
-                        <th>#</th>
-                        <th>Car ID</th>
-                        <th>Company</th>
-                        <th>Model</th>
-                        <th>Status</th>
-                        <th>Color</th>
-                        <th>Year</th>
-                        <th>Miles</th>
-                        <th>Price</th>
-                        <th>Licence No</th>
-                        <th>Office</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for(var i=0; i < allCars.length; i++){ %>
+            <div style="overflow: scroll; height: 430px;">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="bg-color-red">
                         <tr>
-                            <th>
-                                <%= i+1 %>
-                            </th>
-                            <th>
-                                <%= allCars[i].car_id %>
-                            </th>
-                            <th>
-                                <%= allCars[i].company %>
-                            </th>
-                            <th>
-                                <%= allCars[i].model %>
-                            </th>
-                            <th>
-                                <%= allCars[i].status %>
-                            </th>
-                            <th>
-                                <%= allCars[i].color %>
-                            </th>
-                            <th>
-                                <%= allCars[i].year %>
-                            </th>
-                            <th>
-                                <%= allCars[i].miles %>
-                            </th>
-                            <th>
-                                <%= allCars[i].price %>
-                            </th>
-                            <th>
-                                <%= allCars[i].lic_no %>
-                            </th>
-                            <th>
-                                <%= allCars[i].location %>
-                            </th>
+                            <th>#</th>
+                            <th>Car ID</th>
+                            <th>Company</th>
+                            <th>Model</th>
+                            <th>Status</th>
+                            <th>Color</th>
+                            <th>Year</th>
+                            <th>Miles</th>
+                            <th>Price</th>
+                            <th>Licence No</th>
+                            <th>Office</th>
                         </tr>
-                        <% } %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < allCars.length; i++){ %>
+                            <tr>
+                                <th>
+                                    <%= i+1 %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].car_id %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].company %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].model %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].status %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].color %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].year %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].miles %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].price %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].lic_no %>
+                                </th>
+                                <th>
+                                    <%= allCars[i].location %>
+                                </th>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <form action="/admin" method="post">
             <div class="orange-button">
@@ -160,14 +160,14 @@
             </div>
         </form>
 
-        <div class="row">
+        <div class="row" style="margin-top: 20px;">
             <form action="/change" method="post">
                 <select name="index" class="input_field">
                     <option value="" disabled selected>Car to delete</option>
                     <% for(var i=0; i < freeCars.length; i++){ %>
                         <option value="<%= freeCars[i].lic_no %>">
                             <%= freeCars[i].car_id %> - <%= freeCars[i].company %> - <%= freeCars[i].model %>
-                                        - <%= freeCars[i].lic_no %>- <%= freeCars[i].office %>
+                                        - <%= freeCars[i].office %>
                         </option>
                         <% } %>
                 </select>
@@ -184,10 +184,115 @@
         </div>
 
 
+
+
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Service schedule</h3>
+            </div>
+        </div>
         <hr />
 
 
+        <form action="search" method="post">
+            <input type="checkbox" id="menu2">
+            <label for="menu2">Search</label>
+            <div class="collapsible-container">
+                <div class=" filters-container" style="height: 100px;">
+                    <div class="block1">
+                        <span class="filter-text">Date:</span>
+                        <div>
+                            <input type="date" class="input_field filters-input-field" name="search_service_date">
+                        </div>
+                    </div>
+                    <div class="block2">
+                        <button class="filters_btn" name="search_btn" value="search_service_schedule"
+                            type="submit">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <p class="search_message">
+            <%= services_search_message %>
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="bg-color-red">
+                    <tr>
+                        <th>#</th>
+                        <th>Schedule ID</th>
+                        <th>Car ID</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Schedule Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < scheduled_cars.length; i++){ %>
+                        <tr>
+                            <th>
+                                <%= i+1 %>
+                            </th>
+                            <th>
+                                <%= scheduled_cars[i].serv_no %>
+                            </th>
+                            <th>
+                                <%= scheduled_cars[i].car_id %>
+                            </th>
+                            <th>
+                                <%= scheduled_cars[i].startD.toLocaleString("sv-SE") %>
+                            </th>
+                            <th>
+                                <%= scheduled_cars[i].endD.toLocaleString("sv-SE") %>
+                            </th>
+                            <th>
+                                <%= scheduled_cars[i].serv_date.toLocaleString("sv-SE") %>
+                            </th>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <form action="/admin" method="post">
+            <div class="orange-button">
+                <button name="control_btn" value="add_schedule" type="submit"
+                    class="btn btn-danger square-btn">Add</button>
+            </div>
+        </form>
+
+        <div class="row" style="margin-top: 20px;">
+            <form action="/change" method="post">
+                <select name="index" class="input_field">
+                    <option value="" disabled selected>Schedule ID to delete</option>
+                    <% for(var i=0; i < scheduled_cars.length; i++){ %>
+                        <option value="<%= scheduled_cars[i].serv_no %>">
+                            <%= scheduled_cars[i].serv_no %>
+                        </option>
+                        <% } %>
+                </select>
+                <br>
+                <div class="orange-button" style="float: left !important; padding: 15px 10px;">
+                    <button name="delete_btn" value="delete_schedule" type="submit"
+                        class="btn btn-danger square-btn">Delete</button>
+                </div>
+            </form>
+        </div>
+
+
+
+
+        <hr />
         <div class="row">
+            <div class="col-md-12">
+                <h3>Cars Images</h3>
+            </div>
+        </div>
+        <hr />
+        <br>
+        <div class="row" style="overflow: scroll; height: 500px;">
             <% for(var i=0; i < allCars.length; i++){ %>
                 <div class="col-md-3 col-sm-6 col-xs-6">
                     <div class="panel panel-back noti-box">
@@ -195,7 +300,8 @@
                             <img class="car-image" src="../images/cars/<%= allCars[i].car_id %>.jpg" alt="car image">
                             <p class="text-muted car-card-text">car ID: <%= allCars[i].car_id %>
                             </p>
-                            <p class="text-muted car-card-text">Status:<%= allCars[i].status %></p>
+                            <p class="text-muted car-card-text">Status:<%= allCars[i].status %>
+                            </p>
                             <p class="text-muted car-card-text">
                                 model: <%= allCars[i].company %>
                                     <%= allCars[i].model %>

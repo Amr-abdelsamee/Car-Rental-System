@@ -22,7 +22,7 @@
                         </h2>
                         <hr style="margin:  0; border-top: 2px solid  ;">
                         
-                        <h4>Car reserved days:</h4>
+                        <h4>Car unavailable days:</h4>
                         <div class="table-responsive">
                             <div class="scroll_bar">
                                 <table class="table table-striped table-bordered table-hover">
@@ -36,10 +36,10 @@
                                         <% for(var i=0; i < reservations.length; i++){ %>
                                             <tr>
                                                 <th>
-                                                    <%= reservations[i].startD.toLocaleString() %>
+                                                    <%= reservations[i].startD.toLocaleString("sv-SE") %>
                                                 </th>
                                                 <th>
-                                                    <%= reservations[i].endD.toLocaleString() %>
+                                                    <%= reservations[i].endD.toLocaleString("sv-SE") %>
                                                 </th>
                                             </tr>
                                             <% } %>

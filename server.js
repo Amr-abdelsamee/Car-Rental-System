@@ -12,7 +12,6 @@
 //? npm install express-fileupload
 //TODO: to run the server type: nodemon server.js
 
-
 require('dotenv').config(); // for .env file
 const express = require("express"); // express module for routes
 const session = require("express-session");
@@ -23,9 +22,10 @@ const bodyParser = require("body-parser"); // for requestes parsing
 const favicon = require('serve-favicon'); // for icon
 //const chalk = require("chalk") // for console colors
 const Get_Color_Name = require("hex-color-to-color-name")
-
 const fs = require('fs'); // for images
 const { log } = require('console');
+
+
 
 const app = express();
 app.set('views', __dirname + '/views/');
@@ -78,9 +78,9 @@ app.route("/control")
         if (app_session.adminPermission) {
             res.redirect("admin")
         } else {
-            res.render("control/admin_signIn",{
-                error_msg:"",
-                error_class:""
+            res.render("control/admin_signIn", {
+                error_msg: "",
+                error_class: ""
             })
         }
     })
@@ -94,9 +94,9 @@ app.route("/control")
         db.query(sql, VALUES, (err, result) => {
             if (err) {
                 console.log(err)
-                res.render("control/admin_signIn",{
-                    error_msg:"ERROR!sign in failed please try again!",
-                    error_class:""
+                res.render("control/admin_signIn", {
+                    error_msg: "ERROR!sign in failed please try again!",
+                    error_class: ""
                 })
             } else {
                 if (result.length) {
@@ -111,9 +111,9 @@ app.route("/control")
                 } else {
                     console.log(new Date().toLocaleString() + ":: admin sign in failed!")
                     console.log(VALUES)
-                    res.render("control/admin_signIn",{
-                        error_msg:"Username or Password is incorrect!!",
-                        error_class:"error"
+                    res.render("control/admin_signIn", {
+                        error_msg: "Username or Password is incorrect!!",
+                        error_class: "error"
                     })
                 }
             }
@@ -156,7 +156,8 @@ app.route("/admin")
                 case "all_cars":
                     sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;";
                     sql += "SELECT * FROM offices;"
-                    sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations) ";
+                    sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations); ";
+                    sql += "SELECT * FROM service_sche;"
                     db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
@@ -166,7 +167,10 @@ app.route("/admin")
                                 offices: results[1],
                                 freeCars: results[2],
                                 startDate: new Date().toJSON().slice(0, 10),
-                                search_message: ""
+                                cars_search_message: "",
+                                scheduled_cars: results[3],
+                                services_search_message: ""
+
                             })
                         }
                     })
@@ -226,11 +230,11 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/add_car", { 
+                            res.render("control/add_car", {
                                 offices: result,
-                                error_msg1:"",
-                                error_msg2:"" 
-                                })
+                                error_msg1: "",
+                                error_msg2: ""
+                            })
                         }
                     })
                     break;
@@ -262,6 +266,25 @@ app.route("/admin")
                         }
                     })
                     break;
+                case "add_schedule":
+                    // let currentDate = new Date().toJSON().slice(0, 10)
+                    // let maxDate = new Date()
+                    // maxDate.setFullYear(maxDate.getFullYear() + 1)
+                    // maxDate = maxDate.toJSON().slice(0, 10)
+                    sql = "SELECT * FROM cars;";
+                    db.query(sql, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log(result)
+                            res.render("control/add_schedule", {
+                                cars: result,
+                                // minDate: currentDate,
+                                // maxDate: maxDate
+                            })
+                        }
+                    })
+                    break;
             }
         } else {
             res.redirect("control")
@@ -278,6 +301,7 @@ app.route("/add")
         if (app_session.adminPermission) {
             let sql = ""
             let VALUES
+            let dates
             switch (req.body.control_btn) {
                 case "add_car":
                     const { image } = req.files
@@ -372,9 +396,14 @@ app.route("/add")
                     break;
 
                 case "add_res":
-                    const dates = make_date(req.body.sdate, req.body.edate)
+                    dates = make_date(req.body.sdate, req.body.edate)
                     if (dates.valid) {
                         const VALUE = [
+                            req.body.car_id.split('-')[0],
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD,
                             req.body.car_id.split('-')[0],
                             dates.startD,
                             dates.endD,
@@ -382,6 +411,8 @@ app.route("/add")
                             dates.endD
                         ]
                         let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
+                        sql += " UNION "
+                        sql += "SELECT serv_no,startD,endD FROM service_sche AS SS  JOIN cars AS C ON SS.car_id=C.car_id WHERE SS.car_id= ? AND (( ? BETWEEN SS.startD AND SS.endD OR ? BETWEEN SS.startD AND SS.endD) OR SS.startD BETWEEN ? AND ?)";
                         db.query(sql, VALUE, (err, result) => {
                             if (err) {
                                 console.log(err)
@@ -394,7 +425,7 @@ app.route("/add")
                                 } else {
                                     let time = dates.endD.getTime() - dates.startD.getTime() + 60000;
                                     let days = Math.ceil(time / (1000 * 3600 * 24));
-        
+
                                     VALUES = [
                                         req.body.customer_id
                                         , req.body.car_id.split('-')[0]
@@ -424,7 +455,64 @@ app.route("/add")
                         display_failure(res, "ERROR! can not make the reservation !", "Selected dates are not valid", "")
                     }
                     break;
+
+                case "add_schedule":
+                    dates = make_date(req.body.sdate, req.body.edate)
+                    if (dates.valid) {
+                        const VALUE = [
+                            req.body.car_id,
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD,
+                            req.body.car_id,
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD
+                        ]
+                        let sql = "SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)";
+                        sql += " UNION "
+                        sql += "SELECT serv_no,startD,endD FROM service_sche AS SS  JOIN cars AS C ON SS.car_id=C.car_id WHERE SS.car_id= ? AND (( ? BETWEEN SS.startD AND SS.endD OR ? BETWEEN SS.startD AND SS.endD) OR SS.startD BETWEEN ? AND ?)";
+                        db.query(sql, VALUE, (err, result) => {
+                            if (err) {
+                                console.log(err)
+                                display_failure(res, "ERROR! can not search for this car now !", err.sqlMessage, "")
+                            } else {
+                                if (result.length) {
+                                    console.log("car is busy in these dates")
+
+                                    //res.status(204).send()
+                                    display_failure(res, "ERROR! can not service this car !", "Selected dates is not available for this car", "")
+                                } else {
+                                    VALUES = [
+                                        req.body.car_id
+                                        , dates.startD
+                                        , dates.endD
+                                    ]
+                                    sql = "INSERT INTO service_sche(car_id, startD, endD) VALUES (?)";
+                                    db.query(sql, [VALUES], (err, result) => {
+                                        if (err) {
+                                            console.log(err)
+                                            display_failure(res, "ERROR! can not service this car now try again later !", err.sqlMessage, "")
+                                        } else {
+                                            console.log("NEW service is made!")
+                                            console.log(VALUES)
+                                            display_success(res, "New service was added successfully!", "", "")
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    }
+                    else {
+                        console.log("dates are not valid!")
+                        // res.status(204).send()
+                        display_failure(res, "ERROR! can not make the reservation !", "Selected dates are not valid", "")
+                    }
+                    break;
             }
+
         } else {
             res.redirect("control")
         }
@@ -687,6 +775,7 @@ app.route("/search")
                     sql += ");"
                     sql += " SELECT * FROM offices;"
                     sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations);";
+                    sql += "SELECT * FROM service_sche"
                     // console.log("ac_VALUES: ", ac_VALUES)
                     // console.log(sql)
                     db.query(sql, ac_VALUES, (err, results) => {
@@ -705,7 +794,9 @@ app.route("/search")
                                 offices: results[1],
                                 freeCars: results[2],
                                 startDate: new Date().toJSON().slice(0, 10),
-                                search_message: fmessage
+                                cars_search_message: fmessage,
+                                scheduled_cars: results[3],
+                                services_search_message: "",
                             })
                         }
                     })
@@ -915,13 +1006,49 @@ app.route("/search")
                     })
                     break;
 
+                case "search_service_schedule":
+                    let date = new Date(req.body.search_service_date)
+                    const VALUES = [
+                        date.toJSON().slice(0, 10) + " 10:00:00",
+                    ]
+                    sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;";
+                    sql += "SELECT * FROM offices;"
+                    sql += "SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations); ";
+                    sql += "SELECT * FROM service_sche WHERE ? BETWEEN startD AND endD;"
+
+                    db.query(sql, VALUES, (err, results) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            let fmessage = ""
+                            if (results[3].length === 0) {
+                                fmessage = "No results"
+                            }
+                            res.render("control/all_cars", {
+                                allCars: results[0],
+                                offices: results[1],
+                                freeCars: results[2],
+                                startDate: new Date().toJSON().slice(0, 10),
+                                cars_search_message: "",
+                                scheduled_cars: results[3],
+                                services_search_message: fmessage
+                            })
+                        }
+                    })
+                    break;
+
                 case "daily_report":
-                    load_dashBoard(app_session.admin_id, res, req.body.search_profit_sdate, req.body.search_profit_edate);
+                    load_dashBoard(app_session.admin_id, res, req.body.search_profit_sdate, req.body.search_profit_edate, "", "");
                     break;
 
                 case "income_statemet":
                     load_dashBoard(app_session.admin_id, res, "", "", req.body.search_income_sdate, req.body.search_income_edate);
                     break;
+
+                case "car_status":
+                    load_dashBoard(app_session.admin_id, res, "", "", "", "", req.body.search_cStatus_date);
+                break;
+
             }
         } else {
             res.redirect("control")
@@ -1194,22 +1321,22 @@ app.route("/reserve")
         app_session = req.session
         if (app_session.userPermission) {
             const VALUE = req.body.reserve_btn
-            let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?; SELECT startD, endD FROM reservations WHERE car_id=? ORDER BY startD";
-            db.query(sql, [VALUE, VALUE], (err, results) => {
+            let sql = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;";
+            sql += "SELECT startD, endD FROM reservations WHERE car_id=?"
+            sql += " UNION "
+            sql += "SELECT startD, endD FROM service_sche WHERE car_id=? ORDER BY startD"
+            db.query(sql, [VALUE, VALUE, VALUE], (err, results) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    let currentDate = new Date().toJSON().slice(0, 10)
                     let maxDate = new Date()
                     maxDate.setFullYear(maxDate.getFullYear() + 1)
                     maxDate = maxDate.toJSON().slice(0, 10)
-                    // console.log("min date: ", currentDate)
-                    // console.log("max date: ", maxDate)
                     res.render("cars/reserve", {
                         car: results[0][0],
                         reservations: results[1],
-                        minDate: currentDate,
-                        maxDate: maxDate,
+                        minDate: new Date().toJSON().slice(0, 10),
+                        maxDate:  maxDate,
                     })
                 }
             })
@@ -1250,6 +1377,8 @@ app.route("/confirmReservation")
                                 console.log("Start date: ", result[i].startD.toLocaleString())
                                 console.log("End date: ", result[i].endD.toLocaleString())
                             }
+
+
                             res.status(204).send()
                         } else {
 
@@ -1419,19 +1548,19 @@ app.get('*', function (req, res) {
 
 
 //? ---------------------------------------------< all functions >-------------------------------------------------------
-function display_failure(res, msg1, msg2, msg3){
-    res.render("control/failure", { 
-        message1:msg1,
-        message2:msg2,
-        message3:msg3
+function display_failure(res, msg1, msg2, msg3) {
+    res.render("control/failure", {
+        message1: msg1,
+        message2: msg2,
+        message3: msg3
     })
 }
 
-function display_success(res, msg1, msg2, msg3){
-    res.render("control/success", { 
-        message1:msg1,
-        message2:msg2,
-        message3:msg3
+function display_success(res, msg1, msg2, msg3) {
+    res.render("control/success", {
+        message1: msg1,
+        message2: msg2,
+        message3: msg3
     })
 }
 
@@ -1481,7 +1610,7 @@ function loadOneImage(lic_no) {
 }
 
 
-function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) {
+function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS, status_date) {
 
     let startDate
     let endDate
@@ -1489,11 +1618,13 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) 
     let startDateIncome
     let endDateIncome
 
+    let carStatusDate
+
     if (sDate) {
         startDate = sDate
     }
     else {
-        startDate = new Date().toJSON().slice(0, 10) + " 10:00:00"
+        startDate = new Date().toJSON().slice(0, 10)
     }
 
     if (eDate) {
@@ -1522,35 +1653,63 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) 
         endDateIncome = endDateIncome.toJSON().slice(0, 10)
     }
 
+    if(status_date){
+        carStatusDate = new Date(status_date)
+        carStatusDate = carStatusDate.toJSON().slice(0, 10) + " 10:00:00"
+    }
+    else{
+        carStatusDate = new Date()
+        carStatusDate = carStatusDate.toJSON().slice(0, 10) + " 10:00:00"
+    }
 
-    let sql1 = "SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id limit 10;"
+
+    let sql1 = "SELECT C.car_id, company, model, `year`, price, O.location, image, COUNT(*) AS num_res FROM cars AS C\
+    JOIN offices AS O ON C.office_id=O.office_id \
+    JOIN reservations AS R ON C.car_id=R.car_id\
+    GROUP BY C.car_id limit 12;"
     let sql2 = "SELECT COUNT(car_id) AS count FROM cars;"
     let sql3 = "SELECT COUNT(customer_id) AS count FROM customers;"
-    let sql4 = "SELECT COUNT(reserve_no) AS count FROM reservations;";
+    let sql4 = "SELECT COUNT(reserve_no) AS count FROM reservations;"
     let sql5 = "SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;"
     let sql6 = "SELECT reserve_no, fname, lname, car_id, startD, endD,res_date FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id ORDER BY  res_date DESC  limit 10;"
     let sql7 = "SET @from = ?;\
     SET @to = ?;\
     WITH dates AS\
     (   \
-        SELECT @from + INTERVAL seq DAY AS `days`\
-          FROM seq_0_to_99999999\
-         WHERE seq BETWEEN 0 and (SELECT TIMESTAMPDIFF(DAY, @from, @to))\
+        SELECT @from + INTERVAL seq DAY + INTERVAL 10 HOUR AS `days`\
+        FROM seq_0_to_99999999\
+        WHERE seq BETWEEN 0 and (SELECT TIMESTAMPDIFF(DAY, @from, @to))\
     )\
     SELECT days, IFNULL(SUM(C.price),0) AS total_profit, COUNT(C.car_id) AS cars_num FROM reservations AS R\
-      JOIN cars AS C ON R.car_id=C.car_id \
-      RIGHT JOIN dates ON (days BETWEEN R.startD AND R.endD)\
-      GROUP BY days\
-      ORDER BY days\
-      ;";
-    let sql8 = "SELECT DATE(res_date)AS resDate, COUNT(res_date)AS num_res, SUM(cost)AS income FROM reservations WHERE res_date BETWEEN ? AND ? GROUP BY DATE(res_date)";
+    JOIN cars AS C ON R.car_id=C.car_id \
+    RIGHT JOIN dates ON (days BETWEEN R.startD AND R.endD)\
+    GROUP BY days\
+    ORDER BY days\
+    ;";
+    let sql8 = "SELECT DATE(res_date)AS resDate, COUNT(res_date)AS num_res, SUM(cost)AS income FROM reservations WHERE res_date BETWEEN ? AND ? GROUP BY DATE(res_date);";
+    let sql9 = "SET @dat = ?;\
+    SET @status1= 'Available';\
+    SET @status2= 'Rented';\
+    SET @status3= 'Out of Service';\
+    SELECT SS.car_id, C.company, C.model, C.year,  @status3 AS `status` from service_sche AS SS JOIN cars AS C ON SS.car_id=C.car_id WHERE @dat BETWEEN startD AND endD\
+    UNION\
+    SELECT R.car_id, C.company, C.model, C.year, @status2 from reservations AS R JOIN cars AS C ON R.car_id=C.car_id  WHERE @dat BETWEEN startD AND endD\
+    UNION\
+    SELECT C.car_id, C.company, C.model, C.year, @status1 from cars AS C \
+    WHERE C.car_id NOT IN (\
+        SELECT SS.car_id from service_sche AS SS WHERE @dat BETWEEN startD AND endD\
+    UNION\
+    SELECT R.car_id from reservations AS R WHERE @dat BETWEEN startD AND endD\
+    )\
+    ORDER BY car_id;"
     const VALUES = [
         startDate
         , endDate
         , startDateIncome
         , endDateIncome
+        , carStatusDate
     ]
-    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7 + sql8
+    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7 + sql8 +sql9
     db.query(sql, VALUES, (err, results) => {
         if (err) {
             console.log(err)
@@ -1566,6 +1725,7 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) 
                 , search_message: ""
                 , profitsReport: results[8]
                 , incomeTable: results[9]
+                , carStatus: results[14]
             })
         }
     })
@@ -1638,6 +1798,16 @@ function delete_entry(btn_value, data_index) {
                 }
             })
             break;
+        case "delete_schedule":
+            sql = "DELETE FROM service_sche WHERE serv_no = ?";
+            db.query(sql, VALUE, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log("An admin deleted a service from the system!")
+                }
+            })
+            break;
     }
     return;
 }
@@ -1673,5 +1843,7 @@ function make_date(sDate, eDate) {
 app.listen(process.env.PORT || 3000, function () {
     console.log(new Date().toLocaleString() + ":: Server started..")
 })
+
+
 
 
