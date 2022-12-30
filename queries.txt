@@ -1,0 +1,519 @@
+ADMIN Section
+=====================
+
+ADMIN SIGN IN
+
+
+SELECT * FROM `admins` WHERE `password`= ? AND email=?
+Values= [ md5(req.body.password + process.env.SALT), req.body.username]
+
+=========================================================
+
+ADMIN All Cars
+
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;
+display all cars in the system with their offices
+
+SELECT * FROM offices;
+Displays all data in offices table
+
+SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations) 
+Displays all cars that have not been reserved yet.
+
+in ADD Car:
+SELECT * FROM offices
+Get all data in offices table
+
+Then
+INSERT INTO cars VALUES (?)
+Values= [
+                        null
+                        , req.body.company
+                        , req.body.model
+                        , req.body.lic_no
+                        , color_name
+                        , req.body.stat
+                        , parseInt(req.body.year)
+                        , parseInt(req.body.miles)
+                        , parseInt(req.body.price)
+                        , parseInt(req.body.office)
+                        , image.data
+                    ]
+Adds the car added by user to car table when add button is pressed.
+
+in EDIT Car:
+SELECT * FROM offices; 
+get all data in offices table
+
+SELECT * FROM cars WHERE lic_no = ?
+VALUE = req.body.index
+get cars in cars table with desired license number for editing
+
+Then
+UPDATE cars SET  company=?, model=?, lic_no=?, color=?, `status`=?, `year`=?, miles=?, price=?, office_id=?, `image`= ? WHERE car_id=?
+Values=[
+                        req.body.company
+                        , req.body.model
+                        , req.body.lic_no
+                        , color_name
+                        , req.body.stat
+                        , parseInt(req.body.year)
+                        , parseInt(req.body.miles)
+                        , parseInt(req.body.price)
+                        , parseInt(req.body.office)
+                        , image.data
+                        , req.body.car_id
+                    ]
+add the edits made to the car details into its original tuple in car table
+
+
+FILTER Search Cars:
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id 
+Select the data from cars from cars table 
+Then we append the filter depending on what the admin requests to filter:
+
+For office id:
+append C.office_id
+append =? if an input was added
+
+For company:
+append C.company
+append =? if an input was added
+
+For status:
+append C.status
+append =? if an input was added
+
+For model:
+append C.model
+append =? if an input was added
+
+For year:
+append C.year
+append =? if an input was added
+
+For license number:
+append C.lic_no
+append =? if an input was added
+
+For lower bound of price:
+append C.price >=?
+
+For upper bound of price:
+append C.price <=?
+
+For start date:
+append C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)
+which means that the car is not reserved on the given start date or between the given start date and end date
+
+For end date:
+append  OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD)
+which means that the car is not reserved on the given end date or between the given start date and end date
+
+append );
+
+SELECT * FROM offices;
+gets all the data on offices on office table
+
+SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations);
+gets all the data on cars that have not been reserved yet.
+
+SELECT * FROM service_sche
+gets all the data on service schedule table
+
+ADD schedule
+SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)
+UNION
+SELECT serv_no,startD,endD FROM service_sche AS SS  JOIN cars AS C ON SS.car_id=C.car_id WHERE SS.car_id= ? AND (( ? BETWEEN SS.startD AND SS.endD OR ? BETWEEN SS.startD AND SS.endD) OR SS.startD BETWEEN ? AND ?)
+
+Values =  [
+                            req.body.car_id,
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD,
+                            req.body.car_id,
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD
+                        ]
+
+get all the data on reservations and service schedule that have the same car id as the car that is being reserved or serviced 
+and check if the start date and end date of the reservation or service schedule is between the start date and end date of the new reservation or service schedule 
+or if the start date and end date of the new reservation or service schedule is between the start date and end date of the reservation or service schedule.
+
+Then
+INSERT INTO service_sche(car_id, startD, endD) VALUES (?)
+Values = [
+                                        req.body.car_id
+                                        , dates.startD
+                                        , dates.endD
+                                    ]
+Insert the new service schedule into service schedule table
+
+
+Search Service Schedule
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id;
+get all the data on cars and offices
+
+SELECT * FROM offices;
+get all the data on offices
+
+SELECT * FROM cars WHERE car_id NOT IN(SELECT DISTINCT car_id FROM reservations);
+get all the data on cars that have not been reserved yet
+
+SELECT * FROM service_sche WHERE ? BETWEEN startD AND endD;
+get all the data on service schedule that have the start date and end date between the given start date and end date
+
+
+
+
+=============================================================
+
+ADMIN All customers
+
+
+SELECT * FROM customers;
+Display all data in customers table
+
+SELECT * FROM customers where customer_id NOT IN(SELECT DISTINCT customer_id FROM reservations)
+Display all customers who have not made any reservation yet.
+
+SELECT * FROM service_sche;
+Display all data in service_sche table
+
+in ADD customer
+INSERT INTO customers VALUES (?)
+Values=[
+                        null
+                        , req.body.fname
+                        , req.body.lname
+                        , req.body.nationalID
+                        , req.body.email
+                        , md5(req.body.password + process.env.SALT)
+                        , req.body.address
+                        , req.body.phone
+                    ]
+Insert into customer table the given data of new customer
+
+in edit customer
+
+SELECT * FROM customers WHERE customer_id=?
+Get the customer chosen to be edited using the customer_id.
+
+Then
+UPDATE customers SET fname=?, lname=?, national_ID=?, email=?, `address`=?, phone=? WHERE customer_id=?
+Values= [
+                        req.body.fname
+                        , req.body.lname
+                        , req.body.nationalID
+                        , req.body.email
+                        , req.body.address
+                        , req.body.phone
+                        , req.body.customer_id
+                    ]
+add the edits made to the customer to its original tuple in customer table
+
+FILTER Search Customers:
+
+SELECT * FROM customers AS C
+Select the data from customers from customers table 
+Then we append the filter depending on what the admin requests to filter:
+
+For customer id:
+append C.customer_id=?
+
+For first name:
+append C.fname=?
+
+For last name:
+append C.lname=?
+
+For Email:
+append C.email=?
+
+For Address:
+append C.address=?
+
+For phone:
+append C.phone=?
+
+append ;
+
+SELECT * FROM customers where customer_id NOT IN(SELECT DISTINCT customer_id FROM reservations)
+Display all customers who have not made any reservation yet.
+
+
+==================================================================
+
+ADMIN reservations
+SELECT reserve_no, fname, lname, R.customer_id, car_id, startD, endD,rented FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id
+Display reservation details in reservation tables as well as the corresponding customer making reservations as well as the rented status.
+
+in ADD Reservation:
+SELECT * FROM cars; SELECT * from customers
+display all data in cars table and customers table
+
+Then
+SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)
+Values= [
+                            req.body.car_id.split('-')[0],
+                            dates.startD,
+                            dates.endD,
+                            dates.startD,
+                            dates.endD
+                        ]
+            
+Append UNION
+Append SELECT serv_no,startD,endD FROM service_sche AS SS  JOIN cars AS C ON SS.car_id=C.car_id WHERE SS.car_id= ? AND (( ? BETWEEN SS.startD AND SS.endD OR ? BETWEEN SS.startD AND SS.endD) OR SS.startD BETWEEN ? AND ?)
+
+display all of the reserved days of car between the given period by the user
+union with all of the service days of car between the given period by the user
+
+
+INSERT INTO reservations(customer_id, car_id, startD, endD, cost, rented) VALUES (?)
+Values =  [
+                                        req.body.customer_id
+                                        , req.body.car_id.split('-')[0]
+                                        , dates.startD
+                                        , dates.endD
+                                        , days * req.body.car_id.split('-')[1]
+                                        , req.body.rented
+                                    ]
+Insert the input data into the reservations table 
+
+FILTER Search Reservations:
+
+SELECT * FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id 
+Select the data from reservations from reservations table 
+Then we append the filter depending on what the admin requests to filter:
+
+For reservation number:
+append R.reserve_no=?
+
+For customer id:
+append R.customer_id=?
+
+For car id:
+append R.car_id=?
+
+For First name:
+append C.fname=?
+
+For rented status:
+append R.rented=?
+
+For start date:
+append R.startD=?
+
+For end date:
+append R.endD=?
+
+append ;
+
+============================================================================
+
+ADMIN Settings
+
+
+SELECT * FROM admins;
+display all data in admin table
+
+SELECT * FROM offices
+display all data in offices table
+
+
+add admin button:
+
+INSERT INTO admins (email,password) VALUES (?)
+values =  [
+                        req.body.email
+                        , md5(req.body.password + process.env.SALT)
+                    ]
+insert new admin to admin table into database using the input email and md5 hashed password.
+
+
+add office button:
+
+INSERT INTO offices VALUES (?)
+Values = VALUES = [
+                        null
+                        , req.body.location
+                    ]
+
+Insert new office in offices table using input location
+
+
+=======================================================================
+
+LOGIN section
+
+========================================================================
+
+Sign In USER
+
+
+SELECT * FROM `customers` WHERE email=? AND `password`=?
+
+
+SELECT email FROM customers WHERE email=?
+
+
+INSERT INTO customers VALUES (?)
+
+
+=======================================================================
+
+MAIN section
+
+========================================================================
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE status='Active'; 
+
+SELECT * FROM offices
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id 
+WHERE status='Active' AND C.office_id AND C.office_id=? AND C.company=? AND C.model=? AND C.year=? AND C.lic_no=? AND C.price >= ? AND C.price <= ? 
+AND C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)
+OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD))
+
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?
+
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;
+
+=======================================================================
+
+Reserve section
+
+========================================================================
+
+SELECT startD, endD FROM reservations WHERE car_id=?
+SELECT startD, endD FROM service_sche WHERE car_id=? ORDER BY startD
+UNION 
+SELECT startD, endD FROM service_sche WHERE car_id=? ORDER BY startD
+
+
+SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id 
+WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)
+
+
+INSERT INTO reservations(customer_id, car_id, startD, endD, cost ) VALUES (?);
+
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;
+
+
+SELECT reserve_no, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id 
+WHERE R.customer_id= ? AND R.car_id= ? AND R.startD= ? AND R.endD= ?;
+
+
+UPDATE reservations SET rented = ? WHERE reserve_no=?
+
+
+=======================================================================
+
+Profile section
+
+========================================================================
+
+SELECT * FROM customers WHERE customer_id=?; SELECT *, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id  WHERE R.customer_id= ?
+
+
+SELECT startD FROM reservations WHERE reserve_no = ?
+
+DELETE FROM reservations WHERE reserve_no = ?
+
+UPDATE reservations SET rented='Yes' WHERE reserve_no=? 
+
+
+
+=======================================================================
+
+Functions section
+
+========================================================================
+
+SELECT car_id,image FROM cars
+
+SELECT car_id,image FROM cars WHERE lic_no=?
+
+
+SELECT C.car_id, company, model, `year`, price, O.location, image, COUNT(*) AS num_res FROM cars AS C
+JOIN offices AS O ON C.office_id=O.office_id 
+JOIN reservations AS R ON C.car_id=R.car_id
+GROUP BY C.car_id limit 12;"
+
+
+SELECT COUNT(car_id) AS count FROM cars;
+
+
+SELECT COUNT(customer_id) AS count FROM customers;
+
+
+SELECT COUNT(reserve_no) AS count FROM reservations;
+
+
+SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;
+
+
+SELECT reserve_no, fname, lname, car_id, startD, endD,res_date 
+FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id 
+ORDER BY  res_date DESC  
+limit 10;
+
+
+SET @from = ?;
+SET @to = ?;
+WITH dates AS
+(  
+SELECT @from + INTERVAL seq DAY + INTERVAL 10 HOUR AS `days`
+FROM seq_0_to_99999999
+WHERE seq BETWEEN 0 and (SELECT TIMESTAMPDIFF(DAY, @from, @to))
+)
+
+
+SELECT days, IFNULL(SUM(C.price),0) AS total_profit, COUNT(C.car_id) AS cars_num FROM reservations AS R
+JOIN cars AS C ON R.car_id=C.car_id 
+RIGHT JOIN dates ON (days BETWEEN R.startD AND R.endD)
+GROUP BY days
+ORDER BY days;
+
+
+SELECT DATE(res_date)AS resDate, COUNT(res_date)AS num_res, SUM(cost)AS income FROM reservations WHERE res_date BETWEEN ? AND ? GROUP BY DATE(res_date);
+
+
+SET @dat = ?;
+SET @status1= 'Available';
+SET @status2= 'Rented';
+SET @status3= 'Out of Service';
+SELECT SS.car_id, C.company, C.model, C.year,  @status3 AS `status` from service_sche AS SS JOIN cars AS C ON SS.car_id=C.car_id 
+WHERE @dat BETWEEN startD AND endD
+UNION
+SELECT R.car_id, C.company, C.model, C.year, @status2 from reservations AS R JOIN cars AS C ON R.car_id=C.car_id  WHERE @dat BETWEEN startD AND endD
+UNION
+SELECT C.car_id, C.company, C.model, C.year, @status1 from cars AS C 
+WHERE C.car_id NOT IN (
+SELECT SS.car_id from service_sche AS SS WHERE @dat BETWEEN startD AND endD
+UNION
+SELECT R.car_id from reservations AS R WHERE @dat BETWEEN startD AND endD
+)
+ORDER BY car_id;
+
+
+DELETE FROM cars WHERE lic_no = ?
+
+DELETE FROM customers WHERE customer_id = ?
+
+DELETE FROM admins WHERE email = ?
+
+DELETE FROM offices WHERE office_id = ?
+
+DELETE FROM reservations WHERE reserve_no = ?
+
+DELETE FROM service_sche WHERE serv_no = ?
