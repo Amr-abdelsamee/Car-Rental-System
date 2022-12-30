@@ -36,6 +36,7 @@ CREATE TABLE reservations(
 CREATE TABLE service_sche(
     serv_no int auto_increment PRIMARY KEY, 
     car_id int NOT NULL,
+    office_id int NOT NULL,
     startD datetime NOT NULL,
     endD datetime NOT NULL,
     serv_date datetime DEFAULT current_timestamp() NOT NULL,
@@ -60,4 +61,6 @@ ALTER TABLE cars ADD FOREIGN KEY (office_id)
 REFERENCES offices(office_id);
 
 
+ALTER TABLE service_sche ADD FOREIGN KEY (office_id) 
+REFERENCES offices(office_id);
 

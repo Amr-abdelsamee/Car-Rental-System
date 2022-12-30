@@ -12,12 +12,12 @@
         <div class="add panel-back">
             <h4>Car</h4>
             <select name="car_id" class="input_field">
-                <option value="<%= cars[0].car_id %>" selected>
+                <option value="<%= cars[0].car_id %>-<%= cars[0].office_id %> " selected>
                     <%= cars[0].car_id %> - <%= cars[0].company %>
                             <%= cars[0].model %> - <%= cars[0].year %>
                 </option>
                 <% for(var i=1; i < cars.length; i++){ %>
-                    <option value="<%= cars[i].car_id %>">
+                    <option value="<%= cars[i].car_id %>-<%= cars[i].office_id %>">
                         <%= cars[i].car_id %> - <%= cars[i].company %>
                                 <%= cars[i].model %> - <%= cars[i].year %>
                     </option>

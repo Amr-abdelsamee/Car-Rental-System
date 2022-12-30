@@ -225,6 +225,7 @@
                         <th>#</th>
                         <th>Schedule ID</th>
                         <th>Car ID</th>
+                        <th>Office ID</th>
                         <th>Start Date</th>
                         <th>End Date</th>
                         <th>Schedule Date</th>
@@ -241,6 +242,9 @@
                             </th>
                             <th>
                                 <%= scheduled_cars[i].car_id %>
+                            </th>
+                            <th>
+                                <%= scheduled_cars[i].office_id %>
                             </th>
                             <th>
                                 <%= scheduled_cars[i].startD.toLocaleString("sv-SE") %>

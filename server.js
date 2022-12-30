@@ -483,11 +483,13 @@ app.route("/add")
                                     display_failure(res, "ERROR! can not service this car !", "Selected dates is not available for this car", "")
                                 } else {
                                     VALUES = [
-                                        req.body.car_id
+                                        req.body.car_id.split('-')[0]
+                                        ,req.body.car_id.split('-')[1]
                                         , dates.startD
                                         , dates.endD
                                     ]
-                                    sql = "INSERT INTO service_sche(car_id, startD, endD) VALUES (?)";
+                                    console.log("GGGGGG ",VALUES)
+                                    sql = "INSERT INTO service_sche(car_id, office_id, startD, endD) VALUES (?)";
                                     db.query(sql, [VALUES], (err, result) => {
                                         if (err) {
                                             console.log(err)
@@ -1897,4 +1899,3 @@ function make_date(sDate, eDate) {
 app.listen(process.env.PORT || 3000, function () {
     console.log(new Date().toLocaleString() + ":: Server started..")
 })
-
