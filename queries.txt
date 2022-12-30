@@ -350,11 +350,170 @@ Insert new office in offices table using input location
 
 =======================================================================
 
+LOGIN section
+
+========================================================================
+
+Sign In USER
+
+
+SELECT * FROM `customers` WHERE email=? AND `password`=?
+
+
+SELECT email FROM customers WHERE email=?
+
+
+INSERT INTO customers VALUES (?)
+
+
+=======================================================================
+
 MAIN section
 
 ========================================================================
 
-Sign In
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE status='Active'; 
+
+SELECT * FROM offices
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id 
+WHERE status='Active' AND C.office_id AND C.office_id=? AND C.company=? AND C.model=? AND C.year=? AND C.lic_no=? AND C.price >= ? AND C.price <= ? 
+AND C.car_id NOT IN (SELECT R.car_id FROM reservations AS R WHERE R.startD = ? OR ( ? BETWEEN R.startD AND R.endD)
+OR R.endD = ? OR ( ? BETWEEN R.startD AND R.endD))
 
 
-SELECT * FROM `customers` WHERE email=? AND `password`=?
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?
+
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;
+
+=======================================================================
+
+Reserve section
+
+========================================================================
+
+SELECT startD, endD FROM reservations WHERE car_id=?
+SELECT startD, endD FROM service_sche WHERE car_id=? ORDER BY startD
+UNION 
+SELECT startD, endD FROM service_sche WHERE car_id=? ORDER BY startD
+
+
+SELECT reserve_no,startD,endD FROM reservations AS R  JOIN cars AS C ON R.car_id=C.car_id 
+WHERE R.car_id= ? AND (( ? BETWEEN R.startD AND R.endD OR ? BETWEEN R.startD AND R.endD) OR R.startD BETWEEN ? AND ?)
+
+
+INSERT INTO reservations(customer_id, car_id, startD, endD, cost ) VALUES (?);
+
+
+SELECT * FROM cars AS C JOIN offices AS O ON C.office_id=O.office_id WHERE C.car_id= ?;
+
+
+SELECT reserve_no, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id 
+WHERE R.customer_id= ? AND R.car_id= ? AND R.startD= ? AND R.endD= ?;
+
+
+UPDATE reservations SET rented = ? WHERE reserve_no=?
+
+
+=======================================================================
+
+Profile section
+
+========================================================================
+
+SELECT * FROM customers WHERE customer_id=?; SELECT *, DATEDIFF(endD, startD) AS days, (DATEDIFF(endD, startD) * C.price) AS cost FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id  WHERE R.customer_id= ?
+
+
+SELECT startD FROM reservations WHERE reserve_no = ?
+
+DELETE FROM reservations WHERE reserve_no = ?
+
+UPDATE reservations SET rented='Yes' WHERE reserve_no=? 
+
+
+
+=======================================================================
+
+Functions section
+
+========================================================================
+
+SELECT car_id,image FROM cars
+
+SELECT car_id,image FROM cars WHERE lic_no=?
+
+
+SELECT C.car_id, company, model, `year`, price, O.location, image, COUNT(*) AS num_res FROM cars AS C
+JOIN offices AS O ON C.office_id=O.office_id 
+JOIN reservations AS R ON C.car_id=R.car_id
+GROUP BY C.car_id limit 12;"
+
+
+SELECT COUNT(car_id) AS count FROM cars;
+
+
+SELECT COUNT(customer_id) AS count FROM customers;
+
+
+SELECT COUNT(reserve_no) AS count FROM reservations;
+
+
+SELECT SUM(DATEDIFF(endD, startD) * C.price) AS total_profits FROM reservations AS R JOIN cars AS C ON R.car_id=C.car_id;
+
+
+SELECT reserve_no, fname, lname, car_id, startD, endD,res_date 
+FROM reservations AS R JOIN customers AS C ON R.customer_id=C.customer_id 
+ORDER BY  res_date DESC  
+limit 10;
+
+
+SET @from = ?;
+SET @to = ?;
+WITH dates AS
+(  
+SELECT @from + INTERVAL seq DAY + INTERVAL 10 HOUR AS `days`
+FROM seq_0_to_99999999
+WHERE seq BETWEEN 0 and (SELECT TIMESTAMPDIFF(DAY, @from, @to))
+)
+
+
+SELECT days, IFNULL(SUM(C.price),0) AS total_profit, COUNT(C.car_id) AS cars_num FROM reservations AS R
+JOIN cars AS C ON R.car_id=C.car_id 
+RIGHT JOIN dates ON (days BETWEEN R.startD AND R.endD)
+GROUP BY days
+ORDER BY days;
+
+
+SELECT DATE(res_date)AS resDate, COUNT(res_date)AS num_res, SUM(cost)AS income FROM reservations WHERE res_date BETWEEN ? AND ? GROUP BY DATE(res_date);
+
+
+SET @dat = ?;
+SET @status1= 'Available';
+SET @status2= 'Rented';
+SET @status3= 'Out of Service';
+SELECT SS.car_id, C.company, C.model, C.year,  @status3 AS `status` from service_sche AS SS JOIN cars AS C ON SS.car_id=C.car_id 
+WHERE @dat BETWEEN startD AND endD
+UNION
+SELECT R.car_id, C.company, C.model, C.year, @status2 from reservations AS R JOIN cars AS C ON R.car_id=C.car_id  WHERE @dat BETWEEN startD AND endD
+UNION
+SELECT C.car_id, C.company, C.model, C.year, @status1 from cars AS C 
+WHERE C.car_id NOT IN (
+SELECT SS.car_id from service_sche AS SS WHERE @dat BETWEEN startD AND endD
+UNION
+SELECT R.car_id from reservations AS R WHERE @dat BETWEEN startD AND endD
+)
+ORDER BY car_id;
+
+
+DELETE FROM cars WHERE lic_no = ?
+
+DELETE FROM customers WHERE customer_id = ?
+
+DELETE FROM admins WHERE email = ?
+
+DELETE FROM offices WHERE office_id = ?
+
+DELETE FROM reservations WHERE reserve_no = ?
+
+DELETE FROM service_sche WHERE serv_no = ?
