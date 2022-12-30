@@ -7,10 +7,10 @@
     </div>
 
     <hr />
-    <form action="/add" method="post" enctype="multipart/form-data">
+    <form id="form" action="/add" method="post" enctype="multipart/form-data">
         <div class="add panel-back">
             <h4>Company</h4>
-            <input type="text" class="input_field" name="company" required>
+            <input type="text" class="input_field" id="company" name="company" minlength="1" required>
             <h4>Color</h4>
             <input type="color" value="#0000" name="color" required>
             <h4>Status</h4>
@@ -27,15 +27,15 @@
                     <% } %>
             </select>
             <h4>Model</h4>
-            <input type="text" class="input_field" name="model" required>
+            <input type="text" class="input_field" id="model" name="model" minlength="1" required>
             <h4>Year</h4>
-            <input type="number" class="input_field" name="year" required>
+            <input type="number" class="input_field" id="year" name="year" required min="1900">
             <h4>Miles</h4>
-            <input type="number" class="input_field" name="miles" required>
+            <input type="number" class="input_field" id="miles" name="miles" required min="0">
             <h4>Price</h4>
-            <input type="number" class="input_field" name="price" required>
+            <input type="number" class="input_field" id="price" name="price" required min="0">
             <h4>licence No</h4>
-            <input type="text" class="input_field" name="lic_no" required>
+            <input type="text" class="input_field" id="lic_no" name="lic_no" required>
             <h4>Image</h4>
             <input type="file" name="image" accept="image/*" required>
 
@@ -45,3 +45,4 @@
             </div>
     </form>
     </div>
+    <script src="../../js/add_car.js" ></script>
