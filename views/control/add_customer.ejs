@@ -11,22 +11,23 @@
 
         <div class="add panel-back">
             <h4>First name</h4>
-            <input type="text" class="input_field" name="fname" required>
+            <input type="text" class="input_field" name="fname" id="fname" required>
             <h4>Last name</h4>
-            <input type="text" class="input_field" name="lname" required>
+            <input type="text" class="input_field" name="lname" id="lname" required>
             <h4>Nationa ID</h4>
-            <input type="number" class="input_field" name="nationalID" required>
+            <input type="number" class="input_field" name="nationalID" id="nationalID" min="10000000000000" max="100000000000000" required>
             <h4>Email</h4>
-            <input type="text" class="input_field" name="email" required>
+            <input type="text" class="input_field" name="email" id="email" required>
             <h4>Password</h4>
-            <input type="text" class="input_field" name="password" required>
+            <input type="text" class="input_field" name="password" id="password" minlength="8" required>
             <h4>Address</h4>
-            <input type="text" class="input_field" name="address" required>
+            <input type="text" class="input_field" name="address" id="address" required>
             <h4>Phone</h4>
-            <input type="text" class="input_field" name="phone" required>
+            <input type="number" class="input_field" name="phone" id="phone" min="1000000000" required>
 
             <div class="orange-button">
                 <button name="control_btn" value="add_customer" type="submit" class="btn btn-danger square-btn">Done</button>
             </div>
     </form>
     </div>
+    <script src="../../js/add_customer.js" ></script>
