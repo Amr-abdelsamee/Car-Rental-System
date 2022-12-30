@@ -1,15 +1,3 @@
-//? npm install express
-//? npm install dotenv
-//? npm install express-session
-//? npm install serve-favicon
-//? npm install ejs
-//? npm install chalk
-//? npm install body-parser
-//? npm install -g nodemon
-//? npm install url
-//? npm install mysql
-//? npm install hex-color-to-color-name
-//? npm install express-fileupload
 //TODO: to run the server type: nodemon server.js
 
 require('dotenv').config(); // for .env file
@@ -94,6 +82,7 @@ app.route("/control")
         db.query(sql, VALUES, (err, result) => {
             if (err) {
                 console.log(err)
+                display_filure_user(res, "ERROR! sign in failed!", "Database failed!", "", "")
                 res.render("control/admin_signIn", {
                     error_msg: "ERROR!sign in failed please try again!",
                     error_class: ""
@@ -161,6 +150,7 @@ app.route("/admin")
                     db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             res.render("control/all_cars", {
                                 allCars: results[0],
@@ -181,6 +171,7 @@ app.route("/admin")
                     db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             res.render("control/all_customers", {
                                 allCustomers: results[0],
@@ -195,6 +186,7 @@ app.route("/admin")
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             res.render("control/reservations", {
                                 reservations: result,
@@ -208,11 +200,13 @@ app.route("/admin")
                     db.query(sql, (err, result1) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             sql = "SELECT * FROM offices";
                             db.query(sql, (err, result2) => {
                                 if (err) {
                                     console.log(err)
+                                    display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                                 } else {
                                     res.render("control/setting", {
                                         admins: result1,
@@ -229,6 +223,7 @@ app.route("/admin")
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             res.render("control/add_car", {
                                 offices: result,
@@ -256,6 +251,7 @@ app.route("/admin")
                     db.query(sql, (err, results) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             res.render("control/admin_reserve", {
                                 cars: results[0],
@@ -275,8 +271,9 @@ app.route("/admin")
                     db.query(sql, (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
-                            console.log(result)
+                            //console.log(result)
                             res.render("control/add_schedule", {
                                 cars: result,
                                 // minDate: currentDate,
@@ -305,7 +302,7 @@ app.route("/add")
             switch (req.body.control_btn) {
                 case "add_car":
                     const { image } = req.files
-                    console.log(image.data)
+                    //console.log(image.data)
                     const color_name = Get_Color_Name.GetColorName(req.body.color);
                     VALUES = [
                         null
@@ -1019,6 +1016,7 @@ app.route("/search")
                     db.query(sql, VALUES, (err, results) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
                         } else {
                             let fmessage = ""
                             if (results[3].length === 0) {
@@ -1047,7 +1045,7 @@ app.route("/search")
 
                 case "car_status":
                     load_dashBoard(app_session.admin_id, res, "", "", "", "", req.body.search_cStatus_date);
-                break;
+                    break;
 
             }
         } else {
@@ -1063,6 +1061,7 @@ app.route("/search")
 app.route("/")
     .get(function (req, res) {
         res.redirect("/main")
+
     })
     .post(function (req, res) {
     });
@@ -1093,6 +1092,7 @@ app.route("/signin")
         db.query(sql, VALUES, (err, result) => {
             if (err) {
                 console.log(err)
+                display_filure_user(res, "ERROR! sign in failed!", "Please try again later!", "", "")
             } else {
                 if (result.length) {
                     app_session.user_id = result[0].customer_id
@@ -1124,14 +1124,29 @@ app.route("/signup")
             , req.body.address
             , parseInt(req.body.phone)
         ]
-        sql = "INSERT INTO customers VALUES (?)";
-        db.query(sql, [VALUES], (err, result) => {
+        sql = "SELECT email FROM customers WHERE email=?";
+        db.query(sql, req.body.email, (err, result) => {
             if (err) {
                 console.log(err)
+                display_filure_user(res, "ERROR! sign up failed!", "Please check your information", "", "")
             } else {
-                console.log(new Date().toLocaleString() + ":: NEW customer added to the system!")
-                console.log(VALUES)
-                res.redirect("/signin")
+                if (result.length) {
+                    console.log(err)
+                    display_filure_user(res, "ERROR! can not sign up!", "This email already exist!", "", "")
+                 }
+                else {
+                    sql = "INSERT INTO customers VALUES (?)";
+                    db.query(sql, [VALUES], (err, result) => {
+                        if (err) {
+                            console.log(err)
+                            display_filure_user(res, "ERROR! sign up failed!", "Please try again later!", "", "")
+                        } else {
+                            console.log(new Date().toLocaleString() + ":: NEW customer added to the system!")
+                            console.log(VALUES)
+                            res.redirect("/signin")
+                        }
+                    })
+                }
             }
         })
     });
@@ -1160,6 +1175,7 @@ app.route("/main")
         db.query(sql, (err, results) => {
             if (err) {
                 console.log(err)
+                display_filure_user(res, "ERROR! can not load the page now!", "Try again later", "", "")
             } else {
                 let currentDate = new Date().toJSON().slice(0, 10)
                 if (app_session.userPermission) {
@@ -1266,6 +1282,7 @@ app.route("/filters")
         db.query(sql, ac_VALUES, (err, results) => {
             if (err) {
                 console.log(err)
+                display_filure_user(res, "ERROR! can not search now!", "Try again later", "", "")
             } else {
                 if (results[0].length === 0) {
                     fmessage = "No results"
@@ -1306,6 +1323,7 @@ app.route("/overview")
         db.query(sql, VALUE, (err, results) => {
             if (err) {
                 console.log(err)
+                display_filure_user(res, "ERROR! can not view this car now!", "Try again later", "", "")
             } else {
                 res.render("cars/car_overview", { car: results[0] })
             }
@@ -1328,6 +1346,7 @@ app.route("/reserve")
             db.query(sql, [VALUE, VALUE, VALUE], (err, results) => {
                 if (err) {
                     console.log(err)
+                    display_filure_user(res, "ERROR! can not reserve this car now!", "Try again later", "", "")
                 } else {
                     let maxDate = new Date()
                     maxDate.setFullYear(maxDate.getFullYear() + 1)
@@ -1336,7 +1355,7 @@ app.route("/reserve")
                         car: results[0][0],
                         reservations: results[1],
                         minDate: new Date().toJSON().slice(0, 10),
-                        maxDate:  maxDate,
+                        maxDate: maxDate,
                     })
                 }
             })
@@ -1369,6 +1388,7 @@ app.route("/confirmReservation")
                 db.query(sql, VALUE, (err, result) => {
                     if (err) {
                         console.log(err)
+                        display_filure_user(res, "ERROR! can not reserve this car now!", "Try again later", "", "")
                     } else {
                         if (result.length) {
                             for (let i = 0; i < result.length; i++) {
@@ -1377,9 +1397,8 @@ app.route("/confirmReservation")
                                 console.log("Start date: ", result[i].startD.toLocaleString())
                                 console.log("End date: ", result[i].endD.toLocaleString())
                             }
-
-
-                            res.status(204).send()
+                            display_filure_user(res, "ERROR! can not reserve this car!", "These dates are not available", "", "")
+                            //res.status(204).send()
                         } else {
 
                             let time = dates.endD.getTime() - dates.startD.getTime() + 60000;
@@ -1399,6 +1418,7 @@ app.route("/confirmReservation")
                             db.query(sql, [VALUE, VALUE[1], VALUE[0], VALUE[1], VALUE[2], VALUE[3], VALUE[4]], (err, results) => {
                                 if (err) {
                                     console.log(err)
+                                    display_filure_user(res, "ERROR! can not reserve this car now!", "Try again later", "", "")
                                 } else {
                                     console.log(new Date().toLocaleString() + ":: reservation made by user ID:" + app_session.user_id + " car ID:" + req.body.car_id)
                                     res.render("cars/payments", {
@@ -1414,7 +1434,8 @@ app.route("/confirmReservation")
                     }
                 })
             } else {
-                res.status(204).send()
+                display_filure_user(res, "ERROR! can not reserve this car now!", "Dates not valid!", "", "")
+                //res.status(204).send()
             }
         }
         else {
@@ -1454,6 +1475,7 @@ app.route("/payments")
             db.query(sql, [VALUE[0], VALUE[1]], (err, results) => {
                 if (err) {
                     console.log(err)
+                    display_filure_user(res, "ERROR! can not pay now!", "Try again later", "", "")
                 } else {
                     console.log(new Date().toLocaleString() + ":payments status for user with ID:" + app_session.user_id + " has been saved!")
                     res.redirect("profile")
@@ -1497,19 +1519,22 @@ app.route("/profile")
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_filure_user(res, "ERROR! can not cancel this car now!", "Try again later", "", "")
                 } else {
                     console.log(result[0].startD)
                     let currentDate = new Date()
                     let startDate = new Date(result[0].startD);
                     if (Date.parse(startDate) < Date.parse(currentDate)) {
                         console.log("you can not delete this reservation!")
-                        res.status(204).send()
+                        display_filure_user(res, "ERROR! can not cancel this car now!", "Rent period started!", "contact the admin", "")
+                        //res.status(204).send()
                     } else {
                         sql = "DELETE FROM reservations WHERE reserve_no = ?";
                         const VALUE = req.body.cancel_btn
                         db.query(sql, VALUE, (err, result) => {
                             if (err) {
                                 console.log(err)
+                                display_filure_user(res, "ERROR! can not delete this car now!", "Try again later", "", "")
                             } else {
                                 console.log("A user canceled a reservation!")
                                 res.redirect("profile")
@@ -1523,17 +1548,15 @@ app.route("/profile")
 
             sql = "UPDATE reservations SET rented='Yes' WHERE reserve_no=? ";
             const VALUE = req.body.pay_now_btn
-
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_filure_user(res, "ERROR! can not pay now!", "Try again later", "", "")
                 } else {
                     console.log("A user paid reservation no " + VALUE + "!")
                     res.redirect("profile")
                 }
             })
-
-
         }
     })
 //? ---------------------------------------------< End of profile route section >-------------------------------------------------------
@@ -1548,6 +1571,25 @@ app.get('*', function (req, res) {
 
 
 //? ---------------------------------------------< all functions >-------------------------------------------------------
+function display_success_user(res, msg1, msg2, msg3) {
+    res.render("success", {
+        messge1: msg1
+        , messge2: msg2
+        , messge3: msg3
+    })
+}
+
+function display_filure_user(res, msg1, msg2, msg3) {
+    res.render("failure", {
+        messge1: msg1
+        , messge2: msg2
+        , messge3: msg3
+    })
+}
+
+
+
+
 function display_failure(res, msg1, msg2, msg3) {
     res.render("control/failure", {
         message1: msg1,
@@ -1579,7 +1621,10 @@ function loadAllImages() {
                 let imageName = result[i].car_id
                 let buffer = Buffer.from(result[i].image, 'binary');
                 fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
-                    if (err) console.log(err);
+                    if (err){ 
+                        console.log(err);
+                        display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
+                    }
                     else {
                         //console.log("Image " + imageName + ".jpg successfully loaded!");
                     }
@@ -1596,13 +1641,17 @@ function loadOneImage(lic_no) {
     db.query(sql, lic_no, (err, result) => {
         if (err) {
             console.log(err)
+            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
         } else {
             let imageName = result[0].car_id
             let buffer = Buffer.from(result[0].image, 'binary');
             fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
-                if (err) console.log(err);
+                if (err) {
+                    console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
+                }
                 else {
-                    console.log("Image " + imageName + ".jpg successfully loaded!");
+                   // console.log("Image " + imageName + ".jpg successfully loaded!");
                 }
             });
         }
@@ -1653,11 +1702,11 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS, 
         endDateIncome = endDateIncome.toJSON().slice(0, 10)
     }
 
-    if(status_date){
+    if (status_date) {
         carStatusDate = new Date(status_date)
         carStatusDate = carStatusDate.toJSON().slice(0, 10) + " 10:00:00"
     }
-    else{
+    else {
         carStatusDate = new Date()
         carStatusDate = carStatusDate.toJSON().slice(0, 10) + " 10:00:00"
     }
@@ -1709,10 +1758,11 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS, 
         , endDateIncome
         , carStatusDate
     ]
-    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7 + sql8 +sql9
+    let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7 + sql8 + sql9
     db.query(sql, VALUES, (err, results) => {
         if (err) {
             console.log(err)
+            display_failure(res, "ERROR! failed to load data!", "Database failed!", err.sqlMessage)
         } else {
             res.render("control/dashboard", {
                 admin: admin
@@ -1735,7 +1785,6 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS, 
 function delete_entry(btn_value, data_index) {
     let sql = ""
     const VALUE = data_index
-    console.log(btn_value, "___", data_index)
 
     switch (btn_value) {
         // to delete a car
@@ -1744,6 +1793,7 @@ function delete_entry(btn_value, data_index) {
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Delete failed!", err.sqlMessage)
                 } else {
                     console.log("An admin deleted a car from the system!")
                 }
@@ -1756,6 +1806,7 @@ function delete_entry(btn_value, data_index) {
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Delete failed!", err.sqlMessage)
                 } else {
                     console.log("An admin deleted a customer from the system!")
 
@@ -1769,6 +1820,7 @@ function delete_entry(btn_value, data_index) {
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Delete failed!", err.sqlMessage)
                 } else {
                     console.log("An admin deleted another from the system!")
                 }
@@ -1781,6 +1833,7 @@ function delete_entry(btn_value, data_index) {
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Delete failed!", err.sqlMessage)
                 } else {
                     console.log("An admin deleted an office from the system!")
                 }
@@ -1793,6 +1846,7 @@ function delete_entry(btn_value, data_index) {
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Delete failed!", err.sqlMessage)
                 } else {
                     console.log("An admin deleted a reservation from the system!")
                 }
@@ -1803,6 +1857,7 @@ function delete_entry(btn_value, data_index) {
             db.query(sql, VALUE, (err, result) => {
                 if (err) {
                     console.log(err)
+                    display_failure(res, "ERROR! failed to load data!", "Delete failed!", err.sqlMessage)
                 } else {
                     console.log("An admin deleted a service from the system!")
                 }
@@ -1837,13 +1892,9 @@ function make_date(sDate, eDate) {
     return response;
 }
 
-
 //? ---------------------------------------------< ------------- >-------------------------------------------------------
 
 app.listen(process.env.PORT || 3000, function () {
     console.log(new Date().toLocaleString() + ":: Server started..")
 })
-
-
-
 

@@ -1,0 +1,29 @@
+<%- include("header") -%>
+
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/car_overview.css" type="text/css">
+    <title>Failure!</title>
+    </head>
+
+    <body>
+
+        <div class="payment-container" >
+            <div class="container-header"></div>
+            <div class="sub-container" style="height:100% !important; padding: 20px; text-align: center;">
+                <span style="color: red; font-size: 50px; margin-bottom: 10px;">Failure!</span>
+
+
+                <hr style="width: 100%;">
+                <h4> <%= messge1 %> </h4>
+                <h4> <%= messge2 %></h4>
+                <h4> <%= messge3 %></h4>
+                <hr style="width: 100%;">
+
+                    <button class="reserve-button" name="yes_pay_btn" onclick="location.href ='main'">Main menu</button>
+                    <button class="reserve-button" name="no_pay_btn" onclick="window.history.go(-1); return false;">Try Again</button>
+
+                <div class="container-footer" style="width: 100%;margin-top: 20px;"></div>
+            </div>
+        </div>
+
+    </body>
