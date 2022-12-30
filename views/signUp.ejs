@@ -11,60 +11,22 @@
 
     <div class="customer-sign-container">
       <h1>Sign Up</h1>
-      <form id="form" action="/signup" method="post" onsubmit="Validation()">
+      <form id="form" action="/signup" method="post">
         <p class="signinMessage"></p>
-        <input class="input_field" name="fname" placeholder="First name" autocomplete="off" type="text" required
+        <input class="input_field" name="fname" id="fname" placeholder="First name" autocomplete="off" type="text" required
           autofocus>
-        <input class="input_field" name="lname" placeholder="Last name" autocomplete="off" type="text" required>
-        <input class="input_field" name="nationalID" placeholder="National ID" autocomplete="off" type="number" required>
-        <input class="input_field" name="email" placeholder="E-mail" autocomplete="off" type="email" required>
-        <input class="input_field" name="password" placeholder="password" autocomplete="off" type="password" required>
-        <input class="input_field" name="address" placeholder="Address" autocomplete="off" type="text" required>
-        <input class="input_field" name="phone" placeholder="Phone" autocomplete="off" type="number" required>
+          <input class="input_field" name="lname" id="lname" placeholder="Last name" autocomplete="off" type="text" required>
+          <input class="input_field" name="nationalID" id="nationalID" placeholder="National ID" autocomplete="off" type="number" required>
+          <input class="input_field" name="email" placeholder="E-mail" id="email" autocomplete="off" type="email" required>
+          <input class="input_field" name="password" placeholder="password" id = "password" autocomplete="off" type="password" required>
+          <input class="input_field" name="address" placeholder="Address" id="address" autocomplete="off" type="text" required>
+          <input class="input_field" name="phone" placeholder="Phone" id="phone" autocomplete="off" type="text" required>
         <br>
         <button class="signBtn" name="btn" value="signup" type="submit">Sign up</button>
         <p>Already have an account? <a id="log" href="signIn">SignIn</a></p>
     </div>
     </form>
-    <script>
-
-       function validation(){
-        var fname = document.forms["form"]["fname"].value;
-        var lname = document.forms["form"]["lname"].value;
-        var nationalID = document.forms["form"]["nationalID"].value;
-        var email = document.forms["form"]["email"].value;
-        var password = document.forms["form"]["password"].value;
-        var address = document.forms["form"]["address"].value;
-        var phone = document.forms["form"]["phone"].value;
-        if(fname == "" || lname == "" || nationalID == "" || email == "" || password == "" || address == "" || phone == ""){
-          console.log("Please fill all the fields");
-          return false;
-        }
-        if (password.length < 8) {
-          console.log("Password must be at least 8 characters long.");
-          return false;
-        }
-        if (isNaN(nationalID)) {
-          console.log("National ID must be a number");
-          return false;
-        }
-        if (isNaN(phone)) {
-          console.log("Phone must be a number");
-          return false;
-        }
-        if (phone.length != 11) {
-          console.log("Phone must be 11 digits");
-          return false;
-        }
-        if (nationalID.length != 14) {
-          console.log("National ID must be 14 digits");
-          return false;
-        }
-        console.log("You have signed up successfully")
-        document.getElementById("form").submit();
-       }
-      
-    </script>
+    <script src="../js/signUp.js"></script>
 
 
   </body>
