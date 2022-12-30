@@ -20,13 +20,14 @@
         <input class="input_field" name="email" placeholder="E-mail" autocomplete="off" type="email" required>
         <input class="input_field" name="password" placeholder="password" autocomplete="off" type="password" required>
         <input class="input_field" name="address" placeholder="Address" autocomplete="off" type="text" required>
-        <input class="input_field" name="phone" placeholder="Phone" autocomplete="off" type="text" required>
+        <input class="input_field" name="phone" placeholder="Phone" autocomplete="off" type="number" required>
         <br>
         <button class="signBtn" name="btn" value="signup" type="submit">Sign up</button>
         <p>Already have an account? <a id="log" href="signIn">SignIn</a></p>
     </div>
     </form>
     <script>
+
        function validation(){
         var fname = document.forms["form"]["fname"].value;
         var lname = document.forms["form"]["lname"].value;
@@ -36,33 +37,31 @@
         var address = document.forms["form"]["address"].value;
         var phone = document.forms["form"]["phone"].value;
         if(fname == "" || lname == "" || nationalID == "" || email == "" || password == "" || address == "" || phone == ""){
-          alert("Please fill all the fields");
+          console.log("Please fill all the fields");
           return false;
         }
         if (password.length < 8) {
-          alert("Password must be at least 8 characters long.");
+          console.log("Password must be at least 8 characters long.");
           return false;
         }
         if (isNaN(nationalID)) {
-          alert("National ID must be a number");
+          console.log("National ID must be a number");
           return false;
         }
         if (isNaN(phone)) {
-          alert("Phone must be a number");
+          console.log("Phone must be a number");
           return false;
         }
         if (phone.length != 11) {
-          alert("Phone must be 11 digits");
+          console.log("Phone must be 11 digits");
           return false;
         }
         if (nationalID.length != 14) {
-          alert("National ID must be 14 digits");
+          console.log("National ID must be 14 digits");
           return false;
         }
-        alert("You have signed up successfully")
+        console.log("You have signed up successfully")
         document.getElementById("form").submit();
-        
-
        }
       
     </script>

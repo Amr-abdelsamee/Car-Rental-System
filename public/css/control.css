@@ -241,7 +241,7 @@ p {
     border: 0;
     border-bottom: 2px solid gray;
     outline: 0;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     padding: 5px 4px;
     transition: border-color 0.2s;
     }
@@ -280,3 +280,12 @@ img.car-image{
     padding: 0;
     font-size: 20px;
 } 
+
+.failed{
+    font-family: Monospace;
+    font-size: 15px;
+    color: red;
+    align-items: center;
+
+    }
+    

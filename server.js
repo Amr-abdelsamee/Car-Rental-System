@@ -78,7 +78,10 @@ app.route("/control")
         if (app_session.adminPermission) {
             res.redirect("admin")
         } else {
-            res.render("control/admin_signIn")
+            res.render("control/admin_signIn",{
+                error_msg:"",
+                error_class:""
+            })
         }
     })
     .post(function (req, res) {
@@ -91,25 +94,27 @@ app.route("/control")
         db.query(sql, VALUES, (err, result) => {
             if (err) {
                 console.log(err)
+                res.render("control/admin_signIn",{
+                    error_msg:"ERROR!sign in failed please try again!",
+                    error_class:""
+                })
             } else {
                 if (result.length) {
                     loadAllImages()
-                    sql = "SELECT * FROM cars AS C JOIN offices AS O WHERE C.office_id=O.office_id";
-                    db.query(sql, (err, result2) => {
-                        if (err) {
-                            console.log(err)
-                        } else {
-                            app_session.admin_id = VALUES[1]
-                            app_session.userPermission = false
-                            app_session.adminPermission = true
-                            console.log(new Date().toLocaleString() + ":: admin logged in")
-                            load_dashBoard(VALUES[1], res, "", "", "", "")
-                        }
-                    })
+
+                    app_session.admin_id = VALUES[1]
+                    app_session.userPermission = false
+                    app_session.adminPermission = true
+                    console.log(new Date().toLocaleString() + ":: admin logged in")
+                    load_dashBoard(VALUES[1], res, "", "", "", "")
+
                 } else {
                     console.log(new Date().toLocaleString() + ":: admin sign in failed!")
                     console.log(VALUES)
-                    res.redirect("/control")
+                    res.render("control/admin_signIn",{
+                        error_msg:"Username or Password is incorrect!!",
+                        error_class:"error"
+                    })
                 }
             }
         })
@@ -135,7 +140,7 @@ app.route("/admin")
     .get(function (req, res) {
         app_session = req.session
         if (app_session.adminPermission) {
-            load_dashBoard(app_session.admin_id, res, "", "","","");
+            load_dashBoard(app_session.admin_id, res, "", "", "", "");
         } else { res.redirect("control") }
     })
     .post(function (req, res) {
@@ -221,7 +226,11 @@ app.route("/admin")
                         if (err) {
                             console.log(err)
                         } else {
-                            res.render("control/add_car", { offices: result })
+                            res.render("control/add_car", { 
+                                offices: result,
+                                error_msg1:"",
+                                error_msg2:"" 
+                                })
                         }
                     })
                     break;
@@ -291,12 +300,13 @@ app.route("/add")
                     db.query(sql, [VALUES], (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! New car can not be added!", err.sqlMessage, "")
                         } else {
                             console.log("NEW car added to the system!")
                             console.log(VALUES)
-                            // success message should be added here ------------------------------<
                             loadOneImage(req.body.lic_no)
-                            res.redirect("/admin")
+                            //res.redirect("/admin")
+                            display_success(res, "New Car was added successfully!", "", "")
                         }
                     })
                     break;
@@ -316,11 +326,11 @@ app.route("/add")
                     db.query(sql, [VALUES], (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! New customer can not be added!", err.sqlMessage, "")
                         } else {
                             console.log("NEW customer added to the system!")
                             console.log(VALUES)
-                            // success message should be added here ------------------------------<
-                            res.redirect("/admin")
+                            display_success(res, "New Customer was added successfully!", "", "")
                         }
                     })
                     break;
@@ -334,11 +344,11 @@ app.route("/add")
                     db.query(sql, [VALUES], (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! new Admin can not be added !", err.sqlMessage, "")
                         } else {
                             console.log("NEW admin added to the system!")
                             console.log(VALUES)
-                            // success message should be added here ------------------------------<
-                            res.redirect("/admin")
+                            display_success(res, "New Admin was added successfully!", "", "")
                         }
                     })
                     break;
@@ -352,22 +362,20 @@ app.route("/add")
                     db.query(sql, [VALUES], (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! new office can not be added !", err.sqlMessage, "")
                         } else {
                             console.log("NEW office added to the system!")
                             console.log(VALUES)
-                            // success message should be added here ------------------------------<
-                            res.redirect("/admin")
+                            display_success(res, "New Office was added successfully!", "", "")
                         }
                     })
                     break;
 
                 case "add_res":
-
                     const dates = make_date(req.body.sdate, req.body.edate)
-
                     if (dates.valid) {
                         const VALUE = [
-                            req.body.car_id,
+                            req.body.car_id.split('-')[0],
                             dates.startD,
                             dates.endD,
                             dates.startD,
@@ -377,27 +385,33 @@ app.route("/add")
                         db.query(sql, VALUE, (err, result) => {
                             if (err) {
                                 console.log(err)
+                                display_failure(res, "ERROR! can not search for this car now !", err.sqlMessage, "")
                             } else {
                                 if (result.length) {
                                     console.log("car is not available in these dates")
-                                    res.status(204).send()
+                                    //res.status(204).send()
+                                    display_failure(res, "ERROR! can not reserve this car !", "Selected dates is not available for this car", "")
                                 } else {
+                                    let time = dates.endD.getTime() - dates.startD.getTime() + 60000;
+                                    let days = Math.ceil(time / (1000 * 3600 * 24));
+        
                                     VALUES = [
                                         req.body.customer_id
-                                        , req.body.car_id
-                                        , req.body.payment
+                                        , req.body.car_id.split('-')[0]
                                         , dates.startD
                                         , dates.endD
+                                        , days * req.body.car_id.split('-')[1]
+                                        , req.body.rented
                                     ]
-                                    sql = "INSERT INTO reservations(customer_id, car_id, payment, startD, endD ) VALUES (?)";
+                                    sql = "INSERT INTO reservations(customer_id, car_id, startD, endD, cost, rented) VALUES (?)";
                                     db.query(sql, [VALUES], (err, result) => {
                                         if (err) {
                                             console.log(err)
+                                            display_failure(res, "ERROR! can not reserve this car now try again later !", err.sqlMessage, "")
                                         } else {
                                             console.log("NEW reservation is made!")
                                             console.log(VALUES)
-                                            // success message should be added here ------------------------------<
-                                            res.redirect("/admin")
+                                            display_success(res, "New Reservation was added successfully!", "", "")
                                         }
                                     })
                                 }
@@ -406,7 +420,8 @@ app.route("/add")
                     }
                     else {
                         console.log("dates are not valid!")
-                        res.status(204).send()
+                        // res.status(204).send()
+                        display_failure(res, "ERROR! can not make the reservation !", "Selected dates are not valid", "")
                     }
                     break;
             }
@@ -430,6 +445,7 @@ app.route("/change")
                             db.query(sql, VALUE, (err, result) => {
                                 if (err) {
                                     console.log(err)
+                                    display_failure(res, "ERROR! Something bad happened!", err.sqlMessage, "")
                                 } else {
                                     res.render("control/edit_car", { offices: result[0], car: result[1][0] })
                                 }
@@ -440,6 +456,7 @@ app.route("/change")
                             db.query(sql, VALUE, (err, result) => {
                                 if (err) {
                                     console.log(err)
+                                    display_failure(res, "ERROR! Something bad happened!", err.sqlMessage, "")
                                 } else {
                                     res.render("control/edit_customer", { customer: result[0] })
                                 }
@@ -489,11 +506,12 @@ app.route("/confirmed")
                     db.query(sql, VALUES, (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! Can not edit this car now try again later!", err.sqlMessage, "")
                         } else {
                             console.log("car with licence No.:", req.body.lic_no, " has been modified!")
                             console.log(VALUES)
-                            // success message should be added here ------------------------------<
                             loadOneImage(req.body.lic_no)
+                            display_success(res, "Car was updated successfully!", "", "")
                         }
                     })
                     break;
@@ -513,15 +531,16 @@ app.route("/confirmed")
                     db.query(sql, VALUES, (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! Can not update this customer information now try again later!", err.sqlMessage, "")
                         } else {
                             console.log("customer information has been modified!")
                             console.log(VALUES)
-                            // success message should be added here ------------------------------<
+                            display_success(res, "Customer information was updated successfully!", "", "")
                         }
                     })
                     break;
             }
-            res.redirect("/admin")
+            //res.redirect("/admin")
         } else {
             res.redirect("control")
         }
@@ -673,6 +692,7 @@ app.route("/search")
                     db.query(sql, ac_VALUES, (err, results) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! Search failed!", err.sqlMessage, "")
                         } else {
                             if (results[0].length === 0) {
                                 fmessage = "No results"
@@ -769,6 +789,7 @@ app.route("/search")
                     db.query(sql, ac_VALUES, (err, results) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! Search failed!", err.sqlMessage, "")
                         } else {
                             if (results[0].length === 0) {
                                 fmessage = "No results"
@@ -877,6 +898,7 @@ app.route("/search")
                     db.query(sql, ac_VALUES, (err, result) => {
                         if (err) {
                             console.log(err)
+                            display_failure(res, "ERROR! Search failed!", err.sqlMessage, "")
                         } else {
                             if (result.length === 0) {
                                 fmessage = "No results"
@@ -897,8 +919,8 @@ app.route("/search")
                     load_dashBoard(app_session.admin_id, res, req.body.search_profit_sdate, req.body.search_profit_edate);
                     break;
 
-                    case "income_statemet":
-                    load_dashBoard(app_session.admin_id, res,"","", req.body.search_income_sdate, req.body.search_income_edate);
+                case "income_statemet":
+                    load_dashBoard(app_session.admin_id, res, "", "", req.body.search_income_sdate, req.body.search_income_edate);
                     break;
             }
         } else {
@@ -1397,6 +1419,21 @@ app.get('*', function (req, res) {
 
 
 //? ---------------------------------------------< all functions >-------------------------------------------------------
+function display_failure(res, msg1, msg2, msg3){
+    res.render("control/failure", { 
+        message1:msg1,
+        message2:msg2,
+        message3:msg3
+    })
+}
+
+function display_success(res, msg1, msg2, msg3){
+    res.render("control/success", { 
+        message1:msg1,
+        message2:msg2,
+        message3:msg3
+    })
+}
 
 
 //used when admin login
@@ -1415,7 +1452,7 @@ function loadAllImages() {
                 fs.writeFile('public\\images\\cars\\' + imageName + '.jpg', buffer, function (err, written) {
                     if (err) console.log(err);
                     else {
-                        console.log("Image " + imageName + ".jpg successfully loaded!");
+                        //console.log("Image " + imageName + ".jpg successfully loaded!");
                     }
                 });
             }
@@ -1479,7 +1516,7 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) 
     if (eDate_incomeS) {
         endDateIncome = eDate_incomeS
     } else {
-        
+
         endDateIncome = new Date()
         endDateIncome.setDate(endDateIncome.getDate() + 5);
         endDateIncome = endDateIncome.toJSON().slice(0, 10)
@@ -1513,13 +1550,11 @@ function load_dashBoard(admin, res, sDate, eDate, sDate_incomeS, eDate_incomeS) 
         , startDateIncome
         , endDateIncome
     ]
-    console.log(VALUES)
     let sql = sql1 + sql2 + sql3 + sql4 + sql5 + sql6 + sql7 + sql8
     db.query(sql, VALUES, (err, results) => {
         if (err) {
             console.log(err)
         } else {
-            console.log(results[8])
             res.render("control/dashboard", {
                 admin: admin
                 , cars: results[0]
